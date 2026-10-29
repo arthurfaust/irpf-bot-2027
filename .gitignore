@@ -13,6 +13,6 @@ wheels/
 config/.env
 
 # Data
-data/
+data/dados.json
 raw/
 gold/

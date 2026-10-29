@@ -26,7 +26,7 @@ def encontrar_bens() -> None:
             
     return linhas_bens
 
-with open(raw_file, "r", encoding="utf-8") as f:
+with open(raw_file, "r", encoding="latin-1") as f:
     linhas = f.readlines()
 
 linhas_bens = encontrar_bens()
@@ -35,5 +35,5 @@ linha_novo_bem = linhas_bens[-1] + 1
 
 linhas.insert(linha_novo_bem, 'Novo bem aqui')
 
-with open(new_file, "w", encoding="utf-8") as nf:
+with open(new_file, "w", encoding="latin-1") as nf:
     nf.writelines(linhas)

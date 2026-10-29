@@ -1,0 +1,11 @@
+{
+    "grupo": "08",
+    "codigo": "01",
+    "localizacao": "105",
+    "autocustodiante": 0,
+    "cnpjCustodiante": "123456789000",
+    "discriminacao": "Teste do lançamento de criptoativos com dados ficticios",
+    "usufruto": 1,
+    "situacao2024": 1000,
+    "situacao2025": 2000
+}
