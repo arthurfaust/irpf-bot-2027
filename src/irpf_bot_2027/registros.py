@@ -1,3 +1,4 @@
+import zlib
 from irpf_bot_2027.campos import Campo
 
 class Registro27:
@@ -60,3 +61,26 @@ class Registro27:
     ATUALIZACAO_15265    = Campo(1240, 1240)
     USUFRUTO             = Campo(1241, 1241, "N")
     CONTROLE             = Campo(1242, 1251, "N")
+
+    @classmethod
+    def gravar_valores_padrao(cls, cpf: str) -> str:
+        """Linha de 1251 posições já com os valores de 'não usado'."""
+        linha = ' ' * cls.TAMANHO
+        for campo in vars(cls).values():
+            if isinstance(campo, Campo) and campo.tipo == 'N':
+                linha = campo.gravar(linha, 0)          # campos numéricos com zeros
+
+        linha = cls.TIPO_REGISTRO.gravar(linha, 27)
+        linha = cls.CPF.gravar(linha, cpf)
+        linha = cls.CPF_DONO.gravar(linha, cpf)          # dono = titular, por padrão
+        linha = cls.TITULAR_DEPENDENTE.gravar(linha, 'T')
+        linha = cls.REGISTRADO_CARTORIO.gravar(linha, 2) # 2 = não respondido
+        linha = cls.UNIDADE_AREA.gravar(linha, 2)        # 2 = não informado
+        
+        return linha
+
+    @classmethod
+    def gravar_cod_controle(cls, linha: str) -> str:
+        """Grava o código de controle: CRC32 das posições 1 a 1241."""
+        corpo = linha[:cls.CONTROLE.ini - 1]
+        return cls.CONTROLE.gravar(linha, zlib.crc32(corpo.encode('latin-1')))

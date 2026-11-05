@@ -1,11 +1,24 @@
 {
-    "grupo": "08",
-    "codigo": "01",
-    "localizacao": "105",
-    "autocustodiante": 0,
-    "cnpjCustodiante": "123456789000",
-    "discriminacao": "Teste do lançamento de criptoativos com dados ficticios",
-    "usufruto": 1,
-    "situacao2024": 1000,
-    "situacao2025": 2000
+  "cpf": "77039677008",
+  "bens": [
+    {
+      "grupo": "08", "codigo": "01", "pais": "105",
+      "discriminacao": "0,05 BTC custodiados na corretora X",
+      "situacao_2024": "1000.00", "situacao_2025": "2000.00",
+      "usufruto": false,
+      "pertence_a": {"tipo": "T"},
+      "cripto": {"autocustodiante": false, "cnpj_custodiante": "12345678000199"}
+    },
+    {
+      "grupo": "01", "codigo": "11", "pais": "105",
+      "discriminacao": "Apartamento ...",
+      "situacao_2024": "350000.00", "situacao_2025": "350000.00",
+      "imovel": {
+        "logradouro": "Rua X", "numero": "100", "bairro": "Centro", "cep": "80000000",
+        "uf": "PR", "cod_municipio": "7535", "municipio": "Curitiba",
+        "area": "75.5", "unidade": "m2", "data_aquisicao": "2019-05-10",
+        "iptu": "123456", "registrado_cartorio": true, "matricula": "9999", "cartorio": "1º RI"
+      }
+    }
+  ]
 }

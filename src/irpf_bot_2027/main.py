@@ -35,20 +35,21 @@ chave = proxima_chave(linhas, linhas_bens)
 cpf = Registro27.CPF.ler(next(l for l in linhas if not l.startswith('IR')))
 
 for bem in dados['bens']:
-    string = ' ' * Registro27.TAMANHO  # str com 1251 espaços
-    string = Registro27.TIPO_REGISTRO.gravar(string, '27')
-    string = Registro27.CPF.gravar(string, cpf)
-    string = Registro27.GRUPO.gravar(string, bem['grupo'])
-    string = Registro27.CODIGO.gravar(string, bem['codigo'])
-    string = Registro27.EXTERIOR.gravar(string, 0)
-    string = Registro27.PAIS.gravar(string, bem['pais'])
-    string = Registro27.DISCRIMINACAO.gravar(string, bem['discriminacao'])
-    string = Registro27.VALOR_2024.gravar(string, bem['situacao_2024'])
-    string = Registro27.VALOR_2025.gravar(string, bem['situacao_2025'])
-    string = Registro27.USUFRUTO.gravar(string, bem.get('usufruto', False))
-    string = Registro27.CHAVE.gravar(string, chave) 
+    exterior = 0 if str(bem['pais']) == '105' else 1
 
-    linhas.insert(index_preenchimento, string + '\r\n')
+    lancamento = Registro27.gravar_valores_padrao(cpf)
+    lancamento = Registro27.GRUPO.gravar(lancamento, bem['grupo'])
+    lancamento = Registro27.CODIGO.gravar(lancamento, bem['codigo'])
+    lancamento = Registro27.PAIS.gravar(lancamento, bem['pais'])
+    lancamento = Registro27.EXTERIOR.gravar(lancamento, exterior)
+    lancamento = Registro27.DISCRIMINACAO.gravar(lancamento, bem['discriminacao'])
+    lancamento = Registro27.VALOR_2024.gravar(lancamento, bem['situacao_2024'])
+    lancamento = Registro27.VALOR_2025.gravar(lancamento, bem['situacao_2025'])
+    lancamento = Registro27.USUFRUTO.gravar(lancamento, bem.get('usufruto', False))
+    lancamento = Registro27.CHAVE.gravar(lancamento, chave)
+    lancamento = Registro27.gravar_cod_controle(lancamento)          # sempre por último
+
+    linhas.insert(index_preenchimento, lancamento + '\r\n')
     print(f'Bem {bem['grupo']}/{bem['codigo']} inserido na linha {index_preenchimento + 1} com chave {chave}')
     
     index_preenchimento += 1
