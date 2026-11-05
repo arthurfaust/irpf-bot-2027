@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from decimal import Decimal, ROUND_HALF_UP
 
 @dataclass(frozen=True)
 class Campo:
@@ -20,7 +21,7 @@ class Campo:
     def formatar(self, valor) -> str:
         if self.tipo == "N":
             if self.decimais:
-                valor = round(float(valor) * 10 ** self.decimais)   # 1000.00 -> 100000
+                valor = (Decimal(str(valor or 0)) * 10 ** self.decimais).quantize(Decimal(1), ROUND_HALF_UP)  # 1000.00 -> 100000
             texto = str(int(valor or 0)).zfill(self.tamanho)
         else:
             texto = str(valor or "").upper().ljust(self.tamanho)
