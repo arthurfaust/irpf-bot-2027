@@ -63,8 +63,12 @@ class Registro27:
     CONTROLE             = Campo(1242, 1251, "N")
 
     @classmethod
-    def gravar_valores_padrao(cls, cpf: str) -> str:
-        """Linha de 1251 posições já com os valores de 'não usado'."""
+    def gravar_valores_padrao(cls, cpf: str, tem_titular_dependente: bool) -> str:
+        """Linha de 1251 posições já com os valores de 'não usado'.
+
+        tem_titular_dependente: o bem tem a pergunta "pertencente ao titular/dependente"
+        (regras.TITULAR_OU_DEPENDENTE). Sem ela, o programa grava esses dois campos em branco.
+        """
         linha = ' ' * cls.TAMANHO
         for campo in vars(cls).values():
             if isinstance(campo, Campo) and campo.tipo == 'N':
@@ -72,8 +76,9 @@ class Registro27:
 
         linha = cls.TIPO_REGISTRO.gravar(linha, 27)
         linha = cls.CPF.gravar(linha, cpf)
-        linha = cls.CPF_DONO.gravar(linha, cpf)          # dono = titular, por padrão
-        linha = cls.TITULAR_DEPENDENTE.gravar(linha, 'T')
+        if tem_titular_dependente:
+            linha = cls.CPF_DONO.gravar(linha, cpf)      # dono = titular, por padrão
+            linha = cls.TITULAR_DEPENDENTE.gravar(linha, 'T')
         linha = cls.REGISTRADO_CARTORIO.gravar(linha, 2) # 2 = não respondido
         linha = cls.UNIDADE_AREA.gravar(linha, 2)        # 2 = não informado
         

@@ -7,6 +7,7 @@ from irpf_bot_2027.registros import Registro27
 from irpf_bot_2027.config_log import configurar_log
 from irpf_bot_2027.tabela_bens import nome_codigo
 from irpf_bot_2027.validacao import validar_bem
+from irpf_bot_2027.regras import BRASIL, TITULAR_OU_DEPENDENTE, esta_na_tabela
 
 logger = logging.getLogger(__name__)
 
@@ -60,10 +61,11 @@ if erros:
         logger.error("  - %s", erro)
     raise SystemExit(1)
 
-for bem in dados['bens']:
-    exterior = 0 if str(bem['pais']) == '105' else 1
+for bem, campos in zip(dados['bens'], campos_por_bem):
+    exterior = 0 if str(bem['pais']) == BRASIL else 1
+    tem_titular_dependente = esta_na_tabela(TITULAR_OU_DEPENDENTE, bem['grupo'], bem['codigo'])
 
-    lancamento = Registro27.gravar_valores_padrao(cpf)
+    lancamento = Registro27.gravar_valores_padrao(cpf, tem_titular_dependente)
     lancamento = Registro27.GRUPO.gravar(lancamento, bem['grupo'])
     lancamento = Registro27.CODIGO.gravar(lancamento, bem['codigo'])
     lancamento = Registro27.PAIS.gravar(lancamento, bem['pais'])
@@ -73,10 +75,15 @@ for bem in dados['bens']:
     lancamento = Registro27.VALOR_2025.gravar(lancamento, bem['situacao_2025'])
     lancamento = Registro27.USUFRUTO.gravar(lancamento, bem.get('usufruto', False))
     lancamento = Registro27.CHAVE.gravar(lancamento, chave)
+
+    for nome, valor in campos.items():                 # campos dos blocos do JSON, já validados
+        lancamento = getattr(Registro27, nome).gravar(lancamento, valor)
+
     lancamento = Registro27.gravar_cod_controle(lancamento)          # sempre por último
 
     linhas.insert(index_preenchimento, lancamento + '\r\n')
     logger.info("Bem %s/%s (%s) inserido na linha %d com chave %d", bem['grupo'], bem['codigo'], nome_codigo(bem['grupo'], bem['codigo']), index_preenchimento + 1, chave)
+    logger.info("  campos extras gravados: %s", ", ".join(sorted(campos)) or "nenhum")
     
     index_preenchimento += 1
     chave +=1
