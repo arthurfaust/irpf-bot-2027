@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 from dotenv import load_dotenv
 from irpf_bot_2027.registros import Registro27
+from irpf_bot_2027.tabela_bens import codigo_existe, nome_codigo
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(ROOT_DIR / 'config' / '.env')
@@ -34,6 +35,17 @@ chave = proxima_chave(linhas, linhas_bens)
 
 cpf = Registro27.CPF.ler(next(l for l in linhas if not l.startswith('IR')))
 
+erros =[]
+for numero, bem in enumerate(dados['bens'], start=1):
+    if not codigo_existe(bem['grupo'], bem['codigo']):
+        erros.append(f"bem {numero}: grupo/código {bem['grupo']}/{bem['codigo']} não existe")
+
+if erros:
+    print('Nenhum bem foi inserido. Corrija o JSON:')
+    for erro in erros:
+        print(' -', erro)
+    raise SystemExit(1)
+
 for bem in dados['bens']:
     exterior = 0 if str(bem['pais']) == '105' else 1
 
@@ -50,7 +62,7 @@ for bem in dados['bens']:
     lancamento = Registro27.gravar_cod_controle(lancamento)          # sempre por último
 
     linhas.insert(index_preenchimento, lancamento + '\r\n')
-    print(f'Bem {bem['grupo']}/{bem['codigo']} inserido na linha {index_preenchimento + 1} com chave {chave}')
+    print(f"Bem {bem['grupo']}/{bem['codigo']} ({nome_codigo(bem['grupo'], bem['codigo'])}) inserido na linha {index_preenchimento + 1} com chave {chave}")
     
     index_preenchimento += 1
     chave +=1
