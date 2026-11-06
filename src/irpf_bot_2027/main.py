@@ -5,7 +5,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from irpf_bot_2027.registros import Registro27
 from irpf_bot_2027.config_log import configurar_log
-from irpf_bot_2027.tabela_bens import codigo_existe, nome_codigo
+from irpf_bot_2027.tabela_bens import nome_codigo
+from irpf_bot_2027.validacao import validar_bem
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +47,12 @@ chave = proxima_chave(linhas, linhas_bens)
 
 cpf = Registro27.CPF.ler(next(l for l in linhas if not l.startswith('IR')))
 
-erros =[]
+erros = []
+campos_por_bem = []   # campos extras de cada bem, já convertidos (usados na gravação)
 for numero, bem in enumerate(dados['bens'], start=1):
-    if not codigo_existe(bem['grupo'], bem['codigo']):
-        erros.append(f"bem {numero}: grupo/código {bem['grupo']}/{bem['codigo']} não existe")
+    campos, erros_bem = validar_bem(bem)
+    campos_por_bem.append(campos)
+    erros.extend(f"bem {numero}: {erro}" for erro in erros_bem)
 
 if erros:
     logger.error('Nenhum bem foi inserido. %d erro(s) no JSON.', len(erros))
