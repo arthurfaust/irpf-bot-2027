@@ -16,3 +16,4 @@ config/.env
 data/dados.json
 raw/
 gold/
+logs/

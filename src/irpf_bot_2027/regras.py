@@ -1,16 +1,16 @@
-"""Regras da tela "Editar: Bem e Direito" do IRPF 2026.
+"""
+Regras da tela "Editar: Bem e Direito" do IRPF 2026.
 
 Dizem quais campos do Registro27 aparecem na tela para cada grupo, código e país.
 Extraídas das classes do próprio programa (Bem e PainelBensDetalhe).
 
 Cada tabela abaixo segue o formato de tabela_bens.py:
-    grupo -> códigos em que a regra vale (TODOS = todos os códigos do grupo).
+    
+grupo -> códigos em que a regra vale (TODOS = todos os códigos do grupo).
 """
 
 TODOS = "todos"
 BRASIL = "105"
-
-# ---------------------------------------------------------------- tabelas
 
 CAMPOS_COMUNS = {"GRUPO", "CODIGO", "PAIS", "DISCRIMINACAO", "VALOR_2024", "VALOR_2025", "USUFRUTO"}
 
@@ -81,16 +81,11 @@ REGISTRO_IMOVEL = {
 ENDERECO_IMOVEL = {"LOGRADOURO", "NUMERO", "COMPLEMENTO", "BAIRRO", "CEP", "MUNICIPIO", "AREA", "UNIDADE_AREA"}
 SEM_DATA_NEM_CARTORIO = {"16", "17"}                # Construção e benfeitorias
 
-
-# ---------------------------------------------------------------- consulta
-
 def esta_na_tabela(tabela: dict, grupo: str, codigo: str) -> bool:
     """True se o par grupo/código aparece na tabela (TODOS vale para qualquer código)."""
     codigos = tabela.get(grupo)
     return codigos == TODOS or (codigos is not None and codigo in codigos)
 
-
-# ---------------------------------------------------------------- regras por assunto
 
 def campos_imovel(codigo: str, no_brasil: bool) -> set[str]:
     campos = set(ENDERECO_IMOVEL)
@@ -105,14 +100,12 @@ def campos_imovel(codigo: str, no_brasil: bool) -> set[str]:
             campos |= {"REGISTRADO_CARTORIO", "MATRICULA", "CARTORIO"}
     return campos
 
-
 def tem_cnpj_cpf(grupo: str, codigo: str, no_brasil: bool, autocustodiante: bool) -> bool:
     if not no_brasil:
         return False
     if esta_na_tabela(CRIPTO_COM_CUSTODIANTE, grupo, codigo):
         return not autocustodiante
     return esta_na_tabela(TEM_CNPJ_CPF, grupo, codigo)
-
 
 def campos_cripto(grupo: str, codigo: str) -> set[str]:
     campos = set()
@@ -124,9 +117,7 @@ def campos_cripto(grupo: str, codigo: str) -> set[str]:
         campos.add("STABLECOIN")
     return campos
 
-
-# ---------------------------------------------------------------- função principal
-
+# Função principal
 def campos_aplicaveis(g: str, c: str, pais: str, autocustodiante: bool = False, bolsa: bool = False) -> set[str]:
     """Campos do Registro27 que aparecem na tela para este bem.
 

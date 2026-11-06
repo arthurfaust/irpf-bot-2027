@@ -1,9 +1,13 @@
 import os
 import json
+import logging
 from pathlib import Path
 from dotenv import load_dotenv
 from irpf_bot_2027.registros import Registro27
+from irpf_bot_2027.config_log import configurar_log
 from irpf_bot_2027.tabela_bens import codigo_existe, nome_codigo
+
+logger = logging.getLogger(__name__)
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(ROOT_DIR / 'config' / '.env')
@@ -11,6 +15,9 @@ load_dotenv(ROOT_DIR / 'config' / '.env')
 raw_file = ROOT_DIR / os.environ['RAW_FILE']
 new_file = ROOT_DIR / os.environ['OUTPUT_FILE']
 client_data = ROOT_DIR / 'data' / 'dados.example.json'
+log_dir = ROOT_DIR / 'logs'
+
+configurar_log(log_dir)
 
 def encontrar_bens(linhas:list) -> list:
     linhas_bens = []
@@ -30,6 +37,10 @@ with open(client_data, 'r', encoding='utf-8', newline='') as data:
     dados = json.load(data)
 
 linhas_bens = encontrar_bens(linhas)
+
+logger.info("Arquivo de entrada: %s (%d linhas, %d bens)", raw_file.name, len(linhas), len(linhas_bens))
+logger.info("Dados do cliente: %s (%d bens a inserir)", client_data.name, len(dados['bens']))
+
 index_preenchimento = linhas_bens[-1] + 1
 chave = proxima_chave(linhas, linhas_bens)
 
@@ -41,9 +52,9 @@ for numero, bem in enumerate(dados['bens'], start=1):
         erros.append(f"bem {numero}: grupo/código {bem['grupo']}/{bem['codigo']} não existe")
 
 if erros:
-    print('Nenhum bem foi inserido. Corrija o JSON:')
+    logger.error('Nenhum bem foi inserido. %d erro(s) no JSON.', len(erros))
     for erro in erros:
-        print(' -', erro)
+        logger.error("  - %s", erro)
     raise SystemExit(1)
 
 for bem in dados['bens']:
@@ -62,10 +73,11 @@ for bem in dados['bens']:
     lancamento = Registro27.gravar_cod_controle(lancamento)          # sempre por último
 
     linhas.insert(index_preenchimento, lancamento + '\r\n')
-    print(f"Bem {bem['grupo']}/{bem['codigo']} ({nome_codigo(bem['grupo'], bem['codigo'])}) inserido na linha {index_preenchimento + 1} com chave {chave}")
+    logger.info("Bem %s/%s (%s) inserido na linha %d com chave %d", bem['grupo'], bem['codigo'], nome_codigo(bem['grupo'], bem['codigo']), index_preenchimento + 1, chave)
     
     index_preenchimento += 1
     chave +=1
 
 with open(new_file, 'w', encoding='latin-1', newline='') as nf:
     nf.writelines(linhas)
+    logger.info('Arquivo gravado: %s', new_file.name)
