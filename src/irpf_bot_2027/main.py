@@ -16,7 +16,7 @@ load_dotenv(ROOT_DIR / 'config' / '.env')
 
 raw_file = ROOT_DIR / os.environ['RAW_FILE']
 new_file = ROOT_DIR / os.environ['OUTPUT_FILE']
-client_data = ROOT_DIR / 'data' / 'dados.example.json'
+client_data = ROOT_DIR / os.environ.get('CLIENT_DATA', 'data/dados.example.json')
 log_dir = ROOT_DIR / 'logs'
 
 configurar_log(log_dir)

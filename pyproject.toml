@@ -17,3 +17,8 @@ irpf-bot-2027 = "irpf_bot_2027:main"
 [build-system]
 requires = ["uv_build>=0.12.17,<0.13.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
