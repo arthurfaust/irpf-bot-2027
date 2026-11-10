@@ -28,10 +28,8 @@ ORDEM_REGISTROS = (
     "60", "61", "62", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75", "76",
 )
 
-
 def tipo_da_linha(linha: str) -> str:
     return linha[:2]
-
 
 class ArquivoDBK:
     def __init__(self, linhas: list[str], quebra_no_fim: bool = False):

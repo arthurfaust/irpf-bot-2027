@@ -15,7 +15,6 @@ import zlib
 
 from irpf_bot_2027.dbk.campo import Campo
 
-
 class Registro:
     TIPO: str = ""
     TAMANHO: int = 0

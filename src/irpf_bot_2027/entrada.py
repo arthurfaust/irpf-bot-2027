@@ -6,19 +6,20 @@ para qual campo do Registro27 vai cada chave. CONVERSOES traduz o formato amigá
 JSON (true/false, "m2"/"ha") para o código que o DBK espera.
 
 Origem dos códigos gravados:
-    Do irpf.jar!/mapeamentoTxt.xml do programa IRPF2026 (versão 1.5), descrição dos campos do registro 27:
+    - Do irpf.jar!/mapeamentoTxt.xml do programa IRPF2026 (versão 1.5), descrição dos campos do registro 27:
         - UNIDADE_AREA (NM_UNID):                0 = m², 1 = ha, 2 = vazio
         - REGISTRADO_CARTORIO (NM_IND_REG_IMOV): 0 = não, 1 = sim, 2 = vazio
         - AUTOCUSTODIANTE (IN_CUSTODIANTE):      0 = não, 1 = sim
         - TITULAR_DEPENDENTE (IN_TIPO_BENEFIC):  "T" titular, "D" dependente
 
-    Confirmados em DBKs gravados pelo programa (tests/dados/):
+    - Confirmados em DBKs gravados pelo programa (tests/dados/):
         - DATA_AQUISICAO (DT_AQUISICAO): DDMMAAAA 
             - O leiaute não informa o formato;
             - Confirmado em 10/11/2026 com a data 23/10/2020 gravada como "23102020".
         - CNPJ_CPF, CPF_DONO, CEP: somente dígitos.
 
-    Chaves e blocos do JSON: formato definido por este projeto (não vem do programa).
+    - Chaves e blocos do JSON: 
+        - Formato definido por este projeto (não vem do programa).
 """
 
 import logging
@@ -71,10 +72,8 @@ def sim_nao(valor) -> int:
         raise ValueError(f"esperado true ou false, veio {valor!r}")
     return 1 if valor else 0
 
-
 def so_digitos(valor) -> str:
     return "".join(ch for ch in str(valor) if ch.isdigit())
-
 
 def titular_dependente(valor) -> str:
     valor = str(valor).upper()
@@ -82,13 +81,11 @@ def titular_dependente(valor) -> str:
         raise ValueError(f'esperado "T" ou "D", veio {valor!r}')
     return valor
 
-
 def unidade_area(valor) -> int:
     unidades = {"m2": 0, "ha": 1}
     if valor not in unidades:
         raise ValueError(f'esperado "m2" ou "ha", veio {valor!r}')
     return unidades[valor]
-
 
 def data_ddmmaaaa(valor) -> str:
     """"2020-10-23" -> "23102020". Formato confirmado numa cópia de segurança gerada pelo programa."""
@@ -97,7 +94,6 @@ def data_ddmmaaaa(valor) -> str:
     except ValueError:
         raise ValueError(f'esperada data no formato "AAAA-MM-DD", veio {valor!r}') from None
     return data.strftime("%d%m%Y")
-
 
 CONVERSOES = {
     "TITULAR_DEPENDENTE": titular_dependente,
