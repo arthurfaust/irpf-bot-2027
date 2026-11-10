@@ -6,7 +6,7 @@ from decimal import Decimal
 import pytest
 
 from conftest import linhas_27
-from irpf_bot_2027.registros import Registro27
+from irpf_bot_2027.leiautes.irpf2026.registro27 import Registro27
 
 CAMPOS = list(Registro27.campos().values())
 LINHAS = linhas_27()

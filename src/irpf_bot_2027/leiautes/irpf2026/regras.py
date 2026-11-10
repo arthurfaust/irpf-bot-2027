@@ -33,7 +33,7 @@ grupo -> códigos em que a regra vale (TODOS = todos os códigos do grupo).
 TODOS = "todos"
 BRASIL = "105"
 
-CAMPOS_COMUNS = {"GRUPO", "CODIGO", "PAIS", "DISCRIMINACAO", "VALOR_2024", "VALOR_2025", "USUFRUTO"}
+CAMPOS_COMUNS = {"GRUPO", "CODIGO", "PAIS", "DISCRIMINACAO", "VALOR_ANTERIOR", "VALOR_ATUAL", "USUFRUTO"}
 
 # CNPJ/CPF (só no Brasil). A cripto tem regra própria: CRIPTO_COM_CUSTODIANTE.
 TEM_CNPJ_CPF = {

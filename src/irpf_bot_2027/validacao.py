@@ -10,8 +10,8 @@ Origem: não tem regras próprias; usa as dos três módulos acima (veja a orige
 """
 
 from irpf_bot_2027.entrada import ORIGEM_NO_JSON, converter_campos
-from irpf_bot_2027.regras import BRASIL, campos_aplicaveis
-from irpf_bot_2027.tabela_bens import codigo_existe, nome_codigo
+from irpf_bot_2027.leiautes.irpf2026.regras import BRASIL, campos_aplicaveis
+from irpf_bot_2027.leiautes.irpf2026.tabela_bens import codigo_existe, nome_codigo
 
 def validar_bem(bem: dict) -> tuple[dict, list[str]]:
     """

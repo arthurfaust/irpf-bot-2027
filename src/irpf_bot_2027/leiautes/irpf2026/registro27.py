@@ -30,8 +30,8 @@ class Registro27(Registro):
     EXTERIOR             = Campo(16, 16, "N") # 0 = Brasil, 1 = exterior
     PAIS                 = Campo(17, 19, "N")
     DISCRIMINACAO        = Campo(20, 531)
-    VALOR_2024           = Campo(532, 544, "N", 2)
-    VALOR_2025           = Campo(545, 557, "N", 2)
+    VALOR_ANTERIOR       = Campo(532, 544, "N", 2)   # VR_ANTER: situação em 31/12 do ano anterior (2024)
+    VALOR_ATUAL          = Campo(545, 557, "N", 2)   # VR_ATUAL: situação em 31/12 do ano-calendário (2025)
     LOGRADOURO           = Campo(558, 597)
     NUMERO               = Campo(598, 603)
     COMPLEMENTO          = Campo(604, 643)

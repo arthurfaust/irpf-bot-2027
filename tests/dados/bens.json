@@ -4,7 +4,7 @@
     {
       "grupo": "08", "codigo": "01", "pais": "105",
       "discriminacao": "0,05 BTC custodiados na corretora X",
-      "situacao_2024": "1000.00", "situacao_2025": "2000.00",
+      "situacao_anterior": "1000.00", "situacao_atual": "2000.00",
       "usufruto": false,
       "pertence_a": {"tipo": "T"},
       "cripto": {"autocustodiante": false, "cnpj_custodiante": "12345678000199"}
@@ -12,7 +12,7 @@
     {
       "grupo": "01", "codigo": "11", "pais": "105",
       "discriminacao": "Apartamento ...",
-      "situacao_2024": "350000.00", "situacao_2025": "350000.00",
+      "situacao_anterior": "350000.00", "situacao_atual": "350000.00",
       "imovel": {
         "logradouro": "Rua X", "numero": "100", "bairro": "Centro", "cep": "80000000",
         "uf": "PR", "cod_municipio": "7535", "municipio": "Curitiba",
