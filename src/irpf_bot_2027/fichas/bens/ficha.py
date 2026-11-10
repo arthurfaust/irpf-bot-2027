@@ -6,19 +6,18 @@ Duas etapas, sempre nesta ordem e para a lista inteira:
        nada deve ser inserido.
     2. inserir(arquivo, bens, campos_por_bem): monta uma linha 27 por bem e insere no arquivo.
 
-Origem: não tem regras próprias; usa o leiaute (leiautes/irpf2026) e a validação (validacao.py).
+Origem: não tem regras próprias; usa o leiaute em uso (leiautes/atual.py) e a validação (validacao.py).
 """
 
 import logging
 
 from irpf_bot_2027.dbk import ArquivoDBK
 from irpf_bot_2027.fichas.bens.validacao import validar_bem
-from irpf_bot_2027.leiautes.irpf2026.registro27 import Registro27
-from irpf_bot_2027.leiautes.irpf2026.regras import BRASIL, TITULAR_OU_DEPENDENTE, esta_na_tabela
-from irpf_bot_2027.leiautes.irpf2026.tabela_bens import nome_codigo
+from irpf_bot_2027.leiautes.atual import BRASIL, TITULAR_OU_DEPENDENTE, Registro27, esta_na_tabela, nome_codigo
 
 logger = logging.getLogger(__name__)
 
+NOME = "Bens e Direitos"            # nome da ficha no programa, usado nos logs
 CHAVE_JSON = "bens"                 # nome da lista no JSON do cliente
 
 def validar(bens: list[dict]) -> tuple[list[dict], list[str]]:

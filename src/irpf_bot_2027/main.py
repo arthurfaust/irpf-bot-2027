@@ -4,24 +4,10 @@ import logging
 from irpf_bot_2027.config import ErroConfiguracao, carregar_config
 from irpf_bot_2027.config_log import configurar_log
 from irpf_bot_2027.dbk import ArquivoDBK
-from irpf_bot_2027.fichas import bens
-from irpf_bot_2027.leiautes import irpf2026 as leiaute
-from irpf_bot_2027.leiautes.irpf2026.cabecalho import CabecalhoIR
+from irpf_bot_2027.fichas import CHAVES_JSON_CONHECIDAS, FICHAS
+from irpf_bot_2027.leiautes.atual import verificar_exercicio
 
 logger = logging.getLogger(__name__)
-
-def verificar_exercicio(arquivo: ArquivoDBK) -> str | None:
-    """Mensagem de erro se o DBK não for do exercício do leiaute em uso; None se estiver certo."""
-    cabecalhos = arquivo.linhas_do_tipo(CabecalhoIR.TIPO)
-    if not cabecalhos:
-        return 'o arquivo de entrada não tem o cabeçalho "IR"; não parece um DBK do IRPF'
-
-    exercicio = CabecalhoIR.EXERCICIO.ler(cabecalhos[0])
-    ano_base = CabecalhoIR.ANO_BASE.ler(cabecalhos[0])
-    if (exercicio, ano_base) != (leiaute.EXERCICIO, leiaute.ANO_CALENDARIO):
-        return (f'o DBK é do exercício {exercicio} (ano-calendário {ano_base}), mas o bot está usando '
-                f'o leiaute do exercício {leiaute.EXERCICIO} (ano-calendário {leiaute.ANO_CALENDARIO})')
-    return None
 
 def main() -> None:
     try:
@@ -42,19 +28,37 @@ def main() -> None:
 
     # 2. Ler o JSON do cliente
     dados = json.loads(config.arquivo_dados.read_text(encoding='utf-8'))
-    lista_bens = dados[bens.CHAVE_JSON]
-    logger.info("Dados do cliente: %s (%d bens a inserir)", config.arquivo_dados.name, len(lista_bens))
+    logger.info("Dados do cliente: %s", config.arquivo_dados.name)
 
-    # 3. Validar tudo antes de gravar qualquer coisa
-    campos_por_bem, erros = bens.validar(lista_bens)
+    chaves_das_fichas = {ficha.CHAVE_JSON for ficha in FICHAS}
+    for chave in sorted(set(dados) - chaves_das_fichas - CHAVES_JSON_CONHECIDAS):
+        logger.warning("A chave '%s' do JSON não é de nenhuma ficha e foi ignorada.", chave)
+
+    # 3. Validar todas as fichas antes de gravar qualquer coisa
+    validados = []                      # (ficha, itens, dados_validados) das fichas presentes no JSON
+    erros = []
+    for ficha in FICHAS:
+        itens = dados.get(ficha.CHAVE_JSON, [])
+        if not itens:
+            continue
+        logger.info("%s: %d item(ns) a inserir", ficha.NOME, len(itens))
+        dados_validados, erros_ficha = ficha.validar(itens)
+        validados.append((ficha, itens, dados_validados))
+        erros.extend(f"{ficha.NOME} > {erro}" for erro in erros_ficha)
+
     if erros:
         logger.error('Nada foi inserido. %d erro(s) no JSON.', len(erros))
         for erro in erros:
             logger.error("  - %s", erro)
         raise SystemExit(1)
 
+    if not validados:
+        logger.warning("O JSON não tem itens de nenhuma ficha; o arquivo será gravado sem alterações.")
+
     # 4. Inserir e gravar
-    bens.inserir(arquivo, lista_bens, campos_por_bem)
+    for ficha, itens, dados_validados in validados:
+        ficha.inserir(arquivo, itens, dados_validados)
+
     arquivo.gravar(config.arquivo_saida)
     logger.info('Arquivo gravado: %s', config.arquivo_saida.name)
 
