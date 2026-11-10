@@ -6,10 +6,9 @@ from decimal import Decimal
 import pytest
 
 from conftest import linhas_27
-from irpf_bot_2027.campos import Campo
 from irpf_bot_2027.registros import Registro27
 
-CAMPOS = sorted((c for c in vars(Registro27).values() if isinstance(c, Campo)), key=lambda c: c.ini)
+CAMPOS = list(Registro27.campos().values())
 LINHAS = linhas_27()
 
 

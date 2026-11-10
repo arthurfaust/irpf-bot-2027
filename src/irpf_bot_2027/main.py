@@ -3,6 +3,7 @@ import logging
 
 from irpf_bot_2027.config import ErroConfiguracao, carregar_config
 from irpf_bot_2027.config_log import configurar_log
+from irpf_bot_2027.dbk import ArquivoDBK
 from irpf_bot_2027.registros import Registro27
 from irpf_bot_2027.regras import BRASIL, TITULAR_OU_DEPENDENTE, esta_na_tabela
 from irpf_bot_2027.tabela_bens import nome_codigo
@@ -10,15 +11,9 @@ from irpf_bot_2027.validacao import validar_bem
 
 logger = logging.getLogger(__name__)
 
-def encontrar_bens(linhas: list) -> list:
-    linhas_bens = []
-    for i, linha in enumerate(linhas):
-        if Registro27.TIPO_REGISTRO.ler(linha) == '27':  # bem
-            linhas_bens.append(i)
-    return linhas_bens
-
-def proxima_chave(linhas: list, linhas_bens: list) -> int:
-    chaves = [int(Registro27.CHAVE.ler(linhas[i])) for i in linhas_bens]
+def proxima_chave(linhas_bens: list[str]) -> int:
+    """Maior chave de bem existente + 1 (ou 1, se o DBK não tiver bens)."""
+    chaves = [int(Registro27.CHAVE.ler(linha)) for linha in linhas_bens]
     return max(chaves, default=0) + 1
 
 def main() -> None:
@@ -30,21 +25,18 @@ def main() -> None:
     configurar_log(config.pasta_logs, config.nivel_log)
     raw_file, new_file, client_data = config.arquivo_entrada, config.arquivo_saida, config.arquivo_dados
 
-    with open(raw_file, 'r', encoding='latin-1', newline='') as f:
-        linhas = f.readlines()
+    arquivo = ArquivoDBK.ler(raw_file)
 
     with open(client_data, 'r', encoding='utf-8', newline='') as data:
         dados = json.load(data)
 
-    linhas_bens = encontrar_bens(linhas)
+    linhas_bens = arquivo.linhas_do_tipo(Registro27.TIPO)
 
-    logger.info("Arquivo de entrada: %s (%d linhas, %d bens)", raw_file.name, len(linhas), len(linhas_bens))
+    logger.info("Arquivo de entrada: %s (%d linhas, %d bens)", raw_file.name, len(arquivo.linhas), len(linhas_bens))
     logger.info("Dados do cliente: %s (%d bens a inserir)", client_data.name, len(dados['bens']))
 
-    index_preenchimento = linhas_bens[-1] + 1
-    chave = proxima_chave(linhas, linhas_bens)
-
-    cpf = Registro27.CPF.ler(next(l for l in linhas if not l.startswith('IR')))
+    chave = proxima_chave(linhas_bens)
+    cpf = arquivo.cpf_declarante
 
     erros = []
     campos_por_bem = []   # campos extras de cada bem, já convertidos (usados na gravação)
@@ -79,16 +71,14 @@ def main() -> None:
 
         lancamento = Registro27.gravar_cod_controle(lancamento)          # sempre por último
 
-        linhas.insert(index_preenchimento, lancamento + '\r\n')
-        logger.info("Bem %s/%s (%s) inserido na linha %d com chave %d", bem['grupo'], bem['codigo'], nome_codigo(bem['grupo'], bem['codigo']), index_preenchimento + 1, chave)
+        posicao = arquivo.inserir(Registro27.TIPO, lancamento)
+        logger.info("Bem %s/%s (%s) inserido na linha %d com chave %d", bem['grupo'], bem['codigo'], nome_codigo(bem['grupo'], bem['codigo']), posicao + 1, chave)
         logger.info("  campos extras gravados: %s", ", ".join(sorted(campos)) or "nenhum")
 
-        index_preenchimento += 1
         chave += 1
 
-    with open(new_file, 'w', encoding='latin-1', newline='') as nf:
-        nf.writelines(linhas)
-        logger.info('Arquivo gravado: %s', new_file.name)
+    arquivo.gravar(new_file)
+    logger.info('Arquivo gravado: %s', new_file.name)
 
 if __name__ == '__main__':
     main()

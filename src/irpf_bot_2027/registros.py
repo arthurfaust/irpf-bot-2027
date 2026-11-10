@@ -13,15 +13,15 @@ Origem:
             - zeros nos campos N, "2" em NM_IND_REG_IMOV e NM_UNID, "T" e o CPF do titular em 
             IN_TIPO_BENEFIC/NR_CPF_BENEFIC só nos bens com a pergunta titular/dependente.
 
-    Código de controle (gravar_cod_controle): 
-        - CRC32 (zlib) das posições 1 a 1241, em decimal com 10 dígitos. 
+    Código de controle (gravar_cod_controle, herdado de dbk.Registro):
+        - CRC32 (zlib) das posições 1 a 1241, em decimal com 10 dígitos.
         - Não documentado no leiaute; confirmado em todas as linhas dos DBKs do programa.
 """
 
-import zlib
-from irpf_bot_2027.campos import Campo
+from irpf_bot_2027.dbk import Campo, Registro
 
-class Registro27:
+class Registro27(Registro):
+    TIPO = "27"
     TAMANHO = 1251
 
     TIPO_REGISTRO        = Campo(1, 2, "N")
@@ -89,10 +89,7 @@ class Registro27:
         tem_titular_dependente: o bem tem a pergunta "pertencente ao titular/dependente"
         (regras.TITULAR_OU_DEPENDENTE). Sem ela, o programa grava esses dois campos em branco.
         """
-        linha = ' ' * cls.TAMANHO
-        for campo in vars(cls).values():
-            if isinstance(campo, Campo) and campo.tipo == 'N':
-                linha = campo.gravar(linha, 0)          # campos numéricos com zeros
+        linha = cls.linha_vazia()                        # campos numéricos com zeros
 
         linha = cls.TIPO_REGISTRO.gravar(linha, 27)
         linha = cls.CPF.gravar(linha, cpf)
@@ -101,11 +98,5 @@ class Registro27:
             linha = cls.TITULAR_DEPENDENTE.gravar(linha, 'T')
         linha = cls.REGISTRADO_CARTORIO.gravar(linha, 2) # 2 = não respondido
         linha = cls.UNIDADE_AREA.gravar(linha, 2)        # 2 = não informado
-        
-        return linha
 
-    @classmethod
-    def gravar_cod_controle(cls, linha: str) -> str:
-        """Grava o código de controle: CRC32 das posições 1 a 1241."""
-        corpo = linha[:cls.CONTROLE.ini - 1]
-        return cls.CONTROLE.gravar(linha, zlib.crc32(corpo.encode('latin-1')))
+        return linha
