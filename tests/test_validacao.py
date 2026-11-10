@@ -75,7 +75,7 @@ def test_campo_de_primeiro_nivel_desconhecido_e_barrado():
 
 
 def test_todos_os_erros_aparecem_de_uma_vez():
-    bem = {"grupo": "01", "codigo": "11", "pais": "105", "imovel": {"vagas": 1}}
+    bem = {"grupo": "02", "codigo": "05", "pais": "105", "imovel": {"vagas": 1}}   # 02/05 não tem obrigatórios próprios
     _, erros = validar_bem(bem)
     assert len(erros) == 4            # vagas + discriminacao + situacao_anterior + situacao_atual
 

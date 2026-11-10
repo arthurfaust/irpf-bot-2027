@@ -6,19 +6,20 @@ Três checagens, nesta ordem:
        convertem (entrada.py) e cabem no campo do Registro27, com os textos normalizados (verificar_formato, comum/texto.py)
     2. o grupo/código existe (tabela_bens.py), o país existe (paises.py) e o código pode estar
        nesse país (regras.SOMENTE_BRASIL / SOMENTE_EXTERIOR)
-    3. cada campo preenchido aparece na tela para esse grupo/código/país (regras.py)
+    3. cada campo preenchido aparece na tela para esse grupo/código/país, e os campos que a tela
+       exige estão preenchidos (regras.campos_aplicaveis / campos_obrigatorios)
 
 Origem: não tem regras próprias; usa as dos três módulos acima (veja a origem em cada um).
 """
 
 from irpf_bot_2027.comum.texto import caracteres_fora_do_latin1, normalizar_texto
-from irpf_bot_2027.fichas.bens.entrada import ORIGEM_NO_JSON, converter_campos
+from irpf_bot_2027.fichas.bens.entrada import converter_campos, informado_no_json, origem_no_json
 from irpf_bot_2027.leiautes.atual import (
-    BRASIL, SOMENTE_BRASIL, SOMENTE_EXTERIOR, Registro27, campos_aplicaveis, codigo_existe, esta_na_tabela,
+    BRASIL, SOMENTE_BRASIL, SOMENTE_EXTERIOR, Registro27, campos_aplicaveis, campos_obrigatorios, codigo_existe, esta_na_tabela,
     nome_codigo, nome_pais, pais_existe,
 )
 
-def verificar_formato(campos: dict) -> list[str]:
+def verificar_formato(bem: dict, campos: dict) -> list[str]:
     """Confere se cada valor cabe no seu campo do Registro27. Normaliza os textos no próprio dicionário.
 
     As mensagens não repetem o conteúdo dos textos, que pode ter dados do cliente.
@@ -26,7 +27,7 @@ def verificar_formato(campos: dict) -> list[str]:
     erros = []
     for nome, valor in list(campos.items()):
         campo = getattr(Registro27, nome)
-        origem = ORIGEM_NO_JSON.get(nome, nome)
+        origem = origem_no_json(bem, nome) or nome
 
         if campo.tipo != "N" and isinstance(valor, str):
             valor = campos[nome] = normalizar_texto(valor)
@@ -60,7 +61,7 @@ def validar_bem(bem: dict) -> tuple[dict, list[str]]:
     grupo, codigo = bem.get("grupo"), bem.get("codigo")
 
     campos, erros = converter_campos(bem)
-    erros += verificar_formato(campos)
+    erros += verificar_formato(bem, campos)
     pais = campos.get("PAIS")                       # já convertido para 3 dígitos
 
     if grupo is None or codigo is None or pais is None:
@@ -84,6 +85,24 @@ def validar_bem(bem: dict) -> tuple[dict, list[str]]:
     local = "no Brasil" if pais == BRASIL else "no exterior"
     for campo in sorted(set(campos) - permitidos):
         motivo = " quando é autocustodiante" if campo == "CNPJ_CPF" and campos.get("AUTOCUSTODIANTE") == 1 else ""
-        erros.append(f"'{ORIGEM_NO_JSON.get(campo, campo)}' não se aplica a {descricao} {local}{motivo}")
+        erros.append(f"'{origem_no_json(bem, campo) or campo}' não se aplica a {descricao} {local}{motivo}")
+
+    obrigatorios = campos_obrigatorios(
+        grupo, codigo, pais,
+        autocustodiante=campos.get("AUTOCUSTODIANTE") == 1,
+        registrado_cartorio=campos.get("REGISTRADO_CARTORIO") == 1,
+        dependente=campos.get("TITULAR_DEPENDENTE") == "D",
+    )
+    for campo in sorted(obrigatorios):
+        if campos.get(campo) is not None and str(campos[campo]).strip() != "":
+            continue
+        origem = origem_no_json(bem, campo)
+        if origem and informado_no_json(bem, origem):
+            continue                                # informado, mas inválido: o erro de formato já está na lista
+        if origem:
+            erros.append(f"'{origem}' é obrigatório para {descricao} {local}")
+        else:
+            erros.append(f"{descricao} {local} exige o campo {campo}, que ainda não pode ser informado no JSON "
+                         f"(esse tipo de bem ainda não é suportado pelo bot)")
 
     return campos, erros

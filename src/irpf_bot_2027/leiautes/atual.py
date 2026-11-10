@@ -11,13 +11,14 @@ from irpf_bot_2027.leiautes.irpf2026.cabecalho import CabecalhoIR, verificar_exe
 from irpf_bot_2027.leiautes.irpf2026.paises import BRASIL, nome_pais, pais_existe
 from irpf_bot_2027.leiautes.irpf2026.registro27 import Registro27
 from irpf_bot_2027.leiautes.irpf2026.regras import (
-    SOMENTE_BRASIL, SOMENTE_EXTERIOR, TITULAR_OU_DEPENDENTE, campos_aplicaveis, esta_na_tabela,
+    SOMENTE_BRASIL, SOMENTE_EXTERIOR, TITULAR_OU_DEPENDENTE, campos_aplicaveis, campos_obrigatorios, esta_na_tabela,
 )
 from irpf_bot_2027.leiautes.irpf2026.tabela_bens import codigo_existe, nome_codigo
 
 __all__ = [
     "ANO_CALENDARIO", "EXERCICIO", "CabecalhoIR", "verificar_exercicio", "Registro27",
     "BRASIL", "nome_pais", "pais_existe",
-    "SOMENTE_BRASIL", "SOMENTE_EXTERIOR", "TITULAR_OU_DEPENDENTE", "campos_aplicaveis", "esta_na_tabela",
+    "SOMENTE_BRASIL", "SOMENTE_EXTERIOR", "TITULAR_OU_DEPENDENTE", "campos_aplicaveis", "campos_obrigatorios",
+    "esta_na_tabela",
     "codigo_existe", "nome_codigo",
 ]

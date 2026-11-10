@@ -40,6 +40,8 @@ CAMPOS_SIMPLES = {
     "situacao_anterior": "VALOR_ANTERIOR",          # situação em 31/12 do ano anterior
     "situacao_atual": "VALOR_ATUAL",                # situação em 31/12 do ano-calendário
     "usufruto": "USUFRUTO",                         # true | false (opcional, padrão false)
+    "cnpj_cpf": "CNPJ_CPF",                         # CNPJ da empresa, instituição ou fundo; CPF/CNPJ do devedor
+                                                    # nos créditos (grupo 05). Na cripto use cripto.cnpj_custodiante.
 }
 
 # Campos do primeiro nível que todo bem precisa ter (o programa exige grupo, código, país e discriminação;
@@ -79,11 +81,33 @@ MAPA_BLOCOS = {
     },
 }
 
-# Caminho no JSON de cada campo do Registro27, para as mensagens de erro (ex.: "CNPJ_CPF" -> "cripto.cnpj_custodiante").
-ORIGEM_NO_JSON = {
-    **{campo: chave for chave, campo in CAMPOS_SIMPLES.items()},
-    **{campo: f"{bloco}.{chave}" for bloco, mapa in MAPA_BLOCOS.items() for chave, campo in mapa.items()},
-}
+# Caminhos no JSON de cada campo do Registro27, para as mensagens de erro. Um campo pode ter mais de um
+# (ex.: CNPJ_CPF vem de "cnpj_cpf" ou de "cripto.cnpj_custodiante").
+ORIGENS_NO_JSON: dict[str, list[str]] = {}
+for _chave, _campo in CAMPOS_SIMPLES.items():
+    ORIGENS_NO_JSON.setdefault(_campo, []).append(_chave)
+for _bloco, _mapa in MAPA_BLOCOS.items():
+    for _chave, _campo in _mapa.items():
+        ORIGENS_NO_JSON.setdefault(_campo, []).append(f"{_bloco}.{_chave}")
+
+def informado_no_json(bem: dict, origem: str) -> bool:
+    """True se o caminho ("situacao_atual" ou "imovel.area") tem algum valor no bem do JSON."""
+    valor = bem
+    for parte in origem.split("."):
+        valor = valor.get(parte) if isinstance(valor, dict) else None
+    return valor is not None
+
+def origem_no_json(bem: dict, campo: str) -> str | None:
+    """Caminho no JSON de onde o campo veio (ou deveria vir, se não foi informado). None se não há caminho."""
+    caminhos = ORIGENS_NO_JSON.get(campo)
+    if not caminhos:
+        return None
+    for caminho in caminhos:
+        if informado_no_json(bem, caminho):
+            return caminho
+    if campo == "CNPJ_CPF" and bem.get("grupo") == "08":
+        return "cripto.cnpj_custodiante"
+    return caminhos[0]
 
 # Campos que existem no mapa mas ainda não podem ser gravados, com o motivo.
 CAMPOS_BLOQUEADOS: dict[str, str] = {}
@@ -133,8 +157,13 @@ def converter_campos(bem: dict) -> tuple[dict, list[str]]:
     """
     campos = {}
     erros = []
+    origem_usada = {}                               # campo -> caminho do JSON que o preencheu
 
     def converter(origem: str, nome: str, valor) -> None:
+        if nome in origem_usada:
+            erros.append(f"'{origem_usada[nome]}' e '{origem}' informam o mesmo campo; use só um deles")
+            return
+        origem_usada[nome] = origem
         if nome in CAMPOS_BLOQUEADOS:
             erros.append(f"'{origem}': {CAMPOS_BLOQUEADOS[nome]}")
             return

@@ -22,6 +22,12 @@ Origem:
     campos_imovel (cartório, data) | Bem.isBemImovelRegistravel + PainelBensDetalhe.habilitarCampoDataAquisicao, habilitaCampoBemImovelRegistrado
     SOMENTE_BRASIL                 | Bem.isBemApenasBrasil (a tela trava o país em 105)
     SOMENTE_EXTERIOR               | Bem.isBemApenasExterior (mensagem bem_brasil_nao_permitido)
+    CNPJ_OBRIGATORIO               | validador Bem$14 (mensagem bem_cnpj_branco) + Ajuda, "Atenção 1"
+    campos_obrigatorios            | validadores Bem$3 (imóvel), $8/$9 (Renavam/embarcação), $17-$19 (conta),
+                                   | $22 (dependente), $34-$36 (cripto), ValidadorDataAquisicao, ValidadorRegistroBemImovel
+                                   | e mensagens bem_*_branco do irpf.jar!/Mensagens.properties
+      Incerto: o que o programa exige de um imóvel no EXTERIOR (ValidadorLocalizacaoBemImovelExterior)
+      não foi lido em detalhe; por isso só logradouro, área e unidade são exigidos fora do Brasil.
 
     Conferidas com a Ajuda do programa (help/AjudaIRPF.pdf, capítulo "Bens e Direitos", págs. 178 a 234) e com a tela do programa nos bens de teste.
 
@@ -118,6 +124,23 @@ SOMENTE_EXTERIOR = {
 ENDERECO_IMOVEL = {"LOGRADOURO", "NUMERO", "COMPLEMENTO", "BAIRRO", "CEP", "MUNICIPIO", "AREA", "UNIDADE_AREA"}
 SEM_DATA_NEM_CARTORIO = {"16", "17"}                # Construção e benfeitorias
 
+# CNPJ obrigatório (quando o campo aparece, isto é, no Brasil). A cripto entra pela regra do custodiante.
+CNPJ_OBRIGATORIO = {
+    "03": {"01", "02", "03", "99"},                 # Ações, quotas, holding, outras participações
+    "04": {"01", "02", "03", "99"},                 # Poupança, títulos tributados, títulos isentos, outras aplicações
+    "06": {"01", "99"},                             # Conta corrente, outros depósitos
+    "07": {"01", "02", "03", "04", "06", "07",      # Todos os fundos nacionais
+           "08", "10", "12", "13"},
+    "99": {"05", "06", "07"},                       # Consórcio, VGBL, JCP a receber
+}
+
+# Obrigatórios de todo imóvel (no Brasil ou no exterior) e só dos imóveis no Brasil.
+IMOVEL_OBRIGATORIO = {"LOGRADOURO", "AREA", "UNIDADE_AREA"}
+IMOVEL_OBRIGATORIO_NO_BRASIL = {"CEP", "UF", "COD_MUNICIPIO", "MUNICIPIO"}
+
+# Registro obrigatório dos bens móveis no Brasil (Renavam do veículo e registro da embarcação; o da aeronave não é).
+REGISTRO_MOVEL_OBRIGATORIO_NO_BRASIL = {"01": "RENAVAM", "03": "REG_EMBARCACAO"}
+
 def esta_na_tabela(tabela: dict, grupo: str, codigo: str) -> bool:
     """True se o par grupo/código aparece na tabela (TODOS vale para qualquer código)."""
     codigos = tabela.get(grupo)
@@ -200,3 +223,52 @@ def campos_aplicaveis(g: str, c: str, pais: str, autocustodiante: bool = False, 
         campos |= {"LD_RECEBIDO", "LD_IMPOSTO"}
 
     return campos
+
+def campos_obrigatorios(g: str, c: str, pais: str, autocustodiante: bool = False, registrado_cartorio: bool = False, dependente: bool = False) -> set[str]:
+    """
+    Campos do Registro27 que a tela exige preenchidos para este bem (além dos comuns).
+    Args:
+        g,c: Grupo e código com 2 dígitos
+        pais: Código do país ("105" = Brasil)
+        autocustodiante: Resposta a "É autocustodiante?" (só cripto)
+        registrado_cartorio: Resposta a "Registrado no cartório?" (só imóvel)
+        dependente: O bem pertence a um dependente
+    Returns:
+        set[str]: Coleção com os campos obrigatórios (sempre um subconjunto de campos_aplicaveis)
+    """
+    no_brasil = pais == BRASIL
+    obrigatorios = set()
+
+    if g == "01":
+        obrigatorios |= IMOVEL_OBRIGATORIO
+        if no_brasil:
+            obrigatorios |= IMOVEL_OBRIGATORIO_NO_BRASIL
+        if c not in SEM_DATA_NEM_CARTORIO:
+            obrigatorios.add("DATA_AQUISICAO")
+            if no_brasil:
+                obrigatorios.add("REGISTRADO_CARTORIO")
+                if registrado_cartorio:
+                    obrigatorios |= {"MATRICULA", "CARTORIO"}
+
+    if g == "02" and no_brasil and c in REGISTRO_MOVEL_OBRIGATORIO_NO_BRASIL:
+        obrigatorios.add(REGISTRO_MOVEL_OBRIGATORIO_NO_BRASIL[c])
+
+    if no_brasil and esta_na_tabela(CNPJ_OBRIGATORIO, g, c):
+        obrigatorios.add("CNPJ_CPF")
+
+    if no_brasil and esta_na_tabela(CONTA_BANCARIA, g, c):
+        obrigatorios |= {"BANCO", "AGENCIA", "CONTA"}
+
+    if esta_na_tabela(CRIPTO_COM_CUSTODIANTE, g, c):
+        obrigatorios.add("AUTOCUSTODIANTE")
+        if no_brasil and not autocustodiante:
+            obrigatorios.add("CNPJ_CPF")
+    if (g, c) == ("08", "02"):
+        obrigatorios.add("ALTCOIN")
+    if (g, c) == ("08", "03"):
+        obrigatorios.add("STABLECOIN")
+
+    if dependente and esta_na_tabela(TITULAR_OU_DEPENDENTE, g, c):
+        obrigatorios.add("CPF_DONO")
+
+    return obrigatorios
