@@ -20,6 +20,8 @@ Origem:
     REGISTRO_BEM_MOVEL             | Bem.isBemRegistravel / Bem.tituloCampoRegistro
     REGISTRO_IMOVEL                | Bem.tituloCampoRegistro / Bem.tamanhoCampoRegistro
     campos_imovel (cartório, data) | Bem.isBemImovelRegistravel + PainelBensDetalhe.habilitarCampoDataAquisicao, habilitaCampoBemImovelRegistrado
+    SOMENTE_BRASIL                 | Bem.isBemApenasBrasil (a tela trava o país em 105)
+    SOMENTE_EXTERIOR               | Bem.isBemApenasExterior (mensagem bem_brasil_nao_permitido)
 
     Conferidas com a Ajuda do programa (help/AjudaIRPF.pdf, capítulo "Bens e Direitos", págs. 178 a 234) e com a tela do programa nos bens de teste.
 
@@ -30,8 +32,9 @@ Cada tabela abaixo segue o formato de tabela_bens.py:
 grupo -> códigos em que a regra vale (TODOS = todos os códigos do grupo).
 """
 
+from irpf_bot_2027.leiautes.irpf2026.paises import BRASIL
+
 TODOS = "todos"
-BRASIL = "105"
 
 CAMPOS_COMUNS = {"GRUPO", "CODIGO", "PAIS", "DISCRIMINACAO", "VALOR_ANTERIOR", "VALOR_ATUAL", "USUFRUTO"}
 
@@ -97,6 +100,19 @@ REGISTRO_IMOVEL = {
     "14": "CIB",                                    # Imóvel rural
     "16": "CEI_CNO",                                # Construção
     "17": None,                                     # Benfeitorias: não tem registro
+}
+
+# Códigos que só podem ser localizados no Brasil (país 105).
+SOMENTE_BRASIL = {
+    "04": {"01", "03", "04"},                       # Poupança, títulos isentos, ativos negociados em bolsa no Brasil
+    "06": {"02"},                                   # Conta em operador de apostas de quota fixa
+    "07": {"01", "02", "03", "04", "06", "07",      # Todos os fundos nacionais (exceto 99)
+           "08", "10", "12", "13"},
+}
+
+# Códigos que só podem ser localizados no exterior (país diferente de 105).
+SOMENTE_EXTERIOR = {
+    "07": {"99"},                                   # Fundos de investimento no exterior
 }
 
 ENDERECO_IMOVEL = {"LOGRADOURO", "NUMERO", "COMPLEMENTO", "BAIRRO", "CEP", "MUNICIPIO", "AREA", "UNIDADE_AREA"}

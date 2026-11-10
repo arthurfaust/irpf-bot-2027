@@ -47,7 +47,7 @@ def montar_linha(bem: dict, campos: dict, cpf: str, chave: int) -> str:
     campos: todos os campos vindos do JSON, já convertidos (validacao.validar_bem).
     Aqui só se acrescentam os campos calculados: padrões, EXTERIOR e CHAVE.
     """
-    exterior = 0 if str(bem["pais"]) == BRASIL else 1
+    exterior = 0 if campos["PAIS"] == BRASIL else 1
     tem_titular_dependente = esta_na_tabela(TITULAR_OU_DEPENDENTE, bem["grupo"], bem["codigo"])
 
     linha = Registro27.gravar_valores_padrao(cpf, tem_titular_dependente)

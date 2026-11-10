@@ -4,7 +4,8 @@ Validação de um bem do JSON antes de gravar no DBK.
 Três checagens, nesta ordem:
     1. os campos e blocos do JSON são conhecidos, os obrigatórios estão presentes e os valores
        convertem (entrada.py) e cabem no campo do Registro27, com os textos normalizados (verificar_formato, comum/texto.py)
-    2. o grupo/código existe (tabela_bens.py)
+    2. o grupo/código existe (tabela_bens.py), o país existe (paises.py) e o código pode estar
+       nesse país (regras.SOMENTE_BRASIL / SOMENTE_EXTERIOR)
     3. cada campo preenchido aparece na tela para esse grupo/código/país (regras.py)
 
 Origem: não tem regras próprias; usa as dos três módulos acima (veja a origem em cada um).
@@ -12,7 +13,10 @@ Origem: não tem regras próprias; usa as dos três módulos acima (veja a orige
 
 from irpf_bot_2027.comum.texto import caracteres_fora_do_latin1, normalizar_texto
 from irpf_bot_2027.fichas.bens.entrada import ORIGEM_NO_JSON, converter_campos
-from irpf_bot_2027.leiautes.atual import BRASIL, Registro27, campos_aplicaveis, codigo_existe, nome_codigo
+from irpf_bot_2027.leiautes.atual import (
+    BRASIL, SOMENTE_BRASIL, SOMENTE_EXTERIOR, Registro27, campos_aplicaveis, codigo_existe, esta_na_tabela,
+    nome_codigo, nome_pais, pais_existe,
+)
 
 def verificar_formato(campos: dict) -> list[str]:
     """Confere se cada valor cabe no seu campo do Registro27. Normaliza os textos no próprio dicionário.
@@ -53,15 +57,24 @@ def validar_bem(bem: dict) -> tuple[dict, list[str]]:
             - Dicionário com os campos validados.
             - Lista de erros encontrados.
     """
-    grupo, codigo, pais = bem.get("grupo"), bem.get("codigo"), str(bem.get("pais", ""))
+    grupo, codigo = bem.get("grupo"), bem.get("codigo")
 
     campos, erros = converter_campos(bem)
     erros += verificar_formato(campos)
+    pais = campos.get("PAIS")                       # já convertido para 3 dígitos
 
-    if grupo is None or codigo is None:
-        return campos, erros                        # o erro de campo obrigatório já está na lista
+    if grupo is None or codigo is None or pais is None:
+        return campos, erros                        # o erro de campo obrigatório ou de formato já está na lista
     if not codigo_existe(grupo, codigo):
         return campos, erros + [f"grupo/código {grupo}/{codigo} não existe"]
+    if not pais_existe(pais):
+        return campos, erros + [f"país {pais} não existe na tabela do programa"]
+
+    descricao = f"{grupo}/{codigo} ({nome_codigo(grupo, codigo)})"
+    if pais != BRASIL and esta_na_tabela(SOMENTE_BRASIL, grupo, codigo):
+        erros.append(f"{descricao} só pode estar localizado no Brasil (país {BRASIL}); veio {pais} ({nome_pais(pais)})")
+    if pais == BRASIL and esta_na_tabela(SOMENTE_EXTERIOR, grupo, codigo):
+        erros.append(f"{descricao} só pode estar localizado no exterior; veio {BRASIL} (Brasil)")
 
     permitidos = campos_aplicaveis(
         grupo, codigo, pais,
@@ -71,9 +84,6 @@ def validar_bem(bem: dict) -> tuple[dict, list[str]]:
     local = "no Brasil" if pais == BRASIL else "no exterior"
     for campo in sorted(set(campos) - permitidos):
         motivo = " quando é autocustodiante" if campo == "CNPJ_CPF" and campos.get("AUTOCUSTODIANTE") == 1 else ""
-        erros.append(
-            f"'{ORIGEM_NO_JSON.get(campo, campo)}' não se aplica a "
-            f"{grupo}/{codigo} ({nome_codigo(grupo, codigo)}) {local}{motivo}"
-        )
+        erros.append(f"'{ORIGEM_NO_JSON.get(campo, campo)}' não se aplica a {descricao} {local}{motivo}")
 
     return campos, erros

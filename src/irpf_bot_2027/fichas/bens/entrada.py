@@ -95,7 +95,15 @@ def unidade_area(valor) -> int:
         raise ValueError(f'esperado "m2" ou "ha", veio {valor!r}')
     return unidades[valor]
 
+def codigo_pais(valor) -> str:
+    """"105", 105 ou "13" -> código de 3 dígitos ("105", "013"). A existência é conferida na validação."""
+    texto = str(valor).strip()
+    if isinstance(valor, bool) or not texto.isdigit() or len(texto) > 3:
+        raise ValueError('esperado o código do país com até 3 dígitos (ex.: "105" para o Brasil)')
+    return texto.zfill(3)
+
 CONVERSOES = {
+    "PAIS": codigo_pais,
     "VALOR_ANTERIOR": valor_em_reais,
     "VALOR_ATUAL": valor_em_reais,
     "AREA": partial(numero, casas=1),               # área com 1 casa decimal (N11,1 no leiaute)
