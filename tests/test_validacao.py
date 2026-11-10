@@ -5,7 +5,7 @@ import json
 import pytest
 
 from conftest import DADOS
-from irpf_bot_2027.validacao import validar_bem
+from irpf_bot_2027.fichas.bens.validacao import validar_bem
 
 BENS = json.loads((DADOS / "bens.json").read_text(encoding="utf-8"))["bens"]
 BITCOIN, APARTAMENTO = BENS

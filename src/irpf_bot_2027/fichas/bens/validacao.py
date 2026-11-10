@@ -9,7 +9,7 @@ Três checagens, nesta ordem:
 Origem: não tem regras próprias; usa as dos três módulos acima (veja a origem em cada um).
 """
 
-from irpf_bot_2027.entrada import ORIGEM_NO_JSON, converter_campos
+from irpf_bot_2027.fichas.bens.entrada import ORIGEM_NO_JSON, converter_campos
 from irpf_bot_2027.leiautes.irpf2026.regras import BRASIL, campos_aplicaveis
 from irpf_bot_2027.leiautes.irpf2026.tabela_bens import codigo_existe, nome_codigo
 
