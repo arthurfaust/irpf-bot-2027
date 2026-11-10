@@ -2,8 +2,9 @@
 Validação de um bem do JSON antes de gravar no DBK.
 
 Três checagens, nesta ordem:
-    1. o grupo/código existe (tabela_bens.py)
-    2. os blocos do JSON são conhecidos e os valores convertem (entrada.py)
+    1. os campos e blocos do JSON são conhecidos, os obrigatórios estão presentes e os valores
+       convertem (entrada.py)
+    2. o grupo/código existe (tabela_bens.py)
     3. cada campo preenchido aparece na tela para esse grupo/código/país (regras.py)
 
 Origem: não tem regras próprias; usa as dos três módulos acima (veja a origem em cada um).
@@ -24,10 +25,12 @@ def validar_bem(bem: dict) -> tuple[dict, list[str]]:
     """
     grupo, codigo, pais = bem.get("grupo"), bem.get("codigo"), str(bem.get("pais", ""))
 
-    if not codigo_existe(grupo, codigo):
-        return {}, [f"grupo/código {grupo}/{codigo} não existe"]
-
     campos, erros = converter_campos(bem)
+
+    if grupo is None or codigo is None:
+        return campos, erros                        # o erro de campo obrigatório já está na lista
+    if not codigo_existe(grupo, codigo):
+        return campos, erros + [f"grupo/código {grupo}/{codigo} não existe"]
 
     permitidos = campos_aplicaveis(
         grupo, codigo, pais,

@@ -40,3 +40,47 @@ def test_apartamento_converte_campos_do_bloco():
 def test_bem_invalido_e_barrado(bem, trecho_do_erro):
     _, erros = validar_bem(bem)
     assert any(trecho_do_erro in erro for erro in erros), erros
+
+
+def sem(bem: dict, chave: str) -> dict:
+    return {k: v for k, v in bem.items() if k != chave}
+
+
+@pytest.mark.parametrize(
+    "chave", ["grupo", "codigo", "pais", "discriminacao", "situacao_anterior", "situacao_atual"]
+)
+def test_campo_obrigatorio_ausente_e_barrado(chave):
+    _, erros = validar_bem(sem(APARTAMENTO, chave))
+    assert f"campo obrigatório '{chave}' não informado" in erros
+
+
+@pytest.mark.parametrize("vazio", ["", "   ", None])
+def test_discriminacao_vazia_e_barrada(vazio):
+    _, erros = validar_bem({**APARTAMENTO, "discriminacao": vazio})
+    assert "campo obrigatório 'discriminacao' não informado" in erros
+
+
+def test_usufruto_e_opcional():
+    _, erros = validar_bem(sem(BITCOIN, "usufruto"))
+    assert erros == []
+
+
+def test_campo_de_primeiro_nivel_desconhecido_e_barrado():
+    """Um nome errado (ex.: com cedilha) não pode ser ignorado: o valor sumiria sem aviso."""
+    bem = {**sem(APARTAMENTO, "situacao_atual"), "situaçao_atual": "350000.00"}
+    _, erros = validar_bem(bem)
+    assert "campo desconhecido 'situaçao_atual'" in erros
+    assert "campo obrigatório 'situacao_atual' não informado" in erros
+
+
+def test_todos_os_erros_aparecem_de_uma_vez():
+    bem = {"grupo": "01", "codigo": "11", "pais": "105", "imovel": {"vagas": 1}}
+    _, erros = validar_bem(bem)
+    assert len(erros) == 4            # vagas + discriminacao + situacao_anterior + situacao_atual
+
+
+def test_campos_do_primeiro_nivel_sao_convertidos():
+    campos, _ = validar_bem(BITCOIN)
+    assert campos["GRUPO"] == "08"
+    assert campos["VALOR_ATUAL"] == "2000.00"
+    assert campos["USUFRUTO"] == 0

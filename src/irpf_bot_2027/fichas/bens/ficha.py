@@ -12,6 +12,7 @@ Origem: não tem regras próprias; usa o leiaute em uso (leiautes/atual.py) e a 
 import logging
 
 from irpf_bot_2027.dbk import ArquivoDBK
+from irpf_bot_2027.fichas.bens.entrada import CAMPOS_SIMPLES
 from irpf_bot_2027.fichas.bens.validacao import validar_bem
 from irpf_bot_2027.leiautes.atual import BRASIL, TITULAR_OU_DEPENDENTE, Registro27, esta_na_tabela, nome_codigo
 
@@ -24,7 +25,7 @@ def validar(bens: list[dict]) -> tuple[list[dict], list[str]]:
     """Valida todos os bens.
 
     Returns:
-        - campos extras de cada bem, já convertidos (mesma ordem da lista de entrada);
+        - campos de cada bem vindos do JSON, já convertidos (mesma ordem da lista de entrada);
         - erros de todos os bens, cada um com o número do bem ("bem 2: ...").
     """
     campos_por_bem = []
@@ -41,22 +42,19 @@ def proxima_chave(arquivo: ArquivoDBK) -> int:
     return max(chaves, default=0) + 1
 
 def montar_linha(bem: dict, campos: dict, cpf: str, chave: int) -> str:
-    """Linha 27 completa de um bem já validado, com o código de controle."""
+    """Linha 27 completa de um bem já validado, com o código de controle.
+
+    campos: todos os campos vindos do JSON, já convertidos (validacao.validar_bem).
+    Aqui só se acrescentam os campos calculados: padrões, EXTERIOR e CHAVE.
+    """
     exterior = 0 if str(bem["pais"]) == BRASIL else 1
     tem_titular_dependente = esta_na_tabela(TITULAR_OU_DEPENDENTE, bem["grupo"], bem["codigo"])
 
     linha = Registro27.gravar_valores_padrao(cpf, tem_titular_dependente)
-    linha = Registro27.GRUPO.gravar(linha, bem["grupo"])
-    linha = Registro27.CODIGO.gravar(linha, bem["codigo"])
-    linha = Registro27.PAIS.gravar(linha, bem["pais"])
     linha = Registro27.EXTERIOR.gravar(linha, exterior)
-    linha = Registro27.DISCRIMINACAO.gravar(linha, bem["discriminacao"])
-    linha = Registro27.VALOR_ANTERIOR.gravar(linha, bem["situacao_anterior"])
-    linha = Registro27.VALOR_ATUAL.gravar(linha, bem["situacao_atual"])
-    linha = Registro27.USUFRUTO.gravar(linha, bem.get("usufruto", False))
     linha = Registro27.CHAVE.gravar(linha, chave)
 
-    for nome, valor in campos.items():                 # campos dos blocos do JSON, já validados
+    for nome, valor in campos.items():
         linha = getattr(Registro27, nome).gravar(linha, valor)
 
     return Registro27.gravar_cod_controle(linha)       # sempre por último
@@ -68,7 +66,7 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
 
     for bem, campos in zip(bens, campos_por_bem):
         posicao = arquivo.inserir(Registro27.TIPO, montar_linha(bem, campos, cpf, chave))
-        logger.info("Bem %s/%s (%s) inserido na linha %d com chave %d", bem["grupo"], bem["codigo"],
-                    nome_codigo(bem["grupo"], bem["codigo"]), posicao + 1, chave)
-        logger.info("  campos extras gravados: %s", ", ".join(sorted(campos)) or "nenhum")
+        logger.info("Bem %s/%s (%s) inserido na linha %d com chave %d", bem["grupo"], bem["codigo"], nome_codigo(bem["grupo"], bem["codigo"]), posicao + 1, chave)
+        extras = sorted(set(campos) - set(CAMPOS_SIMPLES.values()))      # só os campos dos blocos
+        logger.info("  campos extras gravados: %s", ", ".join(extras) or "nenhum")
         chave += 1

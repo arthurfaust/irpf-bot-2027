@@ -1,9 +1,10 @@
 """
-Converte os blocos do JSON do cliente em campos do Registro27.
+Converte um bem do JSON do cliente em campos do Registro27.
 
-Cada bloco do JSON (pertence_a, cripto, imovel) tem uma tabela em MAPA_BLOCOS que diz
-para qual campo do Registro27 vai cada chave. CONVERSOES traduz o formato amigável do
-JSON (true/false, "m2"/"ha") para o código que o DBK espera.
+Os campos do primeiro nível (grupo, codigo, discriminacao...) estão em CAMPOS_SIMPLES, e cada
+bloco (pertence_a, cripto, imovel) tem uma tabela em MAPA_BLOCOS que diz para qual campo do
+Registro27 vai cada chave. CONVERSOES traduz o formato amigável do JSON (true/false, "m2"/"ha")
+para o código que o DBK espera. Chave desconhecida e obrigatório ausente viram erro.
 
 Origem dos códigos gravados:
     - Do irpf.jar!/mapeamentoTxt.xml do programa IRPF2026 (versão 1.5), descrição dos campos do registro 27:
@@ -23,11 +24,27 @@ Origem dos códigos gravados:
 """
 
 import logging
-from datetime import date
+
+from irpf_bot_2027.comum.conversoes import data_ddmmaaaa, sim_nao, so_digitos, titular_dependente
 
 logger = logging.getLogger(__name__)
 
-# JSON -> campo do Registro27
+# JSON -> campo do Registro27: campos do primeiro nível do bem
+CAMPOS_SIMPLES = {
+    "grupo": "GRUPO",
+    "codigo": "CODIGO",
+    "pais": "PAIS",
+    "discriminacao": "DISCRIMINACAO",
+    "situacao_anterior": "VALOR_ANTERIOR",          # situação em 31/12 do ano anterior
+    "situacao_atual": "VALOR_ATUAL",                # situação em 31/12 do ano-calendário
+    "usufruto": "USUFRUTO",                         # true | false (opcional, padrão false)
+}
+
+# Campos do primeiro nível que todo bem precisa ter (o programa exige grupo, código, país e discriminação;
+# os dois valores são exigidos aqui para a IA não omitir um valor por engano: use "0.00" quando for zero).
+CAMPOS_OBRIGATORIOS = ("grupo", "codigo", "pais", "discriminacao", "situacao_anterior", "situacao_atual")
+
+# JSON -> campo do Registro27: blocos
 MAPA_BLOCOS = {
     "pertence_a": {
         "tipo": "TITULAR_DEPENDENTE",               # "T" titular | "D" dependente
@@ -61,41 +78,23 @@ MAPA_BLOCOS = {
 }
 
 # Caminho no JSON de cada campo do Registro27, para as mensagens de erro (ex.: "CNPJ_CPF" -> "cripto.cnpj_custodiante").
-ORIGEM_NO_JSON = {campo: f"{bloco}.{chave}" for bloco, mapa in MAPA_BLOCOS.items() for chave, campo in mapa.items()}
+ORIGEM_NO_JSON = {
+    **{campo: chave for chave, campo in CAMPOS_SIMPLES.items()},
+    **{campo: f"{bloco}.{chave}" for bloco, mapa in MAPA_BLOCOS.items() for chave, campo in mapa.items()},
+}
 
 # Campos que existem no mapa mas ainda não podem ser gravados, com o motivo.
 CAMPOS_BLOQUEADOS: dict[str, str] = {}
 
-# JSON -> código do DBK
-def sim_nao(valor) -> int:
-    if not isinstance(valor, bool):
-        raise ValueError(f"esperado true ou false, veio {valor!r}")
-    return 1 if valor else 0
-
-def so_digitos(valor) -> str:
-    return "".join(ch for ch in str(valor) if ch.isdigit())
-
-def titular_dependente(valor) -> str:
-    valor = str(valor).upper()
-    if valor not in ("T", "D"):
-        raise ValueError(f'esperado "T" ou "D", veio {valor!r}')
-    return valor
-
+# JSON -> código do DBK (as conversões genéricas ficam em comum/conversoes.py)
 def unidade_area(valor) -> int:
     unidades = {"m2": 0, "ha": 1}
     if valor not in unidades:
         raise ValueError(f'esperado "m2" ou "ha", veio {valor!r}')
     return unidades[valor]
 
-def data_ddmmaaaa(valor) -> str:
-    """"2020-10-23" -> "23102020". Formato confirmado numa cópia de segurança gerada pelo programa."""
-    try:
-        data = date.fromisoformat(str(valor))
-    except ValueError:
-        raise ValueError(f'esperada data no formato "AAAA-MM-DD", veio {valor!r}') from None
-    return data.strftime("%d%m%Y")
-
 CONVERSOES = {
+    "USUFRUTO": sim_nao,
     "TITULAR_DEPENDENTE": titular_dependente,
     "CPF_DONO": so_digitos,
     "AUTOCUSTODIANTE": sim_nao,
@@ -117,34 +116,43 @@ def converter_campos(bem: dict) -> tuple[dict, list[str]]:
             - Dicionários com os campos
             - Lista de erros encontrados.
     Os erros são acumulados (não para no primeiro) para que o usuário veja tudo de uma vez.
-    Chaves fora dos blocos (grupo, codigo, pais, discriminacao...) não são tratadas aqui.
+    Trata os campos do primeiro nível (CAMPOS_SIMPLES) e os blocos (MAPA_BLOCOS).
     """
     campos = {}
     erros = []
 
-    for bloco, conteudo in bem.items():
+    def converter(origem: str, nome: str, valor) -> None:
+        if nome in CAMPOS_BLOQUEADOS:
+            erros.append(f"'{origem}': {CAMPOS_BLOQUEADOS[nome]}")
+            return
+        conversao = CONVERSOES.get(nome)
+        try:
+            campos[nome] = conversao(valor) if conversao else valor
+        except ValueError as erro:
+            erros.append(f"'{origem}': {erro}")
+
+    for chave, conteudo in bem.items():
         if not isinstance(conteudo, dict):
-            continue                                # campos simples do bem, tratados no main
-        if bloco not in MAPA_BLOCOS:
-            erros.append(f"bloco desconhecido '{bloco}'")
+            if chave in CAMPOS_SIMPLES:
+                converter(chave, CAMPOS_SIMPLES[chave], conteudo)
+            else:
+                erros.append(f"campo desconhecido '{chave}'")
             continue
 
-        mapa = MAPA_BLOCOS[bloco]
-        for chave, valor in conteudo.items():
-            if chave not in mapa:
-                erros.append(f"campo desconhecido '{bloco}.{chave}'")
-                continue
+        if chave not in MAPA_BLOCOS:
+            erros.append(f"bloco desconhecido '{chave}'")
+            continue
 
-            nome = mapa[chave]
-            if nome in CAMPOS_BLOQUEADOS:
-                erros.append(f"'{bloco}.{chave}': {CAMPOS_BLOQUEADOS[nome]}")
-                continue
+        mapa = MAPA_BLOCOS[chave]
+        for subchave, valor in conteudo.items():
+            if subchave in mapa:
+                converter(f"{chave}.{subchave}", mapa[subchave], valor)
+            else:
+                erros.append(f"campo desconhecido '{chave}.{subchave}'")
 
-            converter = CONVERSOES.get(nome)
-            try:
-                campos[nome] = converter(valor) if converter else valor
-            except ValueError as erro:
-                erros.append(f"'{bloco}.{chave}': {erro}")
+    for chave in CAMPOS_OBRIGATORIOS:
+        if bem.get(chave) is None or str(bem[chave]).strip() == "":
+            erros.append(f"campo obrigatório '{chave}' não informado")
 
-    logger.debug("Campos extras lidos: %s", sorted(campos))
+    logger.debug("Campos lidos: %s", sorted(campos))
     return campos, erros
