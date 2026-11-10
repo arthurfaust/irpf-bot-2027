@@ -1,6 +1,7 @@
 """Comportamento atual da validação de um bem do JSON."""
 
 import json
+from decimal import Decimal
 
 import pytest
 
@@ -82,5 +83,27 @@ def test_todos_os_erros_aparecem_de_uma_vez():
 def test_campos_do_primeiro_nivel_sao_convertidos():
     campos, _ = validar_bem(BITCOIN)
     assert campos["GRUPO"] == "08"
-    assert campos["VALOR_ATUAL"] == "2000.00"
+    assert campos["VALOR_ATUAL"] == Decimal("2000.00")
     assert campos["USUFRUTO"] == 0
+
+
+@pytest.mark.parametrize(
+    ("bem", "erro"),
+    [
+        ({**BITCOIN, "situacao_atual": "2.000,00"},
+         "'situacao_atual': use ponto como separador decimal, sem separador de milhar: \"1234.56\""),
+        ({**BITCOIN, "situacao_anterior": "-1.00"}, "'situacao_anterior': o valor não pode ser negativo"),
+        ({**APARTAMENTO, "imovel": {**APARTAMENTO["imovel"], "area": "75,5"}},
+         "'imovel.area': use ponto como separador decimal, sem separador de milhar: \"1234.5\""),
+    ],
+    ids=["virgula-na-situacao", "situacao-negativa", "virgula-na-area"],
+)
+def test_valor_em_formato_errado_e_barrado(bem, erro):
+    _, erros = validar_bem(bem)
+    assert erros == [erro]
+
+
+def test_valor_como_numero_do_json_e_aceito():
+    campos, erros = validar_bem({**BITCOIN, "situacao_anterior": 1000, "situacao_atual": 2000.5})
+    assert erros == []
+    assert campos["VALOR_ATUAL"] == Decimal("2000.5")

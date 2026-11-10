@@ -1,8 +1,10 @@
 """Conversões genéricas do JSON para o formato do DBK."""
 
+from decimal import Decimal
+
 import pytest
 
-from irpf_bot_2027.comum.conversoes import data_ddmmaaaa, sim_nao, so_digitos, titular_dependente
+from irpf_bot_2027.comum.conversoes import data_ddmmaaaa, numero, sim_nao, so_digitos, titular_dependente, valor_em_reais
 
 
 @pytest.mark.parametrize(("entrada", "esperado"), [(True, 1), (False, 0)])
@@ -46,3 +48,52 @@ def test_data_vira_ddmmaaaa(entrada, esperado):
 def test_data_invalida_e_recusada(entrada):
     with pytest.raises(ValueError, match="AAAA-MM-DD"):
         data_ddmmaaaa(entrada)
+
+
+@pytest.mark.parametrize(
+    ("entrada", "esperado"),
+    [("1234.56", Decimal("1234.56")), ("1000", Decimal("1000")), (1234.56, Decimal("1234.56")),
+     (1000, Decimal("1000")), ("0.00", Decimal("0.00")), (" 10.5 ", Decimal("10.5"))],
+    ids=["texto", "texto-sem-decimais", "numero-json", "inteiro-json", "zero", "espacos-nas-pontas"],
+)
+def test_valor_em_reais_aceito(entrada, esperado):
+    assert valor_em_reais(entrada) == esperado
+
+
+@pytest.mark.parametrize(
+    ("entrada", "trecho"),
+    [
+        ("1.234,56", "use ponto como separador decimal"),
+        ("1234,56", "use ponto como separador decimal"),
+        ("1,234.56", "use ponto como separador decimal"),
+        ("R$ 100.00", "sem símbolo de moeda"),
+        ("", "sem símbolo de moeda"),
+        ("12.345", "no máximo 2 casa(s) decimal(is)"),
+        (0.125, "no máximo 2 casa(s) decimal(is)"),
+        ("-100.00", "não pode ser negativo"),
+        (True, "esperado um número"),
+        (None, "esperado um número"),
+    ],
+    ids=["virgula-e-milhar", "virgula", "milhar-americano", "moeda", "vazio", "tres-casas",
+         "tres-casas-numero", "negativo", "booleano", "nulo"],
+)
+def test_valor_em_reais_recusado(entrada, trecho):
+    with pytest.raises(ValueError) as erro:
+        valor_em_reais(entrada)
+    assert trecho in str(erro.value)
+
+
+def test_mensagem_do_valor_nao_repete_o_valor():
+    with pytest.raises(ValueError) as erro:
+        valor_em_reais("98.765,43")
+    assert "98" not in str(erro.value)
+
+
+def test_negativo_so_quando_permitido():
+    assert numero("-500.00", casas=2, permite_negativo=True) == Decimal("-500.00")
+
+
+def test_area_com_uma_casa_decimal():
+    assert numero("75.5", casas=1) == Decimal("75.5")
+    with pytest.raises(ValueError, match="no máximo 1 casa"):
+        numero("75.55", casas=1)

@@ -25,7 +25,9 @@ Origem dos códigos gravados:
 
 import logging
 
-from irpf_bot_2027.comum.conversoes import data_ddmmaaaa, sim_nao, so_digitos, titular_dependente
+from functools import partial
+
+from irpf_bot_2027.comum.conversoes import data_ddmmaaaa, numero, sim_nao, so_digitos, titular_dependente, valor_em_reais
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +96,9 @@ def unidade_area(valor) -> int:
     return unidades[valor]
 
 CONVERSOES = {
+    "VALOR_ANTERIOR": valor_em_reais,
+    "VALOR_ATUAL": valor_em_reais,
+    "AREA": partial(numero, casas=1),               # área com 1 casa decimal (N11,1 no leiaute)
     "USUFRUTO": sim_nao,
     "TITULAR_DEPENDENTE": titular_dependente,
     "CPF_DONO": so_digitos,
