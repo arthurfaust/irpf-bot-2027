@@ -1,3 +1,14 @@
+"""
+Formato dos campos de largura fixa do arquivo .DBK.
+
+Origem:
+    - Tipos "N" (numérico) e "C"/"A" (alfanumérico) e decimais implícitas: 
+        - Atributos Tipo e Decimais do irpf.jar!/mapeamentoTxt.xml do programa IRPF2026 (versão 1.5).
+
+    - Regras de preenchimento (N com zeros à esquerda; C com espaços à direita; texto em maiúsculas):
+        - Não documentadas no leiaute; confirmadas em DBKs gravados pelo programa (tests/dados/).
+"""
+
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 

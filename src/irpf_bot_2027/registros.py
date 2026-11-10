@@ -1,3 +1,23 @@
+"""
+Leiaute do registro 27 (Bens e Direitos) do arquivo .DBK do IRPF 2026.
+
+Origem:
+    - Posições, tamanhos e tipos: 
+        - irpf.jar!/mapeamentoTxt.xml do programa IRPF2026 (versão 1.5,arquivo de 15/06/2026), 
+            - bloco <DeclaracaoTXT TipoArquivo="ARQ_IRPF">,
+            - <Registro Nome="REG_BEM" Identificador="27">. 
+            - Os nomes dos campos foram simplificados; o nome original está nos comentários quando difere.
+
+    - Valores padrão (gravar_valores_padrao): 
+        - confirmados em DBKs gravados pelo programa(tests/dados/): 
+            - zeros nos campos N, "2" em NM_IND_REG_IMOV e NM_UNID, "T" e o CPF do titular em 
+            IN_TIPO_BENEFIC/NR_CPF_BENEFIC só nos bens com a pergunta titular/dependente.
+
+    Código de controle (gravar_cod_controle): 
+        - CRC32 (zlib) das posições 1 a 1241, em decimal com 10 dígitos. 
+        - Não documentado no leiaute; confirmado em todas as linhas dos DBKs do programa.
+"""
+
 import zlib
 from irpf_bot_2027.campos import Campo
 

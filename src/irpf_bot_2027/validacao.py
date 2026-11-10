@@ -1,24 +1,34 @@
-"""Validação de um bem do JSON antes de gravar no DBK.
+"""
+Validação de um bem do JSON antes de gravar no DBK.
 
 Três checagens, nesta ordem:
     1. o grupo/código existe (tabela_bens.py)
     2. os blocos do JSON são conhecidos e os valores convertem (entrada.py)
     3. cada campo preenchido aparece na tela para esse grupo/código/país (regras.py)
+
+Origem: não tem regras próprias; usa as dos três módulos acima (veja a origem em cada um).
 """
 
-from irpf_bot_2027.entrada import ORIGEM_NO_JSON, campos_do_bem
+from irpf_bot_2027.entrada import ORIGEM_NO_JSON, converter_campos
 from irpf_bot_2027.regras import BRASIL, campos_aplicaveis
 from irpf_bot_2027.tabela_bens import codigo_existe, nome_codigo
 
-
 def validar_bem(bem: dict) -> tuple[dict, list[str]]:
-    """Devolve ({campo_do_registro: valor}, [erros]). Se a lista de erros não estiver vazia, o bem não deve ser gravado."""
+    """
+    Valida os dados de um bem. Se houver erros, o bem não deve ser gravado.
+    Args:
+        bem (dict): Dicionário com os dados do bem.
+    Returns:
+        tuple[dict, list[str]]: Tupla contendo:
+            - Dicionário com os campos validados.
+            - Lista de erros encontrados.
+    """
     grupo, codigo, pais = bem.get("grupo"), bem.get("codigo"), str(bem.get("pais", ""))
 
     if not codigo_existe(grupo, codigo):
         return {}, [f"grupo/código {grupo}/{codigo} não existe"]
 
-    campos, erros = campos_do_bem(bem)
+    campos, erros = converter_campos(bem)
 
     permitidos = campos_aplicaveis(
         grupo, codigo, pais,

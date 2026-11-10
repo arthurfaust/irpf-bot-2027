@@ -2,7 +2,28 @@
 Regras da tela "Editar: Bem e Direito" do IRPF 2026.
 
 Dizem quais campos do Registro27 aparecem na tela para cada grupo, código e país.
-Extraídas das classes do próprio programa (Bem e PainelBensDetalhe).
+
+Origem:
+    - Extraídas das classes do programa IRPF2026 (versão 1.5), lidas com javap:
+        - lib-modulos/irpf-negocio-declaracao.jar!/serpro/ppgd/irpf/negocio/bens/Bem.class (19/05/2026)
+        - lib-modulos/irpf-gui-declaracao.jar!/serpro/ppgd/irpf/gui/declaracao/bens/PainelBensDetalhe.class (13/04/2026)
+
+    Tabela                         | Método de origem
+     ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+    TEM_CNPJ_CPF                   | Bem.isBemComNI / Bem.tituloCampoNI
+    CRIPTO_COM_CUSTODIANTE         | Bem.isCriptoativos + PainelBensDetalhe.habilitarCamposCriptoativos
+    CONTA_BANCARIA                 | Bem.isBemComDadosBancarios + PainelBensDetalhe.habilitarCampoBanco
+    NEGOCIADO_EM_BOLSA             | Bem.isBemNegociadoBolsa + PainelBensDetalhe.habilitaCampoCodigoNegociacao
+    TITULAR_OU_DEPENDENTE          | Bem.isBemComBeneficiario
+    APLICACAO_FINANCEIRA_EXTERIOR  | Bem.isBemComAplicacaoFinanceira
+    LUCROS_DIVIDENDOS_EXTERIOR     | Bem.isBemComLucrosDividendos
+    REGISTRO_BEM_MOVEL             | Bem.isBemRegistravel / Bem.tituloCampoRegistro
+    REGISTRO_IMOVEL                | Bem.tituloCampoRegistro / Bem.tamanhoCampoRegistro
+    campos_imovel (cartório, data) | Bem.isBemImovelRegistravel + PainelBensDetalhe.habilitarCampoDataAquisicao, habilitaCampoBemImovelRegistrado
+
+    Conferidas com a Ajuda do programa (help/AjudaIRPF.pdf, capítulo "Bens e Direitos", págs. 178 a 234) e com a tela do programa nos bens de teste.
+
+    Atenção: estas regras estão no código do programa, não em um arquivo de dados. A cada nova versão do IRPF, refazer a extração e conferir.
 
 Cada tabela abaixo segue o formato de tabela_bens.py:
     
@@ -119,12 +140,15 @@ def campos_cripto(grupo: str, codigo: str) -> set[str]:
 
 # Função principal
 def campos_aplicaveis(g: str, c: str, pais: str, autocustodiante: bool = False, bolsa: bool = False) -> set[str]:
-    """Campos do Registro27 que aparecem na tela para este bem.
-
-    g, c            grupo e código com 2 dígitos ("08", "01")
-    pais            código do país ("105" = Brasil)
-    autocustodiante resposta "É autocustodiante?" (só cripto)
-    bolsa           resposta "Negociados em Bolsa?"
+    """
+    Campos do Registro27 aplicáveis ao bem.
+    Args:
+        g,c: Grupo e código com 2 dígitos ("08", "01")
+        pais: Código do país ("105" = Brasil)
+        autocustodiante: Resposta a "É autocustodiante?" (só cripto)
+        bolsa: Resposta a "Negociados em Bolsa?"
+    Returns:
+        set[str]: Coleção com os campos aplicáveis
     """
     no_brasil = pais == BRASIL
     campos = set(CAMPOS_COMUNS)

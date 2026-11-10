@@ -1,7 +1,7 @@
 """
 Grupos e códigos da ficha Bens e Direitos (IRPF 2026).
 
-Gerado a partir de lib/resources/tipoBens.xml do programa IRPF2026 (vigência 05/03/2026).
+Origem: Gerado a partir de lib/resources/tipoBens.xml do programa IRPF2026 (versão 1.5, vigência da tabela 05/03/2026).
 """
 
 GRUPOS: dict[str, dict] = {
@@ -115,14 +115,11 @@ GRUPOS: dict[str, dict] = {
     },
 }
 
-
 def nome_grupo(grupo: str) -> str:
     return GRUPOS[grupo]["nome"]
 
-
 def nome_codigo(grupo: str, codigo: str) -> str:
     return GRUPOS[grupo]["codigos"][codigo]
-
 
 def codigo_existe(grupo: str, codigo: str) -> bool:
     return codigo in GRUPOS.get(grupo, {}).get("codigos", {})

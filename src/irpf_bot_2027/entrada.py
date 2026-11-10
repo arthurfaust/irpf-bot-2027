@@ -1,8 +1,24 @@
-"""Converte os blocos do JSON do cliente em campos do Registro27.
+"""
+Converte os blocos do JSON do cliente em campos do Registro27.
 
 Cada bloco do JSON (pertence_a, cripto, imovel) tem uma tabela em MAPA_BLOCOS que diz
 para qual campo do Registro27 vai cada chave. CONVERSOES traduz o formato amigável do
 JSON (true/false, "m2"/"ha") para o código que o DBK espera.
+
+Origem dos códigos gravados:
+    Do irpf.jar!/mapeamentoTxt.xml do programa IRPF2026 (versão 1.5), descrição dos campos do registro 27:
+        - UNIDADE_AREA (NM_UNID):                0 = m², 1 = ha, 2 = vazio
+        - REGISTRADO_CARTORIO (NM_IND_REG_IMOV): 0 = não, 1 = sim, 2 = vazio
+        - AUTOCUSTODIANTE (IN_CUSTODIANTE):      0 = não, 1 = sim
+        - TITULAR_DEPENDENTE (IN_TIPO_BENEFIC):  "T" titular, "D" dependente
+
+    Confirmados em DBKs gravados pelo programa (tests/dados/):
+        - DATA_AQUISICAO (DT_AQUISICAO): DDMMAAAA 
+            - O leiaute não informa o formato;
+            - Confirmado em 10/11/2026 com a data 23/10/2020 gravada como "23102020".
+        - CNPJ_CPF, CPF_DONO, CEP: somente dígitos.
+
+    Chaves e blocos do JSON: formato definido por este projeto (não vem do programa).
 """
 
 import logging
@@ -10,8 +26,7 @@ from datetime import date
 
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------- de-para: bloco do JSON -> campo do Registro27
-
+# JSON -> campo do Registro27
 MAPA_BLOCOS = {
     "pertence_a": {
         "tipo": "TITULAR_DEPENDENTE",               # "T" titular | "D" dependente
@@ -50,9 +65,7 @@ ORIGEM_NO_JSON = {campo: f"{bloco}.{chave}" for bloco, mapa in MAPA_BLOCOS.items
 # Campos que existem no mapa mas ainda não podem ser gravados, com o motivo.
 CAMPOS_BLOQUEADOS: dict[str, str] = {}
 
-
-# ---------------------------------------------------------------- conversões: formato do JSON -> código do DBK
-
+# JSON -> código do DBK
 def sim_nao(valor) -> int:
     if not isinstance(valor, bool):
         raise ValueError(f"esperado true ou false, veio {valor!r}")
@@ -97,12 +110,16 @@ CONVERSOES = {
     "DATA_AQUISICAO": data_ddmmaaaa,
 }
 
-
-# ---------------------------------------------------------------- função principal
-
-def campos_do_bem(bem: dict) -> tuple[dict, list[str]]:
-    """Lê os blocos do bem e devolve ({campo_do_registro: valor_convertido}, [erros]).
-
+# main func
+def converter_campos(bem: dict) -> tuple[dict, list[str]]:
+    """
+    Lê os blocos do bem e devolve ({campo_do_registro: valor_convertido}, [erros]).
+    Args:
+        bem (dict): Dicionário com os dados do bem
+    Returns:
+        tuple[dict, list[str]]: Tupla contendo:
+            - Dicionários com os campos
+            - Lista de erros encontrados.
     Os erros são acumulados (não para no primeiro) para que o usuário veja tudo de uma vez.
     Chaves fora dos blocos (grupo, codigo, pais, discriminacao...) não são tratadas aqui.
     """
