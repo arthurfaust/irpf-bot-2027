@@ -37,9 +37,11 @@ Andamento (11/11/2026):
   grupo + CNPJ, em `fichas/bens/busca.py`. Escolhidos primeiro porque o CNPJ é obrigatório no
   programa e único por fundo. 1 → só `VALOR_ATUAL` (situação anterior divergente gera aviso; a do DBK
   é mantida); 0 → lançamento completo; 2+ → revisão. Dois bens do JSON com a mesma chave existente
-  no DBK → os dois vão para revisão. `inserir` devolve os números dos bens em
-  `atualizados`/`novos`/`revisao`.
-- [ ] Bens do DBK ausentes do JSON (item 4) e relatório (item 5).
+  no DBK → os dois vão para revisão.
+- [x] Bens do DBK não atualizados pelo JSON → `Resultado.nao_informados` (nunca zerados nem
+  apagados); os de tipo sem busca vêm com o aviso de conferir duplicidade. Relatório no log ao fim
+  da execução (`ficha.relatorio`), sem dados do cliente: bens do JSON pelo número, bens do DBK pela
+  chave e pelo grupo/código. A busca só casa com linhas do DBK que também são fundos nacionais.
 - [ ] Demais tipos de bem; campos anuais (discriminação, quadros do exterior) na atualização.
 
 1. Tipo inicial: fundos nacionais (decidido). Conta corrente/poupança têm a chave mais confiável

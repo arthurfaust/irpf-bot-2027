@@ -62,7 +62,7 @@ def main() -> None:
         itens = dados.get(ficha.CHAVE_JSON, [])
         if not itens:
             continue
-        logger.info("%s: %d item(ns) a inserir", ficha.NOME, len(itens))
+        logger.info("%s: %d item(ns) no JSON", ficha.NOME, len(itens))
         dados_validados, erros_ficha = ficha.validar(itens)
         validados.append((ficha, itens, dados_validados))
         erros.extend(f"{ficha.NOME} > {erro}" for erro in erros_ficha)
@@ -76,12 +76,17 @@ def main() -> None:
     if not validados:
         logger.warning("O JSON não tem itens de nenhuma ficha; o arquivo será gravado sem alterações.")
 
-    # 4. Inserir e gravar
-    for ficha, itens, dados_validados in validados:
-        ficha.inserir(arquivo, itens, dados_validados)
+    # 4. Atualizar/inserir e gravar
+    resultados = [(ficha, ficha.inserir(arquivo, itens, dados_validados)) for ficha, itens, dados_validados in validados]
 
     arquivo.gravar(config.arquivo_saida)
     logger.info('Arquivo gravado: %s', config.arquivo_saida.name)
+
+    # 5. Relatório para conferência humana
+    logger.info("Relatório da execução:")
+    for ficha, resultado in resultados:
+        for nivel, texto in ficha.relatorio(resultado):
+            logger.log(nivel, texto)
 
 if __name__ == '__main__':
     main()

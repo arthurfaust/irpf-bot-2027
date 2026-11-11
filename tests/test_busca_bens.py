@@ -1,6 +1,7 @@
 """Fase 3: procurar o fundo nacional no DBK pelo CNPJ e atualizar (1), lançar (0) ou revisar (2+)."""
 
 import json
+import logging
 from decimal import Decimal
 
 import pytest
@@ -9,7 +10,7 @@ from conftest import DADOS
 from irpf_bot_2027.dbk import ArquivoDBK
 from irpf_bot_2027.fichas import bens
 from irpf_bot_2027.fichas.bens.busca import chave_busca, procurar
-from irpf_bot_2027.fichas.bens.ficha import montar_linha, proxima_chave
+from irpf_bot_2027.fichas.bens.ficha import bem_do_dbk, montar_linha, proxima_chave
 from irpf_bot_2027.leiautes.irpf2026.registro27 import Registro27
 
 CNPJ = "11222333000181"
@@ -25,6 +26,11 @@ def validados(*lista):
 
 def gravar(arquivo, *lista):
     return bens.inserir(arquivo, list(lista), validados(*lista))
+
+
+def feitos(resultado):
+    """O que aconteceu com os bens do JSON."""
+    return {"atualizados": resultado.atualizados, "novos": resultado.novos, "revisao": resultado.revisao}
 
 
 def dbk_com_fundo(vezes=1):
@@ -66,7 +72,7 @@ def test_fundo_que_nao_esta_no_dbk_e_lancado_completo():
 
     resultado = gravar(arquivo, FUNDO)
 
-    assert resultado == {"atualizados": [], "novos": [1], "revisao": []}
+    assert feitos(resultado) == {"atualizados": [], "novos": [1], "revisao": []}
     assert len(arquivo.linhas_do_tipo("27")) == total + 1
     [linha] = linhas_do_fundo(arquivo)
     assert Registro27.VALOR_ANTERIOR.ler(linha) == "0000000100000"
@@ -83,7 +89,7 @@ def test_fundo_que_esta_no_dbk_tem_so_a_situacao_atual_atualizada():
 
     resultado = gravar(arquivo, novo)
 
-    assert resultado == {"atualizados": [1], "novos": [], "revisao": []}
+    assert feitos(resultado) == {"atualizados": [1], "novos": [], "revisao": []}
     assert len(arquivo.linhas) == total                                    # nada inserido
     [depois] = linhas_do_fundo(arquivo)
     assert Registro27.VALOR_ATUAL.ler(depois) == "0000000234567"
@@ -113,7 +119,7 @@ def test_fundo_repetido_no_dbk_nao_e_gravado_e_vai_para_revisao(caplog):
 
     resultado = gravar(arquivo, {**FUNDO, "situacao_atual": "1.00"})
 
-    assert resultado == {"atualizados": [], "novos": [], "revisao": [1]}
+    assert feitos(resultado) == {"atualizados": [], "novos": [], "revisao": [1]}
     assert arquivo.linhas == antes
     assert "2 lançamentos no DBK com a mesma chave" in caplog.text
 
@@ -124,7 +130,7 @@ def test_dois_bens_do_json_para_o_mesmo_lancamento_vao_para_revisao():
 
     resultado = gravar(arquivo, {**FUNDO, "situacao_atual": "1.00"}, {**FUNDO, "situacao_atual": "2.00"})
 
-    assert resultado == {"atualizados": [], "novos": [], "revisao": [1, 2]}
+    assert feitos(resultado) == {"atualizados": [], "novos": [], "revisao": [1, 2]}
     assert arquivo.linhas == antes
 
 
@@ -135,5 +141,48 @@ def test_mistura_de_resultados_na_ordem_do_json():
 
     resultado = gravar(arquivo, outro_fundo, {**FUNDO, "situacao_atual": "1.00"}, bitcoin)
 
-    assert resultado == {"atualizados": [2], "novos": [1, 3], "revisao": []}
+    assert feitos(resultado) == {"atualizados": [2], "novos": [1, 3], "revisao": []}
     assert Decimal(Registro27.VALOR_ATUAL.ler(linhas_do_fundo(arquivo)[0])) == 100
+
+
+# --- bens do DBK sem atualização e relatório ---
+
+def chaves_nao_informadas(resultado):
+    return [(b.chave, b.grupo, b.codigo, b.com_busca) for b in resultado.nao_informados]
+
+
+def test_bens_do_dbk_nao_atualizados_vao_para_revisao_sem_mudar_nada():
+    arquivo = dbk_com_fundo()                       # bens 1-9 da entrada + fundo com chave 10
+    originais = list(arquivo.linhas)
+
+    resultado = gravar(arquivo, {**FUNDO, "cnpj_cpf": "11444777000161"})     # outro fundo: novo
+
+    assert chaves_nao_informadas(resultado) == [
+        (b.chave, b.grupo, b.codigo, b.com_busca) for b in map(bem_do_dbk, ArquivoDBK.ler(DADOS / "entrada.DBK").linhas_do_tipo("27"))
+    ] + [(10, "07", "03", True)]
+    assert all(l in arquivo.linhas for l in originais)                       # nada zerado nem apagado
+
+
+def test_bem_atualizado_nao_aparece_entre_os_nao_informados():
+    arquivo = dbk_com_fundo()
+
+    resultado = gravar(arquivo, {**FUNDO, "situacao_atual": "1.00"})
+
+    assert 10 not in [b.chave for b in resultado.nao_informados]
+    assert len(resultado.nao_informados) == len(arquivo.linhas_do_tipo("27")) - 1
+
+
+def test_relatorio_resume_e_nao_tem_dados_do_cliente():
+    arquivo = dbk_com_fundo(vezes=2)
+    bitcoin = json.loads((DADOS / "bens.json").read_text(encoding="utf-8"))["bens"][0]
+
+    resultado = gravar(arquivo, {**FUNDO, "situacao_atual": "1.00"}, bitcoin)
+    texto = "\n".join(t for _, t in bens.relatorio(resultado))
+
+    assert "0 atualizado(s), 1 novo(s), 1 para revisão" in texto
+    assert "REVISÃO, não gravados (bens do JSON): 1" in texto
+    assert "07/03" in texto and "tipo sem busca automática" in texto
+    for dado in (CNPJ, "Fundo imobiliario", "1500", "11.222.333"):
+        assert dado not in texto
+    niveis = {nivel for nivel, t in bens.relatorio(resultado) if "REVISÃO" in t}
+    assert niveis == {logging.WARNING}

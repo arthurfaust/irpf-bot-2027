@@ -21,19 +21,20 @@ from irpf_bot_2027.leiautes.atual import BRASIL, CNPJ_OBRIGATORIO, Registro27, e
 
 GRUPO_FUNDOS = "07"
 
-def chave_busca(campos: dict) -> tuple[str, str] | None:
-    """Chave de identificação do bem (campos já validados), ou None se o tipo não tem busca."""
-    grupo, codigo = campos.get("GRUPO"), campos.get("CODIGO")
-    if (grupo == GRUPO_FUNDOS and esta_na_tabela(CNPJ_OBRIGATORIO, grupo, codigo)
-            and campos.get("PAIS") == BRASIL):
-        cnpj = campos.get("CNPJ_CPF", "")
-        return (grupo, cnpj) if cnpj else None
-    return None
+def tem_busca(grupo: str, codigo: str, pais: str) -> bool:
+    """True se o tipo de bem tem busca automática no DBK."""
+    return grupo == GRUPO_FUNDOS and esta_na_tabela(CNPJ_OBRIGATORIO, grupo, codigo) and pais == BRASIL
 
-def chave_da_linha(linha: str) -> tuple[str, str]:
+def chave_busca(campos: dict) -> tuple[str, str] | None:
+    """Chave de identificação do bem (campos do JSON já validados ou campos lidos de uma linha 27
+    com Registro27.ler_tudo), ou None se o tipo não tem busca ou o campo da chave está vazio."""
+    grupo, codigo, pais = campos.get("GRUPO"), campos.get("CODIGO"), campos.get("PAIS")
+    cnpj = campos.get("CNPJ_CPF", "")
+    return (grupo, cnpj) if tem_busca(grupo, codigo, pais) and cnpj else None
+
+def chave_da_linha(linha: str) -> tuple[str, str] | None:
     """A mesma chave, lida de uma linha 27 do DBK."""
-    lido = Registro27.ler_tudo(linha)
-    return lido["GRUPO"], lido["CNPJ_CPF"]
+    return chave_busca(Registro27.ler_tudo(linha))
 
 def procurar(arquivo: ArquivoDBK, chave: tuple[str, str]) -> list[int]:
     """Posições (a partir de 0) das linhas 27 do DBK com a chave."""
