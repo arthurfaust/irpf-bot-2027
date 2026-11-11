@@ -1,6 +1,6 @@
 # Plano do irpf-bot-2027
 
-Situação em 10/11/2026 (último commit: `b22cdf0`). 185 testes passando.
+Situação em 11/11/2026 (último commit: `b22cdf0` + pendências resolvidas). 196 testes passando.
 
 ## Visão geral do fluxo
 
@@ -96,6 +96,8 @@ O programa costuma sair entre o fim de fevereiro e março; adiante esta fase se 
 - **Valores**: aceitos `"1234.56"` ou número do JSON; sem arredondamento escondido.
 - **Conta corrente, poupança, veículo e embarcação no Brasil ficam barrados** até os blocos da
   fase 4, porque o programa exige banco/agência/conta e Renavam/registro.
+- **`"cpf"` obrigatório no JSON e conferido com o CPF do declarante do DBK**; se faltar ou não bater,
+  nada é gravado (evita gravar os dados de um cliente na declaração de outro).
 - **"Negociados em bolsa?" não é exigido**: falta confirmar se o programa aceita o padrão "Não".
 - **Imóvel no exterior**: só logradouro, área e unidade são exigidos (validador do programa para
   esse caso não lido em detalhe).
@@ -109,13 +111,40 @@ O programa costuma sair entre o fim de fevereiro e março; adiante esta fase se 
 - Para grupos sem a pergunta titular/dependente (ex.: imóveis), o programa grava
   `TITULAR_DEPENDENTE` e `CPF_DONO` em branco.
 
+## Descobertas no código do programa (javap, 11/11/2026)
+
+Classes de `irpf.jar`, `lib-modulos/*.jar` e `lib/ppgd-*.jar`, lidas com `javap -c -p`.
+
+- **Controle do cabeçalho IR** (`NR_CONTROLE`, posições 1235-1244): CRC32 de *nome do arquivo* +
+  linha sem os 10 últimos caracteres. Nome = até 8 caracteres do nome sem extensão + extensão, em
+  maiúsculas (ex.: `77039677.DBK`). `DocumentoAjusteTXT.atualizaHeader`/`preparaNomeArquivoParaCrc`,
+  `RegistroTxt.calculaCRCHeader`. Implementado em `cabecalho.controle_cabecalho` (só para conferência)
+  e confirmado nos DBKs de teste. `NR_HASH` do cabeçalho é um CRC acumulado da declaração.
+- **Controles não são conferidos na restauração de .DBK**: `ImportadorTxt.restaurarDeclaracao` só
+  valida os hashes (`validarHashsDeclaracao`, "Arquivo corrompido") de arquivos `.DEC`. Para `.DBK`,
+  `validarHeader` confere só o CPF do cabeçalho e `SISTEMA = "IRPF"`; ele e `validarCRC` calculam os
+  CRCs mas descartam o resultado. Por isso o programa aceitou LF, controle desatualizado e DBK
+  renomeado. O bot continua gravando os controles das linhas corretos.
+- **`IN_CRIT_OBRIGAT`** (`DeclaracaoIRPF.detalhaObrigatoriedadeEntregaAjuste`): soma, em decimal, de
+  1 rendimentos tributáveis acima do limite · 2 isentos + exclusivos acima do limite · 4 renda
+  variável · 8 ganho de capital com imposto · 16 venda de imóvel com reaplicação · 32 bens acima do
+  limite · 64 receita rural acima do limite · 128 retorno ao país · 256 atualização de valor de bem ·
+  512 prejuízo rural a compensar · 1024 lucros e dividendos no exterior · 2048 aplicação financeira no
+  exterior com lucro · 4096 prejuízo da Lei 14.754. Calculado na gravação a partir dos dados; o bot
+  não precisa mexer.
+- **`NR_CONTA`** (`Bem.getContaFormatadaTxt`): Caixa (banco 104) com operação = operação com 3 dígitos
+  + conta com 8 dígitos (zeros à esquerda); Caixa sem operação = conta com 12 dígitos; demais bancos =
+  conta sem espaços nas pontas. `NR_BANCO` só é gravado se o banco foi informado.
+- **Negativos** (`CampoTXT.set(Valor)`/`getTxt`): `-` na primeira posição e os dígitos com zeros à
+  esquerda (-123,45 em N13,2 = `-000000012345`). O `Campo.formatar` do bot já produz esse formato.
+- **Registro 27, por `ConversorObjetosIRPF2Registros.montarFichaBem`**: veículo (02/01), no Brasil ou
+  no exterior, grava o registro do bem em `NR_RENAVAN`; imóvel fora do Brasil grava a cidade em
+  `NM_MUNICIP` e o CEP/ZIP em `NR_CEP` (confirma o que o bot já faz).
+- **Registro 59** (`REG_PERCENTUAL_BEM`): percentual de cada bem por herdeiro (chave do bem, chave do
+  herdeiro, percentual N5,2). Só existe na Declaração Final de Espólio.
+
 ## Pendências em aberto
 
-- Algoritmo do código de controle do cabeçalho IR (posições 1235-1244); não é CRC32 simples.
-- Testar se o programa aceita uma linha 27 com código de controle errado.
-- Formato do `NR_CONTA` para a Caixa (operação) e valores negativos no DBK.
-- Significado dos bits de `IN_CRIT_OBRIGAT` (cabeçalho).
-- Destino do "Registro de Veículo" de veículo no exterior (provavelmente `NR_RENAVAN`) e endereço de
-  imóvel no exterior (cidade/ZIP em `NM_MUNICIP`/`NR_CEP`): inferidos, não confirmados.
-- Conferir o CPF do JSON (`cpf`) com o CPF do DBK (hoje a chave é aceita, mas não conferida).
-- Declaração Final de Espólio (bem a inventariar, registro 59) não foi mapeada.
+- ZIP do exterior com letras: o bot passa o CEP por `so_digitos`; falta ver se o programa aceita
+  letras em `NR_CEP` quando o imóvel é no exterior.
+- Registro 59 (Declaração Final de Espólio): mapeado, não implementado (só se houver cliente espólio).

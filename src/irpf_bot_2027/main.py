@@ -1,6 +1,7 @@
 import json
 import logging
 
+from irpf_bot_2027.comum.conversoes import so_digitos
 from irpf_bot_2027.config import ErroConfiguracao, carregar_config
 from irpf_bot_2027.config_log import configurar_log
 from irpf_bot_2027.dbk import ArquivoDBK
@@ -8,6 +9,21 @@ from irpf_bot_2027.fichas import CHAVES_JSON_CONHECIDAS, FICHAS
 from irpf_bot_2027.leiautes.atual import verificar_exercicio
 
 logger = logging.getLogger(__name__)
+
+def conferir_cpf(dados: dict, cpf_dbk: str) -> str | None:
+    """Mensagem de erro se o "cpf" do JSON faltar ou não for o do declarante do DBK; None se bater.
+
+    Escolha do projeto: o "cpf" é obrigatório, para impedir que os dados de um cliente sejam
+    gravados na declaração de outro. As mensagens não repetem os CPFs (dado do cliente).
+    """
+    if "cpf" not in dados:
+        return 'o JSON não tem a chave "cpf" (CPF do declarante, 11 dígitos)'
+    cpf = so_digitos(dados["cpf"])
+    if len(cpf) != 11:
+        return 'o "cpf" do JSON deve ter 11 dígitos (com ou sem pontos e traço)'
+    if cpf != cpf_dbk:
+        return 'o "cpf" do JSON não é o CPF do declarante do DBK de entrada'
+    return None
 
 def main() -> None:
     try:
@@ -29,6 +45,11 @@ def main() -> None:
     # 2. Ler o JSON do cliente
     dados = json.loads(config.arquivo_dados.read_text(encoding='utf-8'))
     logger.info("Dados do cliente: %s", config.arquivo_dados.name)
+
+    erro_cpf = conferir_cpf(dados, arquivo.cpf_declarante)
+    if erro_cpf:
+        logger.error('Nada foi inserido. %s', erro_cpf)
+        raise SystemExit(1)
 
     chaves_das_fichas = {ficha.CHAVE_JSON for ficha in FICHAS}
     for chave in sorted(set(dados) - chaves_das_fichas - CHAVES_JSON_CONHECIDAS):

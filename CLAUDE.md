@@ -37,7 +37,7 @@ gere o novo `esperado.DBK`, importe no programa para conferir e avise o Arthur.
 
 Os DBKs em `tests/dados/` são de uma declaração de teste (CPF fictício 770.396.770-08).
 
-## Estrutura
+## Estrutura atual
 
 ```
 src/irpf_bot_2027/
@@ -64,7 +64,7 @@ Para uma ficha nova: subpacote em `fichas/` com a mesma forma de `bens/` + inclu
   Tipo `C`/`A`: espaços à direita, gravado em maiúsculas.
 - Os 2 primeiros caracteres são o tipo do registro; posições 3-13 são o CPF do declarante (exceto IR).
 - Últimos 10 caracteres de cada linha = CRC32 (zlib) do resto da linha (exceto o cabeçalho IR, cujo
-  algoritmo é desconhecido). Gravar o controle é sempre a última alteração da linha.
+  algoritmo inclui o nome do arquivo: ver `leiautes/irpf2026/cabecalho.py`). Gravar o controle é sempre a última alteração da linha.
 - Datas em DDMMAAAA (alguns campos do leiaute usam AAAAMMDD: confira antes de reaproveitar).
 
 ## Origem das regras

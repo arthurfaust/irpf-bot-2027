@@ -71,7 +71,7 @@ def test_json_sem_itens_grava_o_dbk_sem_alteracoes(tmp_path):
 
 def test_erro_de_validacao_mostra_a_ficha(tmp_path):
     bens = json.loads((DADOS / "bens.json").read_text(encoding="utf-8"))["bens"]
-    execucao, saida = rodar_main(tmp_path, {"bens": [bens[0], {**bens[1], "codigo": "05"}]})
+    execucao, saida = rodar_main(tmp_path, {"cpf": "77039677008", "bens": [bens[0], {**bens[1], "codigo": "05"}]})
 
     assert execucao.returncode == 1
     assert "Bens e Direitos > bem 2: grupo/código 01/05 não existe" in execucao.stderr
