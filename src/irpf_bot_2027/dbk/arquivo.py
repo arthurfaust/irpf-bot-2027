@@ -1,5 +1,5 @@
 """
-Leitura, busca, inserção e gravação de linhas no arquivo .DBK.
+Leitura, busca, inserção, substituição e gravação de linhas no arquivo .DBK.
 
 Não sabe nada de fichas: trabalha só com linhas e tipos de registro (os 2 primeiros caracteres).
 
@@ -74,6 +74,14 @@ class ArquivoDBK:
             if outro in ORDEM_REGISTROS and ORDEM_REGISTROS.index(outro) > ordem:
                 return i
         return len(self.linhas)
+
+    def substituir(self, posicao: int, linha: str) -> None:
+        """Troca a linha da posição (a partir de 0) por outra do mesmo tipo e do mesmo tamanho."""
+        atual = self.linhas[posicao]
+        if tipo_da_linha(linha) != tipo_da_linha(atual) or len(linha) != len(atual):
+            raise ValueError(f"a linha {posicao + 1} só pode ser trocada por outra do mesmo tipo "
+                             f"({tipo_da_linha(atual)}) e do mesmo tamanho ({len(atual)})")
+        self.linhas[posicao] = linha
 
     def inserir(self, tipo: str, linha: str) -> int:
         """Insere a linha na posição certa e devolve a posição (a partir de 0)."""

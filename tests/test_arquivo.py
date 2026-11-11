@@ -69,3 +69,25 @@ def test_main_com_dbk_sem_bens(tmp_path):
     linhas = ArquivoDBK.ler(saida).linhas
     assert [tipo_da_linha(l) for l in linhas][-3:] == ["27", "27", "T9"]
     assert [l[891:896] for l in linhas if l.startswith("27")] == ["00001", "00002"]
+
+
+def test_substituir_troca_so_a_linha_indicada():
+    arquivo = ArquivoDBK.ler(DADOS / "entrada.DBK")
+    posicao = arquivo.indices("27")[0]
+    antes = list(arquivo.linhas)
+    nova = arquivo.linhas[posicao][:-1] + "X"
+
+    arquivo.substituir(posicao, nova)
+
+    assert arquivo.linhas[posicao] == nova
+    assert arquivo.linhas[:posicao] + arquivo.linhas[posicao + 1:] == antes[:posicao] + antes[posicao + 1:]
+
+
+@pytest.mark.parametrize("troca", [lambda l: "26" + l[2:], lambda l: l + " "], ids=["outro_tipo", "outro_tamanho"])
+def test_substituir_recusa_linha_de_outro_tipo_ou_tamanho(troca):
+    arquivo = ArquivoDBK.ler(DADOS / "entrada.DBK")
+    posicao = arquivo.indices("27")[0]
+    original = arquivo.linhas[posicao]
+    with pytest.raises(ValueError, match="mesmo tipo"):
+        arquivo.substituir(posicao, troca(original))
+    assert arquivo.linhas[posicao] == original

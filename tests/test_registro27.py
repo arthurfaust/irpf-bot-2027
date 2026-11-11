@@ -41,3 +41,22 @@ def test_ida_e_volta(linha):
 def test_controle_e_crc32_das_posicoes_1_a_1241():
     _, linha = LINHAS[0]
     assert int(Registro27.CONTROLE.ler(linha)) == zlib.crc32(linha[:1241].encode("latin-1"))
+
+
+@pytest.mark.parametrize("linha", [l for _, l in LINHAS], ids=[i for i, _ in LINHAS])
+def test_ler_tudo_devolve_todos_os_campos_e_reconstroi_a_linha(linha):
+    lido = Registro27.ler_tudo(linha)
+    assert list(lido) == list(Registro27.campos())
+    assert len(lido["GRUPO"]) == 2 and len(lido["CODIGO"]) == 2      # zeros à esquerda preservados
+    for nome, campo in Registro27.campos().items():
+        if campo.tipo == "N":
+            assert lido[nome] == campo.ler(linha), nome
+        else:
+            assert not lido[nome].endswith(" "), nome
+            assert campo.gravar(linha, lido[nome]) == linha, nome      # gravar o texto lido não muda a linha
+
+
+@pytest.mark.parametrize("linha_errada", ["27" + " " * 10, "26" + " " * (Registro27.TAMANHO - 2)])
+def test_ler_tudo_recusa_linha_de_outro_tipo_ou_tamanho(linha_errada):
+    with pytest.raises(ValueError, match="registro 27"):
+        Registro27.ler_tudo(linha_errada)

@@ -27,6 +27,15 @@ class Registro:
         return dict(sorted(campos.items(), key=lambda item: item[1].ini))
 
     @classmethod
+    def ler_tudo(cls, linha: str) -> dict[str, str]:
+        """Texto de cada campo da linha, por nome: "C"/"A" sem os espaços à direita; "N" como está
+        (com zeros à esquerda e decimais implícitas), para não perder zeros de códigos como "07"."""
+        if len(linha) != cls.TAMANHO or not linha.startswith(cls.TIPO):
+            raise ValueError(f"a linha não é um registro {cls.TIPO} de {cls.TAMANHO} posições")
+        return {nome: campo.ler(linha) if campo.tipo == "N" else campo.ler(linha).rstrip()
+                for nome, campo in cls.campos().items()}
+
+    @classmethod
     def linha_vazia(cls) -> str:
         """Linha do tamanho do registro: campos numéricos com zeros, o resto com espaços."""
         linha = " " * cls.TAMANHO
