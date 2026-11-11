@@ -50,7 +50,8 @@ src/irpf_bot_2027/
 │   └── irpf2026/     cabeçalho, registro 27, tabela de grupos/códigos, países, regras da tela
 └── fichas/
     ├── __init__.py   FICHAS = (bens,): cada ficha expõe NOME, CHAVE_JSON, validar(), inserir()
-    └── bens/         entrada.py (JSON → campos), validacao.py, ficha.py (montagem e inserção)
+    └── bens/         entrada.py (JSON → campos), validacao.py, busca.py (chave e busca no DBK),
+                      ficha.py (atualização, montagem e inserção)
 tools/visualizador_dbk.html   abre um DBK e mostra os campos de cada linha
 ```
 

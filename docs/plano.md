@@ -31,9 +31,19 @@ A IA só estrutura os dados; quem decide o que gravar é o código, de forma det
 
 ### Fase 3 — procurar e atualizar
 
-1. Decidir por qual tipo de bem começar. Conta corrente/poupança têm a chave mais confiável
-   (banco + agência + conta), mas dependem do bloco `conta` (fase 4). Alternativas já suportadas
-   no JSON: imóvel (IPTU/matrícula), cripto (código + custodiante), ações/fundos (CNPJ).
+Andamento (11/11/2026):
+- [x] `Registro.ler_tudo(linha)` e `ArquivoDBK.substituir(posicao, linha)`.
+- [x] Busca dos **fundos nacionais** (grupo 07 com CNPJ obrigatório, inclusive FII/FIA/ETF) por
+  grupo + CNPJ, em `fichas/bens/busca.py`. Escolhidos primeiro porque o CNPJ é obrigatório no
+  programa e único por fundo. 1 → só `VALOR_ATUAL` (situação anterior divergente gera aviso; a do DBK
+  é mantida); 0 → lançamento completo; 2+ → revisão. Dois bens do JSON com a mesma chave existente
+  no DBK → os dois vão para revisão. `inserir` devolve os números dos bens em
+  `atualizados`/`novos`/`revisao`.
+- [ ] Bens do DBK ausentes do JSON (item 4) e relatório (item 5).
+- [ ] Demais tipos de bem; campos anuais (discriminação, quadros do exterior) na atualização.
+
+1. Tipo inicial: fundos nacionais (decidido). Conta corrente/poupança têm a chave mais confiável
+   (banco + agência + conta), mas dependem do bloco `conta` (fase 4).
 2. Chave de identificação por tipo de bem (proposta):
 
    | Bem | Chave |
