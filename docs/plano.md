@@ -42,6 +42,10 @@ Andamento (11/11/2026):
   apagados); os de tipo sem busca vêm com o aviso de conferir duplicidade. Relatório no log ao fim
   da execução (`ficha.relatorio`), sem dados do cliente: bens do JSON pelo número, bens do DBK pela
   chave e pelo grupo/código. A busca só casa com linhas do DBK que também são fundos nacionais.
+- [x] **Confirmado no programa IRPF 2026 (11/11/2026)** com o roteiro `tests/manual/fundos/`: as duas
+  saídas foram restauradas; fundos novos lançados, A e B atualizados só na situação em 31/12/2025
+  (situação anterior e discriminação mantidas), C novo, sem duplicidade, totais 18.000,00/30.000,00.
+  O programa renumera os itens na tela (a CHAVE do DBK não é o número do item).
 - [ ] Demais tipos de bem; campos anuais (discriminação, quadros do exterior) na atualização.
 
 1. Tipo inicial: fundos nacionais (decidido). Conta corrente/poupança têm a chave mais confiável

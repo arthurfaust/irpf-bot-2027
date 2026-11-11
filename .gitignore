@@ -18,3 +18,4 @@ data/dados.json
 raw/
 gold/
 logs/
+tests/manual/*/saida/

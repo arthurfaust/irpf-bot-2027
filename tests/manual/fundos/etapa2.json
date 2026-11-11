@@ -1,0 +1,26 @@
+{
+  "cpf": "77039677008",
+  "bens": [
+    {
+      "grupo": "07", "codigo": "01", "pais": "105",
+      "cnpj_cpf": "11222333000181",
+      "discriminacao": "Fundo A - DESCRICAO NOVA QUE NAO DEVE SUBSTITUIR A DO DBK",
+      "situacao_anterior": "10000.00", "situacao_atual": "15000.00",
+      "pertence_a": {"tipo": "T"}
+    },
+    {
+      "grupo": "07", "codigo": "01", "pais": "105",
+      "cnpj_cpf": "11.444.777/0001-61",
+      "discriminacao": "Fundo B de teste - cotas de fundo come-cotas no banco Y",
+      "situacao_anterior": "9999.99", "situacao_atual": "6000.00",
+      "pertence_a": {"tipo": "T"}
+    },
+    {
+      "grupo": "07", "codigo": "01", "pais": "105",
+      "cnpj_cpf": "33.444.555/0001-81",
+      "discriminacao": "Fundo C de teste - fundo novo nesta declaracao",
+      "situacao_anterior": "0.00", "situacao_atual": "3000.00",
+      "pertence_a": {"tipo": "T"}
+    }
+  ]
+}
