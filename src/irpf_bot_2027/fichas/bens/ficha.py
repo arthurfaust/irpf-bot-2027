@@ -16,7 +16,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 
 from irpf_bot_2027.dbk import ArquivoDBK
-from irpf_bot_2027.fichas.bens.busca import chave_busca, procurar, tem_busca
+from irpf_bot_2027.fichas.bens.busca import chave_busca, identificar, procurar, procurar_incompletos
 from irpf_bot_2027.fichas.bens.entrada import CAMPOS_SIMPLES
 from irpf_bot_2027.fichas.bens.validacao import validar_bem
 from irpf_bot_2027.leiautes.atual import BRASIL, TITULAR_OU_DEPENDENTE, Registro27, esta_na_tabela, nome_codigo
@@ -76,7 +76,8 @@ class BemDoDBK:
     chave: int                  # CHAVE do registro 27 (número do bem no programa)
     grupo: str
     codigo: str
-    com_busca: bool             # o tipo tem busca automática (busca.py)
+    com_busca: bool             # tem chave completa: um bem do JSON o encontraria (busca.py)
+    chave_incompleta: bool = False   # o tipo tem busca, mas falta algum campo da chave no DBK
 
     def descrever(self) -> str:
         return f"chave {self.chave} ({self.grupo}/{self.codigo}, {nome_codigo(self.grupo, self.codigo)})"
@@ -91,7 +92,10 @@ class Resultado:
 
 def bem_do_dbk(linha: str) -> BemDoDBK:
     lido = Registro27.ler_tudo(linha)
-    return BemDoDBK(int(lido["CHAVE"]), lido["GRUPO"], lido["CODIGO"], tem_busca(lido["GRUPO"], lido["CODIGO"], lido["PAIS"]))
+    identificacao = identificar(lido)
+    com_busca = bool(identificacao and identificacao.chave)
+    return BemDoDBK(int(lido["CHAVE"]), lido["GRUPO"], lido["CODIGO"], com_busca,
+                    chave_incompleta=bool(identificacao) and not com_busca)
 
 def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -> Resultado:
     """Grava os bens (já validados) no arquivo, na ordem do JSON.
@@ -101,6 +105,8 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
         0 encontrados -> lançamento completo, com chave nova (como os bens sem busca);
         2 ou mais     -> não grava nada desse bem; vai para revisão.
     Se dois bens do JSON têm a mesma chave e ela existe no DBK, os dois vão para revisão.
+    Se nada foi encontrado, mas o DBK tem bem do mesmo tipo com a chave incompleta, o bem do JSON
+    vai para revisão (pode ser o mesmo bem; lançá-lo criaria duplicidade).
     Os bens que já estavam no DBK e não foram atualizados vão para Resultado.nao_informados;
     nunca são zerados nem apagados.
     """
@@ -140,6 +146,12 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
             resultado.atualizados.append(numero)
             continue
 
+        if chave_bem and procurar_incompletos(arquivo, identificar(campos).tipo):
+            logger.warning("%s: não encontrado, mas o DBK tem bem do mesmo tipo com dados da chave em branco; "
+                           "não foi gravado (revisão).", descricao)
+            resultado.revisao.append(numero)
+            continue
+
         posicao = arquivo.inserir(Registro27.TIPO, montar_linha(bem, campos, cpf, chave))
         logger.info("%s inserido na linha %d com chave %d", descricao, posicao + 1, chave)
         extras = sorted(set(campos) - set(CAMPOS_SIMPLES.values()))      # só os campos dos blocos
@@ -169,6 +181,11 @@ def relatorio(resultado: Resultado) -> list[tuple[int, str]]:
         linhas.append((logging.WARNING, "  REVISÃO, bens do DBK que o JSON não atualizou (nada foi zerado "
                                         "nem apagado; a situação atual continua a do DBK):"))
         for bem in resultado.nao_informados:
-            aviso = "" if bem.com_busca else " - tipo sem busca automática: confira se o JSON não o lançou de novo"
+            if bem.com_busca:
+                aviso = ""
+            elif bem.chave_incompleta:
+                aviso = " - dados da chave em branco no DBK: confira e complete no programa"
+            else:
+                aviso = " - tipo sem busca automática: confira se o JSON não o lançou de novo"
             linhas.append((logging.WARNING, f"    {bem.descrever()}{aviso}"))
     return linhas
