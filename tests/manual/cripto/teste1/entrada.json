@@ -1,0 +1,40 @@
+{
+  "cpf": "77039677008",
+  "bens": [
+    {
+      "grupo": "08", "codigo": "01", "pais": "105",
+      "discriminacao": "BTC em carteira propria",
+      "situacao_anterior": "1000.00", "situacao_atual": "7000.00",
+      "pertence_a": {"tipo": "T"},
+      "cripto": {"autocustodiante": true}
+    },
+    {
+      "grupo": "08", "codigo": "02", "pais": "105",
+      "discriminacao": "ETH na corretora X",
+      "situacao_anterior": "3000.00", "situacao_atual": "4500.00",
+      "pertence_a": {"tipo": "T"},
+      "cripto": {"autocustodiante": false, "cnpj_custodiante": "11.222.333/0001-81", "altcoin": "eth"}
+    },
+    {
+      "grupo": "08", "codigo": "02", "pais": "105",
+      "discriminacao": "ETH na corretora Z - nova nesta declaracao",
+      "situacao_anterior": "0.00", "situacao_atual": "1200.00",
+      "pertence_a": {"tipo": "T"},
+      "cripto": {"autocustodiante": false, "cnpj_custodiante": "11.444.777/0001-61", "altcoin": "ETH"}
+    },
+    {
+      "grupo": "08", "codigo": "03", "pais": "105",
+      "discriminacao": "USDT na corretora X",
+      "situacao_anterior": "500.00", "situacao_atual": "800.00",
+      "pertence_a": {"tipo": "T"},
+      "cripto": {"autocustodiante": false, "cnpj_custodiante": "11.222.333/0001-81", "stablecoin": "USDT"}
+    },
+    {
+      "grupo": "08", "codigo": "01", "pais": "249",
+      "discriminacao": "BTC em corretora no exterior",
+      "situacao_anterior": "0.00", "situacao_atual": "2500.00",
+      "pertence_a": {"tipo": "T"},
+      "cripto": {"autocustodiante": false}
+    }
+  ]
+}

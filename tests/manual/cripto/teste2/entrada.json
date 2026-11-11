@@ -1,0 +1,26 @@
+{
+  "cpf": "77039677008",
+  "bens": [
+    {
+      "grupo": "08", "codigo": "02", "pais": "105",
+      "discriminacao": "ETH na corretora X - conta 1",
+      "situacao_anterior": "3000.00", "situacao_atual": "5000.00",
+      "pertence_a": {"tipo": "T"},
+      "cripto": {"autocustodiante": false, "cnpj_custodiante": "11222333000181", "altcoin": "ETH"}
+    },
+    {
+      "grupo": "08", "codigo": "02", "pais": "105",
+      "discriminacao": "ETH na corretora X - conta 2",
+      "situacao_anterior": "0.00", "situacao_atual": "6000.00",
+      "pertence_a": {"tipo": "T"},
+      "cripto": {"autocustodiante": false, "cnpj_custodiante": "11222333000181", "altcoin": "ETH"}
+    },
+    {
+      "grupo": "08", "codigo": "01", "pais": "105",
+      "discriminacao": "BTC em carteira propria",
+      "situacao_anterior": "9999.99", "situacao_atual": "8000.00",
+      "pertence_a": {"tipo": "T"},
+      "cripto": {"autocustodiante": true}
+    }
+  ]
+}
