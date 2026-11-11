@@ -46,6 +46,9 @@ Andamento (11/11/2026):
   saídas foram restauradas; fundos novos lançados, A e B atualizados só na situação em 31/12/2025
   (situação anterior e discriminação mantidas), C novo, sem duplicidade, totais 18.000,00/30.000,00.
   O programa renumera os itens na tela (a CHAVE do DBK não é o número do item).
+- [x] Busca de **cripto** 08/01-03 (autocustodiante ou custodiado no Brasil) e salvaguarda de
+  chave incompleta: bem do JSON sem correspondente vai para revisão se o DBK tem bem do mesmo tipo
+  com a chave em branco (ADR 0007). Falta o roteiro manual no programa.
 - [ ] Demais tipos de bem; campos anuais (discriminação, quadros do exterior) na atualização.
 
 1. Tipo inicial: fundos nacionais (decidido). Conta corrente/poupança têm a chave mais confiável
@@ -98,25 +101,10 @@ O programa costuma sair entre o fim de fevereiro e março; adiante esta fase se 
 - Outras fichas (rendimentos, dependentes, dívidas, pagamentos) em `fichas/`.
 - JSON Schema gerado das regras, para a IA devolver o JSON no formato certo (saída estruturada).
 
-## Decisões tomadas (e por quê)
+## Decisões tomadas
 
-- **JSON amigável + conversor** (`entrada.py`), em vez de JSON no formato do DBK: a IA escreve o que
-  está no documento (`"m2"`, `true`), os códigos do DBK ficam só no código.
-- **`leiautes/atual.py`** em vez de variável `LEIAUTE` no `.env`: com um leiaute só, a variável
-  exigiria imports dinâmicos sem uso real. Trocar de ano = mudar os imports desse arquivo.
-- **Nomes sem ano**: `VALOR_ANTERIOR`/`VALOR_ATUAL`, `situacao_anterior`/`situacao_atual`.
-- **`cnpj_cpf`** no primeiro nível do bem para o CNPJ de ações, fundos, contas etc. (CPF/CNPJ do
-  devedor nos créditos); a cripto usa `cripto.cnpj_custodiante`. Informar os dois é erro.
-- **Situação anterior e atual são obrigatórias** no JSON (use `"0.00"`), para a IA não omitir
-  um valor por engano.
-- **Valores**: aceitos `"1234.56"` ou número do JSON; sem arredondamento escondido.
-- **Conta corrente, poupança, veículo e embarcação no Brasil ficam barrados** até os blocos da
-  fase 4, porque o programa exige banco/agência/conta e Renavam/registro.
-- **`"cpf"` obrigatório no JSON e conferido com o CPF do declarante do DBK**; se faltar ou não bater,
-  nada é gravado (evita gravar os dados de um cliente na declaração de outro).
-- **"Negociados em bolsa?" não é exigido**: falta confirmar se o programa aceita o padrão "Não".
-- **Imóvel no exterior**: só logradouro, área e unidade são exigidos (validador do programa para
-  esse caso não lido em detalhe).
+As decisões de arquitetura, com contexto, alternativas e consequências, estão em
+[docs/adr/](adr/README.md). Uma decisão nova vira um ADR no mesmo passo em que é implementada.
 
 ## Descobertas sobre o programa (testes de importação)
 

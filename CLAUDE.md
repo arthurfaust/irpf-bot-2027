@@ -4,13 +4,16 @@ Bot que insere lançamentos da declaração de IRPF direto no arquivo `.DBK` (c�
 programa IRPF da Receita), a partir de um JSON com os dados do cliente. Hoje cobre a ficha Bens e
 Direitos (registro 27) com o leiaute do IRPF 2026; o alvo final é o IRPF 2027.
 
-Plano, decisões e pendências: [docs/plano.md](docs/plano.md). Leia antes de começar uma tarefa.
+Plano e pendências: [docs/plano.md](docs/plano.md). Decisões de arquitetura: [docs/adr/](docs/adr/README.md).
+Leia os dois antes de começar uma tarefa.
 
 ## Regras de trabalho
 
 - **Os commits são do Arthur.** Não faça commit nem push; ao fim de cada passo, sugira a mensagem
   (padrão `tipo(escopo): descrição`, em português).
 - Trabalhe em **passos pequenos**: implemente, rode os testes, pare para revisão.
+- **Decisão de arquitetura nova = ADR novo** em `docs/adr/` (copie `modelo.md`, próximo número,
+  atualize o índice) no mesmo passo. ADR aceito não é reescrito: uma mudança gera outro que o substitui.
 - Converse e documente em **português**. Código, nomes e docstrings também em português.
 - **Não entre em pastas com dados de clientes**: `data/` (exceto `dados.example.json`), `raw/`,
   `gold/`, `logs/`, e as pastas `aplicacao/dados`, `gravadas/` e `transmitidas/` da instalação do IRPF.
