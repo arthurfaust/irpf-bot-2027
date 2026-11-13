@@ -1,0 +1,2 @@
+- O arquivo .DBK na raiz da pasta manual está sem nenhum lançamento
+- Os testes são encadeados: o .DBK de entrada do teste 1 é o vazio, e o do teste 2 é o .DBK de saída do teste anterior

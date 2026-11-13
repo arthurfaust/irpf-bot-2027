@@ -9,9 +9,9 @@
       "pertence_a": {"tipo": "T"}
     },
     {
-      "grupo": "07", "codigo": "01", "pais": "105",
+      "grupo": "07", "codigo": "03", "pais": "105",
       "cnpj_cpf": "11.444.777/0001-61",
-      "discriminacao": "Fundo B de teste - cotas de fundo come-cotas no banco Y",
+      "discriminacao": "Fundo B informado com outro codigo e situacao anterior errada",
       "situacao_anterior": "9999.99", "situacao_atual": "6000.00",
       "pertence_a": {"tipo": "T"}
     },
@@ -20,6 +20,20 @@
       "cnpj_cpf": "33.444.555/0001-81",
       "discriminacao": "Fundo C de teste - fundo novo nesta declaracao",
       "situacao_anterior": "0.00", "situacao_atual": "3000.00",
+      "pertence_a": {"tipo": "T"}
+    },
+    {
+      "grupo": "07", "codigo": "01", "pais": "105",
+      "cnpj_cpf": "44.555.666/0001-81",
+      "discriminacao": "Fundo D de teste - corretora X",
+      "situacao_anterior": "0.00", "situacao_atual": "1000.00",
+      "pertence_a": {"tipo": "T"}
+    },
+    {
+      "grupo": "07", "codigo": "01", "pais": "105",
+      "cnpj_cpf": "44.555.666/0001-81",
+      "discriminacao": "Fundo D de teste - corretora Z",
+      "situacao_anterior": "0.00", "situacao_atual": "2000.00",
       "pertence_a": {"tipo": "T"}
     }
   ]
