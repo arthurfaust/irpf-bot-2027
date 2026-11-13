@@ -6,7 +6,6 @@ build/
 dist/
 wheels/
 *.egg-info
-*.dbk
 
 # Virtual environments
 .venv
@@ -15,8 +14,9 @@ wheels/
 config/.env
 
 # Data
+*.dbk
+*.DBK
 data/dados.json
 raw/
 gold/
 logs/
-tests/manual/*/saida/

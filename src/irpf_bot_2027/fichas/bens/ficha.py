@@ -104,7 +104,9 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
         1 encontrado  -> atualiza só a situação atual;
         0 encontrados -> lançamento completo, com chave nova (como os bens sem busca);
         2 ou mais     -> não grava nada desse bem; vai para revisão.
-    Se dois bens do JSON têm a mesma chave e ela existe no DBK, os dois vão para revisão.
+    A busca olha só os bens do DBK de entrada, nunca os lançados nesta mesma execução.
+    Se dois bens do JSON têm a mesma chave e ela existe no DBK, os dois vão para revisão; se ela não
+    existe, os dois são lançados, com aviso.
     Se nada foi encontrado, mas o DBK tem bem do mesmo tipo com a chave incompleta, o bem do JSON
     vai para revisão (pode ser o mesmo bem; lançá-lo criaria duplicidade).
     Os bens que já estavam no DBK e não foram atualizados vão para Resultado.nao_informados;
@@ -112,15 +114,21 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
     """
     resultado = Resultado()
     chave = proxima_chave(arquivo)
+    primeira_chave_nova = chave                 # bens com CHAVE a partir daqui foram lançados nesta execução
     cpf = arquivo.cpf_declarante
     chaves_json = Counter(filter(None, map(chave_busca, campos_por_bem)))
     existentes = [bem_do_dbk(linha) for linha in arquivo.linhas_do_tipo(Registro27.TIPO)]
     chaves_atualizadas = set()                  # CHAVE dos bens do DBK atualizados
 
+    def da_entrada(posicoes: list[int]) -> list[int]:
+        """Só as linhas que já estavam no DBK de entrada: um bem lançado nesta execução não pode ser
+        encontrado (nem sobrescrito) por outro bem do mesmo JSON."""
+        return [p for p in posicoes if int(Registro27.CHAVE.ler(arquivo.linhas[p])) < primeira_chave_nova]
+
     for numero, (bem, campos) in enumerate(zip(bens, campos_por_bem), start=1):
         descricao = f"Bem {numero} ({bem['grupo']}/{bem['codigo']}, {nome_codigo(bem['grupo'], bem['codigo'])})"
         chave_bem = chave_busca(campos)
-        encontrados = procurar(arquivo, chave_bem) if chave_bem else []
+        encontrados = da_entrada(procurar(arquivo, chave_bem)) if chave_bem else []
 
         if len(encontrados) > 1:
             logger.warning("%s: %d lançamentos no DBK com a mesma chave; não foi gravado (revisão).",
@@ -146,11 +154,15 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
             resultado.atualizados.append(numero)
             continue
 
-        if chave_bem and procurar_incompletos(arquivo, identificar(campos).tipo):
+        if chave_bem and da_entrada(procurar_incompletos(arquivo, identificar(campos).tipo)):
             logger.warning("%s: não encontrado, mas o DBK tem bem do mesmo tipo com dados da chave em branco; "
                            "não foi gravado (revisão).", descricao)
             resultado.revisao.append(numero)
             continue
+
+        if chave_bem and chaves_json[chave_bem] > 1:
+            logger.warning("%s: outro bem do JSON tem a mesma chave; os dois são lançados como novos, mas "
+                           "na próxima declaração cairão em revisão (2 lançamentos com a mesma chave).", descricao)
 
         posicao = arquivo.inserir(Registro27.TIPO, montar_linha(bem, campos, cpf, chave))
         logger.info("%s inserido na linha %d com chave %d", descricao, posicao + 1, chave)

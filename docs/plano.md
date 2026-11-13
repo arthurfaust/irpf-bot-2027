@@ -48,7 +48,10 @@ Andamento (11/11/2026):
   O programa renumera os itens na tela (a CHAVE do DBK não é o número do item).
 - [x] Busca de **cripto** 08/01-03 (autocustodiante ou custodiado no Brasil) e salvaguarda de
   chave incompleta: bem do JSON sem correspondente vai para revisão se o DBK tem bem do mesmo tipo
-  com a chave em branco (ADR 0007). Falta o roteiro manual no programa.
+  com a chave em branco (ADR 0007).
+- [x] Teste manual de 13/11/2026 com DBK sem bens (`tests/manual/`): achou o bug do 2º bem do JSON
+  encontrar a linha que o 1º acabara de lançar. Corrigido: a busca olha só os bens do DBK de entrada
+  (ADR 0009).
 - [ ] Demais tipos de bem; campos anuais (discriminação, quadros do exterior) na atualização.
 
 1. Tipo inicial: fundos nacionais (decidido). Conta corrente/poupança têm a chave mais confiável

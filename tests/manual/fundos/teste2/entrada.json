@@ -1,0 +1,26 @@
+{
+  "cpf": "77039677008",
+  "bens": [
+    {
+      "grupo": "07", "codigo": "01", "pais": "105",
+      "cnpj_cpf": "11.222.333/0001-81",
+      "discriminacao": "Fundo A - lote 1",
+      "situacao_anterior": "10000.00", "situacao_atual": "20000.00",
+      "pertence_a": {"tipo": "T"}
+    },
+    {
+      "grupo": "07", "codigo": "01", "pais": "105",
+      "cnpj_cpf": "11.222.333/0001-81",
+      "discriminacao": "Fundo A - lote 2",
+      "situacao_anterior": "0.00", "situacao_atual": "1000.00",
+      "pertence_a": {"tipo": "T"}
+    },
+    {
+      "grupo": "07", "codigo": "03", "pais": "105",
+      "cnpj_cpf": "11.444.777/0001-61",
+      "discriminacao": "Fundo B informado pela IA com outro codigo",
+      "situacao_anterior": "5000.00", "situacao_atual": "7000.00",
+      "pertence_a": {"tipo": "T"}
+    }
+  ]
+}

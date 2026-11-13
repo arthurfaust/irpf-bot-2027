@@ -186,3 +186,25 @@ def test_relatorio_resume_e_nao_tem_dados_do_cliente():
         assert dado not in texto
     niveis = {nivel for nivel, t in bens.relatorio(resultado) if "REVISÃO" in t}
     assert niveis == {logging.WARNING}
+
+
+# --- a busca olha só os bens do DBK de entrada ---
+
+def test_dois_bens_do_json_com_chave_que_nao_esta_no_dbk_sao_lancados(caplog):
+    """Achado no teste manual com DBK sem bens: o 2º bem encontrava a linha que o 1º acabara de inserir."""
+    arquivo = ArquivoDBK.ler(DADOS / "entrada.DBK")
+
+    resultado = gravar(arquivo, {**FUNDO, "situacao_atual": "1.00"}, {**FUNDO, "situacao_atual": "2.00"})
+
+    assert feitos(resultado) == {"atualizados": [], "novos": [1, 2], "revisao": []}
+    assert len(linhas_do_fundo(arquivo)) == 2
+    assert "outro bem do JSON tem a mesma chave" in caplog.text
+
+
+def test_bem_lancado_nesta_execucao_nao_e_atualizado_por_outro_bem_do_json():
+    arquivo = ArquivoDBK.ler(DADOS / "entrada.DBK")
+
+    gravar(arquivo, FUNDO, {**FUNDO, "codigo": "03", "situacao_atual": "9.00"})
+
+    valores = sorted(Registro27.VALOR_ATUAL.ler(l) for l in linhas_do_fundo(arquivo))
+    assert valores == ["0000000000900", "0000000150000"]          # dois lançamentos, nenhum sobrescrito
