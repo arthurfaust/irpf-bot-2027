@@ -50,7 +50,7 @@ src/irpf_bot_2027/
 ├── comum/            conversões (sim/não, dígitos, datas, números) e normalização de texto
 ├── leiautes/
 │   ├── atual.py      ÚNICO ponto de importação do leiaute (troca de ano = mudar os imports daqui)
-│   └── irpf2026/     cabeçalho, registro 27, tabela de grupos/códigos, países, regras da tela
+│   └── irpf2026/     cabeçalho, registro 27, tabela de grupos/códigos, países, bancos, regras da tela
 └── fichas/
     ├── __init__.py   FICHAS = (bens,): cada ficha expõe NOME, CHAVE_JSON, validar(), inserir()
     └── bens/         entrada.py (JSON → campos), validacao.py, busca.py (chave e busca no DBK),
@@ -62,8 +62,9 @@ Para uma ficha nova: subpacote em `fichas/` com a mesma forma de `bens/` + inclu
 
 ## Formato do DBK (confirmado em arquivos do programa)
 
-- Texto **Latin-1**, linhas separadas por **CRLF**, **sem CRLF depois da última linha** (T9).
-  O `ArquivoDBK` preserva isso; nunca leia/grave em modo texto sem `newline=""`.
+- Texto **Latin-1**, linhas separadas por **CRLF**. O CRLF depois da última linha (T9) varia entre
+  DBKs do programa (os antigos não têm, o de 13/11/2026 tem); o `ArquivoDBK` regrava como leu.
+  Nunca leia/grave em modo texto sem `newline=""`.
 - Largura fixa; posições começam em 1. Tipo `N`: zeros à esquerda, decimais implícitas.
   Tipo `C`/`A`: espaços à direita, gravado em maiúsculas.
 - Os 2 primeiros caracteres são o tipo do registro; posições 3-13 são o CPF do declarante (exceto IR).

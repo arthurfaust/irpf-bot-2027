@@ -1,0 +1,35 @@
+{
+  "cpf": "770.396.770-08",
+  "bens": [
+    {
+      "grupo": "06", "codigo": "01", "pais": "105", "cnpj_cpf": "00.000.000/0001-91",
+      "discriminacao": "CONTA CORRENTE BB", "situacao_anterior": "1000.00", "situacao_atual": "1500.00",
+      "conta": {"banco": "001", "agencia": "1234", "conta": "98765", "dv": "X"}
+    },
+    {
+      "grupo": "04", "codigo": "01", "pais": "105", "cnpj_cpf": "00.360.305/0001-04",
+      "discriminacao": "POUPANCA CAIXA COM OPERACAO", "situacao_anterior": "2000.00", "situacao_atual": "2500.00",
+      "conta": {"banco": "104", "agencia": "567", "conta": "4321", "dv": "9"}
+    },
+    {
+      "grupo": "06", "codigo": "01", "pais": "105", "cnpj_cpf": "00.360.305/0001-04",
+      "discriminacao": "CONTA CORRENTE CAIXA SEM OPERACAO", "situacao_anterior": "300.00", "situacao_atual": "350.00",
+      "conta": {"banco": "104", "agencia": "567", "conta": "123456789", "dv": "0"}
+    },
+    {
+      "grupo": "06", "codigo": "01", "pais": "105", "cnpj_cpf": "60.701.190/0001-04",
+      "discriminacao": "CONTA CORRENTE ITAU", "situacao_anterior": "400.00", "situacao_atual": "450.00",
+      "conta": {"banco": "341", "agencia": "0350", "conta": "11223", "dv": "4"}
+    },
+    {
+      "grupo": "04", "codigo": "01", "pais": "105", "cnpj_cpf": "60.701.190/0001-04",
+      "discriminacao": "POUPANCA ITAU MESMO NUMERO DA CORRENTE", "situacao_anterior": "500.00", "situacao_atual": "550.00",
+      "conta": {"banco": "341", "agencia": "0350", "conta": "11223", "dv": "4"}
+    },
+    {
+      "grupo": "06", "codigo": "01", "pais": "105", "cnpj_cpf": "18.236.120/0001-58",
+      "discriminacao": "CONTA PAGAMENTO NUBANK", "situacao_anterior": "600.00", "situacao_atual": "650.00",
+      "conta": {"banco": "260", "agencia": "1", "conta": "7654321", "dv": "5", "conta_pagamento": false}
+    }
+  ]
+}

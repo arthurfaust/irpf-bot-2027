@@ -6,7 +6,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 DADOS = Path(__file__).resolve().parent / "dados"
 
 # DBKs gerados pelo próprio programa IRPF 2026 (cópias de segurança).
-DBKS_DO_PROGRAMA = [DADOS / "entrada.DBK", DADOS / "programa_com_imovel.DBK"]
+DBKS_DO_PROGRAMA = [DADOS / "entrada.DBK", DADOS / "programa_com_imovel.DBK", DADOS / "contas_programa.DBK"]
 
 
 def ler_linhas(caminho: Path) -> list[str]:

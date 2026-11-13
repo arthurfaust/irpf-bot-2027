@@ -32,10 +32,18 @@ def test_nova_linha_entra_depois_da_ultima_do_mesmo_tipo():
     assert arquivo.posicao_para("27") == 9
 
 
-def test_dbk_do_programa_nao_tem_quebra_depois_da_ultima_linha():
-    for dbk in DBKS_DO_PROGRAMA:
-        assert not dbk.read_bytes().endswith(b"\r\n")
-        assert ArquivoDBK.ler(dbk).quebra_no_fim is False
+QUEBRA_NO_FIM = {"entrada": False, "programa_com_imovel": False, "contas_programa": True}
+
+
+@pytest.mark.parametrize("dbk", DBKS_DO_PROGRAMA, ids=lambda dbk: dbk.stem)
+def test_quebra_depois_da_ultima_linha_e_lida_e_preservada(dbk, tmp_path):
+    """O programa grava com ou sem CRLF depois da última linha (contas_programa.DBK, de 13/11/2026,
+    termina com CRLF; os mais antigos não). O ArquivoDBK lê e regrava do mesmo jeito."""
+    assert ArquivoDBK.ler(dbk).quebra_no_fim is QUEBRA_NO_FIM[dbk.stem]
+    assert dbk.read_bytes().endswith(b"\r\n") is QUEBRA_NO_FIM[dbk.stem]
+    copia = tmp_path / dbk.name
+    ArquivoDBK.ler(dbk).gravar(copia)
+    assert copia.read_bytes() == dbk.read_bytes()
 
 
 def sem_tipos(arquivo: ArquivoDBK, *tipos: str) -> ArquivoDBK:

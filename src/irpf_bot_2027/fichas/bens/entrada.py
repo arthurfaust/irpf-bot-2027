@@ -18,6 +18,9 @@ Origem dos códigos gravados:
             - O leiaute não informa o formato;
             - Confirmado em 10/11/2026 com a data 23/10/2020 gravada como "23102020".
         - CNPJ_CPF, CPF_DONO, CEP: somente dígitos.
+        - Bloco conta (DBK gravado pelo programa em 13/11/2026, tests/manual/contas/): banco com 3
+          dígitos, agência com zeros à esquerda ("1" -> "0001"), conta como digitada (exceto na Caixa,
+          veja ajustar_conta_caixa), DV alinhado à esquerda ("X"), IN_CONTA_PAGAMENTO 0/1.
 
     - Chaves e blocos do JSON: 
         - Formato definido por este projeto (não vem do programa).
@@ -28,6 +31,7 @@ import logging
 from functools import partial
 
 from irpf_bot_2027.comum.conversoes import data_ddmmaaaa, numero, sim_nao, so_digitos, titular_dependente, valor_em_reais
+from irpf_bot_2027.leiautes.atual import CAIXA, Registro27
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +83,13 @@ MAPA_BLOCOS = {
         "matricula": "MATRICULA",
         "cartorio": "CARTORIO",
     },
+    "conta": {                                      # poupança (04/01) e conta corrente/pagamento (06/01)
+        "banco": "BANCO",                           # código com até 3 dígitos (ex.: "001"), da tabela do programa
+        "agencia": "AGENCIA",                       # até 4 dígitos, sem o dígito da agência
+        "conta": "CONTA",                           # só os números, sem o dígito verificador
+        "dv": "DV_CONTA",                           # dígito verificador da conta (1 ou 2 caracteres, ex.: "X")
+        "conta_pagamento": "CONTA_PAGAMENTO",       # true | false (só 06/01, opcional, padrão false)
+    },
 }
 
 # Caminhos no JSON de cada campo do Registro27, para as mensagens de erro. Um campo pode ter mais de um
@@ -126,8 +137,55 @@ def codigo_pais(valor) -> str:
         raise ValueError('esperado o código do país com até 3 dígitos (ex.: "105" para o Brasil)')
     return texto.zfill(3)
 
+def so_numeros(valor, maximo: int, formato: str, dica: str = "") -> str:
+    """Texto só com dígitos, com até `maximo` dígitos. A mensagem não repete o valor (dado do cliente)."""
+    texto = str(valor).strip()
+    if isinstance(valor, bool) or not isinstance(valor, (str, int)) or not texto.isdigit():
+        raise ValueError(f"esperado {formato}, só com números{dica}")
+    if len(texto) > maximo:
+        raise ValueError(f"esperado {formato}, com até {maximo} dígitos")
+    return texto
+
+def codigo_banco(valor) -> str:
+    """"1", 1 ou "001" -> "001". A existência na tabela do programa é conferida na validação."""
+    return so_numeros(valor, 3, 'o código do banco (ex.: "001")').zfill(3)
+
+def agencia(valor) -> str:
+    return so_numeros(valor, 4, "o número da agência", dica=", sem o dígito da agência")
+
+def numero_conta(valor) -> str:
+    return so_numeros(valor, Registro27.CONTA.tamanho, "o número da conta",
+                      dica="; o dígito verificador vai em 'conta.dv'")
+
+def digito_conta(valor) -> str:
+    texto = str(valor).strip()
+    if isinstance(valor, bool) or not isinstance(valor, (str, int)) or not texto.isalnum() \
+            or len(texto) > Registro27.DV_CONTA.tamanho:
+        raise ValueError('esperado o dígito verificador com 1 ou 2 letras ou números (ex.: "7" ou "X")')
+    return texto
+
+def ajustar_conta_caixa(campos: dict, erros: list[str]) -> None:
+    """Conta da Caixa: completa com zeros à esquerda até 12 dígitos, como o programa grava.
+
+    Origem: Bem.getContaFormatadaTxt do IRPF 2026 (banco 104 sem operação = conta com 12 dígitos) e
+    DBK gravado pelo programa em 13/11/2026 (conta 4321 gravada como 000000004321). A tela de bens não
+    tem o campo Operação; quem tem conta antiga com operação informa operação + conta no campo conta.
+    """
+    if campos.get("BANCO") != CAIXA or "CONTA" not in campos:
+        return
+    if len(campos["CONTA"]) > 12:
+        erros.append("'conta.conta': na Caixa (banco 104) a conta tem no máximo 12 dígitos")
+        del campos["CONTA"]
+        return
+    campos["CONTA"] = campos["CONTA"].zfill(12)
+
 CONVERSOES = {
     "PAIS": codigo_pais,
+    "BANCO": codigo_banco,
+    "AGENCIA": agencia,
+    "CONTA": numero_conta,
+    "DV_CONTA": digito_conta,
+    "CONTA_PAGAMENTO": sim_nao,
     "VALOR_ANTERIOR": valor_em_reais,
     "VALOR_ATUAL": valor_em_reais,
     "AREA": partial(numero, casas=1),               # área com 1 casa decimal (N11,1 no leiaute)
@@ -191,6 +249,8 @@ def converter_campos(bem: dict) -> tuple[dict, list[str]]:
                 converter(f"{chave}.{subchave}", mapa[subchave], valor)
             else:
                 erros.append(f"campo desconhecido '{chave}.{subchave}'")
+
+    ajustar_conta_caixa(campos, erros)
 
     for chave in CAMPOS_OBRIGATORIOS:
         if bem.get(chave) is None or str(bem[chave]).strip() == "":

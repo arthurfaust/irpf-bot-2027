@@ -23,7 +23,7 @@ Origem:
     SOMENTE_BRASIL                 | Bem.isBemApenasBrasil (a tela trava o país em 105)
     SOMENTE_EXTERIOR               | Bem.isBemApenasExterior (mensagem bem_brasil_nao_permitido)
     CNPJ_OBRIGATORIO               | validador Bem$14 (mensagem bem_cnpj_branco) + Ajuda, "Atenção 1"
-    campos_obrigatorios            | validadores Bem$3 (imóvel), $8/$9 (Renavam/embarcação), $17-$19 (conta),
+    campos_obrigatorios            | validadores Bem$3 (imóvel), $8/$9 (Renavam/embarcação), $16-$19 (conta),
                                    | $22 (dependente), $34-$36 (cripto), ValidadorDataAquisicao, ValidadorRegistroBemImovel
                                    | e mensagens bem_*_branco do irpf.jar!/Mensagens.properties
       Incerto: o que o programa exige de um imóvel no EXTERIOR (ValidadorLocalizacaoBemImovelExterior)
@@ -257,7 +257,9 @@ def campos_obrigatorios(g: str, c: str, pais: str, autocustodiante: bool = False
         obrigatorios.add("CNPJ_CPF")
 
     if no_brasil and esta_na_tabela(CONTA_BANCARIA, g, c):
-        obrigatorios |= {"BANCO", "AGENCIA", "CONTA"}
+        # Validadores Bem$16 a $19 (banco, agência, conta e DV não nulos). No programa são avisos, não
+        # erros; o bot exige os quatro porque banco, agência e conta formam a chave da busca.
+        obrigatorios |= {"BANCO", "AGENCIA", "CONTA", "DV_CONTA"}
 
     if esta_na_tabela(CRIPTO_COM_CUSTODIANTE, g, c):
         obrigatorios.add("AUTOCUSTODIANTE")

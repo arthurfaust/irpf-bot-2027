@@ -129,12 +129,10 @@ def test_acoes_no_exterior_dispensam_cnpj():
 
 @pytest.mark.parametrize(
     ("grupo", "codigo", "campo"),
-    [("06", "01", "AGENCIA"), ("04", "01", "AGENCIA"), ("02", "01", "RENAVAM"), ("02", "03", "REG_EMBARCACAO")],
-    ids=["conta-corrente", "poupanca", "veiculo", "embarcacao"],
+    [("02", "01", "RENAVAM"), ("02", "03", "REG_EMBARCACAO")],
+    ids=["veiculo", "embarcacao"],
 )
 def test_bens_que_exigem_campos_ainda_nao_suportados(grupo, codigo, campo):
     bem = {**BASE, "grupo": grupo, "codigo": codigo}
-    if grupo in ("04", "06"):
-        bem["cnpj_cpf"] = "00000000000191"
     _, erros = validar_bem(bem)
     assert any(f"exige o campo {campo}, que ainda não pode ser informado no JSON" in erro for erro in erros), erros

@@ -88,7 +88,12 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
 
 ### Fase 4 — novos blocos de bens
 
-`conta` (banco, agência, conta, DV, conta pagamento), `bolsa` (negociado, código de negociação),
+- [x] `conta` (13/11/2026, ADR 0010): banco, agência, conta, DV e conta pagamento; libera poupança e
+  conta corrente. As linhas geradas são idênticas às de um DBK gravado pelo programa com 6 contas
+  (`tests/dados/contas_programa.DBK`). Na tela de bens não há campo Operação da Caixa.
+- [ ] Busca de conta: grupo + código + banco + agência + conta sem zeros à esquerda.
+
+Demais blocos: `bolsa` (negociado, código de negociação),
 `veiculo` (Renavam, registros de aeronave/embarcação), `exterior` (aplicação financeira e lucros e
 dividendos; usar `numero(..., permite_negativo=True)` no rendimento ou perda). O bloco `exterior`
 também gera linhas 37: confirmar num teste se o programa as recria a partir da 27 (o teste manual

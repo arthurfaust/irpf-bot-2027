@@ -4,8 +4,9 @@ Leitura, busca, inserção, substituição e gravação de linhas no arquivo .DB
 Não sabe nada de fichas: trabalha só com linhas e tipos de registro (os 2 primeiros caracteres).
 
 Origem:
-    - Encoding Latin-1 e fim de linha CRLF, sem CRLF depois da última linha (T9): confirmados em
-      DBKs gravados pelo programa (tests/dados/).
+    - Encoding Latin-1 e fim de linha CRLF: confirmados em DBKs gravados pelo programa (tests/dados/).
+      O CRLF depois da última linha (T9) varia: os DBKs mais antigos não têm, o de 13/11/2026
+      (contas_programa.DBK) tem. O arquivo é regravado como foi lido (quebra_no_fim).
     - ORDEM_REGISTROS: ordem dos <Registro> no bloco <DeclaracaoTXT TipoArquivo="ARQ_IRPF"> do
       irpf.jar!/mapeamentoTxt.xml do programa IRPF2026 (versão 1.5). Os DBKs do programa seguem
       essa ordem (IR, 16, 19, 20, 26, 27, 37, T9).
@@ -34,7 +35,7 @@ def tipo_da_linha(linha: str) -> str:
 class ArquivoDBK:
     def __init__(self, linhas: list[str], quebra_no_fim: bool = False):
         self.linhas = linhas                    # sem o fim de linha
-        self.quebra_no_fim = quebra_no_fim      # o DBK do programa NÃO tem CRLF depois da última linha
+        self.quebra_no_fim = quebra_no_fim      # CRLF depois da última linha (varia entre DBKs do programa)
 
     @classmethod
     def ler(cls, caminho: Path) -> "ArquivoDBK":

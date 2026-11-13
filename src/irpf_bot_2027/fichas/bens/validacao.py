@@ -4,7 +4,7 @@ Validação de um bem do JSON antes de gravar no DBK.
 Três checagens, nesta ordem:
     1. os campos e blocos do JSON são conhecidos, os obrigatórios estão presentes e os valores
        convertem (entrada.py) e cabem no campo do Registro27, com os textos normalizados (verificar_formato, comum/texto.py)
-    2. o grupo/código existe (tabela_bens.py), o país existe (paises.py) e o código pode estar
+    2. o grupo/código existe (tabela_bens.py), o país existe (paises.py), o banco existe (bancos.py) e o código pode estar
        nesse país (regras.SOMENTE_BRASIL / SOMENTE_EXTERIOR)
     3. cada campo preenchido aparece na tela para esse grupo/código/país, e os campos que a tela
        exige estão preenchidos (regras.campos_aplicaveis / campos_obrigatorios)
@@ -15,7 +15,7 @@ Origem: não tem regras próprias; usa as dos três módulos acima (veja a orige
 from irpf_bot_2027.comum.texto import caracteres_fora_do_latin1, normalizar_texto
 from irpf_bot_2027.fichas.bens.entrada import converter_campos, informado_no_json, origem_no_json
 from irpf_bot_2027.leiautes.atual import (
-    BRASIL, SOMENTE_BRASIL, SOMENTE_EXTERIOR, Registro27, campos_aplicaveis, campos_obrigatorios, codigo_existe, esta_na_tabela,
+    BRASIL, SOMENTE_BRASIL, SOMENTE_EXTERIOR, Registro27, banco_existe, campos_aplicaveis, campos_obrigatorios, codigo_existe, esta_na_tabela,
     nome_codigo, nome_pais, pais_existe,
 )
 
@@ -70,6 +70,9 @@ def validar_bem(bem: dict) -> tuple[dict, list[str]]:
         return campos, erros + [f"grupo/código {grupo}/{codigo} não existe"]
     if not pais_existe(pais):
         return campos, erros + [f"país {pais} não existe na tabela do programa"]
+
+    if "BANCO" in campos and not banco_existe(campos["BANCO"]):
+        erros.append(f"'conta.banco': banco {campos['BANCO']} não existe na tabela de bancos do programa")
 
     descricao = f"{grupo}/{codigo} ({nome_codigo(grupo, codigo)})"
     if pais != BRASIL and esta_na_tabela(SOMENTE_BRASIL, grupo, codigo):
