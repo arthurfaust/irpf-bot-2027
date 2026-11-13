@@ -52,6 +52,13 @@ Andamento (11/11/2026):
 - [x] Teste manual de 13/11/2026 com DBK sem bens (`tests/manual/`): achou o bug do 2º bem do JSON
   encontrar a linha que o 1º acabara de lançar. Corrigido: a busca olha só os bens do DBK de entrada
   (ADR 0009).
+- [x] **Confirmado no programa IRPF 2026 (13/11/2026)** com as saídas encadeadas (teste1 → teste2)
+  de fundos e cripto. Cripto: BTC autocustodiante e ETH na corretora X atualizados, ETH na corretora
+  Z e BTC no exterior lançados como novos, USDT repetido no JSON mantido como estava (revisão), totais
+  4.500,00/15.700,00. Fundos: A e B atualizados, C novo, D repetido no JSON lançado duas vezes, totais
+  15.000,00/27.000,00.
+- [ ] Bem encontrado com código diferente do JSON (o B de fundos veio como 07/03 e ficou 07/01 no
+  DBK) não gera aviso: tratar junto com os campos anuais.
 - [ ] Demais tipos de bem; campos anuais (discriminação, quadros do exterior) na atualização.
 
 1. Tipo inicial: fundos nacionais (decidido). Conta corrente/poupança têm a chave mais confiável
