@@ -11,6 +11,7 @@ from irpf_bot_2027.leiautes.irpf2026.tabela_bens import GRUPOS
 
 BITCOIN, APARTAMENTO = json.loads((DADOS / "bens.json").read_text(encoding="utf-8"))["bens"]
 BASE = {"pais": "105", "discriminacao": "Teste", "situacao_anterior": "0.00", "situacao_atual": "100.00"}
+ACOES = {**BASE, "grupo": "03", "codigo": "01", "bolsa": {"negociado": False}}
 
 
 def sem_no_bloco(bem: dict, bloco: str, chave: str) -> dict:
@@ -24,8 +25,9 @@ def test_obrigatorios_sao_sempre_campos_que_aparecem_na_tela(pais, autocustodian
     """Um campo obrigatório que não aparece na tela seria impossível de preencher."""
     for grupo, dados in GRUPOS.items():
         for codigo in dados["codigos"]:
-            obrigatorios = campos_obrigatorios(grupo, codigo, pais, autocustodiante, registrado, dependente=True)
-            aplicaveis = campos_aplicaveis(grupo, codigo, pais, autocustodiante)
+            obrigatorios = campos_obrigatorios(grupo, codigo, pais, autocustodiante, registrado, dependente=True,
+                                               bolsa=True)
+            aplicaveis = campos_aplicaveis(grupo, codigo, pais, autocustodiante, bolsa=True)
             assert obrigatorios <= aplicaveis, (grupo, codigo, obrigatorios - aplicaveis)
 
 
@@ -96,12 +98,12 @@ def test_titular_dispensa_cpf():
 
 
 def test_acoes_no_brasil_exigem_cnpj():
-    _, erros = validar_bem({**BASE, "grupo": "03", "codigo": "01"})
+    _, erros = validar_bem(ACOES)
     assert erros == ["'cnpj_cpf' é obrigatório para 03/01 (Ações (inclusive as listadas em bolsa)) no Brasil"]
 
 
 def test_acoes_com_cnpj_sao_aceitas():
-    campos, erros = validar_bem({**BASE, "grupo": "03", "codigo": "01", "cnpj_cpf": "33.000.167/0001-01"})
+    campos, erros = validar_bem({**ACOES, "cnpj_cpf": "33.000.167/0001-01"})
     assert erros == []
     assert campos["CNPJ_CPF"] == "33000167000101"
 
@@ -123,7 +125,7 @@ def test_cnpj_em_bem_que_nao_tem_cnpj_cita_o_caminho_usado():
 
 
 def test_acoes_no_exterior_dispensam_cnpj():
-    _, erros = validar_bem({**BASE, "grupo": "03", "codigo": "01", "pais": "111"})
+    _, erros = validar_bem({**ACOES, "pais": "111"})
     assert erros == []
 
 

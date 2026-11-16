@@ -13,7 +13,8 @@
       "cnpj_cpf": "11.444.777/0001-61",
       "discriminacao": "Fundo B informado com outro codigo e situacao anterior errada",
       "situacao_anterior": "9999.99", "situacao_atual": "6000.00",
-      "pertence_a": {"tipo": "T"}
+      "pertence_a": {"tipo": "T"},
+      "bolsa": {"negociado": false}
     },
     {
       "grupo": "07", "codigo": "01", "pais": "105",

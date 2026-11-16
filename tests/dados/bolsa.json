@@ -1,0 +1,35 @@
+{
+  "cpf": "770.396.770-08",
+  "bens": [
+    {
+      "grupo": "03", "codigo": "01", "pais": "105", "cnpj_cpf": "33.000.167/0001-01",
+      "discriminacao": "ACOES PETROBRAS PN", "situacao_anterior": "1000.00", "situacao_atual": "1200.00",
+      "bolsa": {"negociado": true, "codigo": "PETR4"}
+    },
+    {
+      "grupo": "03", "codigo": "01", "pais": "105", "cnpj_cpf": "33.000.167/0001-01",
+      "discriminacao": "ACOES PETROBRAS ON", "situacao_anterior": "800.00", "situacao_atual": "900.00",
+      "bolsa": {"negociado": true, "codigo": "PETR3"}
+    },
+    {
+      "grupo": "03", "codigo": "01", "pais": "105", "cnpj_cpf": "11.222.333/0001-81",
+      "discriminacao": "ACOES EMPRESA FECHADA", "situacao_anterior": "5000.00", "situacao_atual": "5000.00",
+      "bolsa": {"negociado": false}
+    },
+    {
+      "grupo": "07", "codigo": "03", "pais": "105", "cnpj_cpf": "11.444.777/0001-61",
+      "discriminacao": "FII DE TESTE", "situacao_anterior": "2000.00", "situacao_atual": "2100.00",
+      "bolsa": {"negociado": true, "codigo": "ABCD11"}
+    },
+    {
+      "grupo": "07", "codigo": "03", "pais": "105", "cnpj_cpf": "11.444.777/0001-61",
+      "discriminacao": "TESTE CODIGO 13 CARACTERES", "situacao_anterior": "100.00", "situacao_atual": "110.00",
+      "bolsa": {"negociado": true, "codigo": "ABCDEFGHIJK12"}
+    },
+    {
+      "grupo": "04", "codigo": "04", "pais": "105",
+      "discriminacao": "BDR APPLE", "situacao_anterior": "300.00", "situacao_atual": "350.00",
+      "bolsa": {"negociado": true, "codigo": "aapl34"}
+    }
+  ]
+}

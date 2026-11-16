@@ -1,6 +1,6 @@
 # 0008. Tipos de bem barrados até o JSON ter o bloco deles
 
-- **Status:** Aceito; substituído em parte por 0010 (conta corrente e poupança)
+- **Status:** Aceito; substituído em parte por 0010 (conta corrente e poupança) e 0012 ("Negociado em bolsa?")
 - **Data:** até 10/11/2026 (registrado em 11/11/2026)
 
 ## Contexto

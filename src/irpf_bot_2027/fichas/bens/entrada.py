@@ -21,6 +21,9 @@ Origem dos códigos gravados:
         - Bloco conta (DBK gravado pelo programa em 13/11/2026, tests/manual/contas/): banco com 3
           dígitos, agência com zeros à esquerda ("1" -> "0001"), conta como digitada (exceto na Caixa,
           veja ajustar_conta_caixa), DV alinhado à esquerda ("X"), IN_CONTA_PAGAMENTO 0/1.
+        - Bloco bolsa (DBK gravado pelo programa em 16/11/2026, tests/dados/bolsa_programa.DBK):
+          IN_BOLSA 1 = sim, 0 = não (descrição do campo no mapeamentoTxt.xml); código de negociação em
+          maiúsculas, em branco quando não é negociado; código com 13 caracteres aceito.
 
     - Chaves e blocos do JSON: 
         - Formato definido por este projeto (não vem do programa).
@@ -89,6 +92,10 @@ MAPA_BLOCOS = {
         "conta": "CONTA",                           # só os números, sem o dígito verificador
         "dv": "DV_CONTA",                           # dígito verificador da conta (1 ou 2 caracteres, ex.: "X")
         "conta_pagamento": "CONTA_PAGAMENTO",       # true | false (só 06/01, opcional, padrão false)
+    },
+    "bolsa": {                                      # ações, BDRs/opções (04/04) e fundos com a pergunta
+        "negociado": "BOLSA",                       # true | false: "Negociados em Bolsa?" (obrigatório onde aparece)
+        "codigo": "COD_NEGOCIACAO",                 # código de negociação (ex.: "PETR4"), obrigatório se negociado
     },
 }
 
@@ -164,6 +171,18 @@ def digito_conta(valor) -> str:
         raise ValueError('esperado o dígito verificador com 1 ou 2 letras ou números (ex.: "7" ou "X")')
     return texto
 
+# Tamanho do campo "Código de Negociação" na tela (Bem.codigoNegociacao, Alfa de 13); o DBK tem 20.
+TAMANHO_COD_NEGOCIACAO = 13
+
+def codigo_negociacao(valor) -> str:
+    """"petr4" -> "PETR4". Só letras e números, até 13 caracteres (o limite da tela)."""
+    texto = str(valor).strip().upper()
+    if isinstance(valor, bool) or not isinstance(valor, str) or not texto.isalnum() or not texto.isascii():
+        raise ValueError('esperado o código de negociação só com letras e números (ex.: "PETR4")')
+    if len(texto) > TAMANHO_COD_NEGOCIACAO:
+        raise ValueError(f"o código de negociação tem no máximo {TAMANHO_COD_NEGOCIACAO} caracteres")
+    return texto
+
 def ajustar_conta_caixa(campos: dict, erros: list[str]) -> None:
     """Conta da Caixa: completa com zeros à esquerda até 12 dígitos, como o programa grava.
 
@@ -186,6 +205,8 @@ CONVERSOES = {
     "CONTA": numero_conta,
     "DV_CONTA": digito_conta,
     "CONTA_PAGAMENTO": sim_nao,
+    "BOLSA": sim_nao,
+    "COD_NEGOCIACAO": codigo_negociacao,
     "VALOR_ANTERIOR": valor_em_reais,
     "VALOR_ATUAL": valor_em_reais,
     "AREA": partial(numero, casas=1),               # área com 1 casa decimal (N11,1 no leiaute)

@@ -32,7 +32,7 @@ def test_nova_linha_entra_depois_da_ultima_do_mesmo_tipo():
     assert arquivo.posicao_para("27") == 9
 
 
-QUEBRA_NO_FIM = {"entrada": False, "programa_com_imovel": False, "contas_programa": True}
+QUEBRA_NO_FIM = {"entrada": False, "programa_com_imovel": False, "contas_programa": True, "bolsa_programa": True}
 
 
 @pytest.mark.parametrize("dbk", DBKS_DO_PROGRAMA, ids=lambda dbk: dbk.stem)

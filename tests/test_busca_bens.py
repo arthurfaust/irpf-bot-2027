@@ -15,7 +15,8 @@ from irpf_bot_2027.leiautes.irpf2026.registro27 import Registro27
 
 CNPJ = "11222333000181"
 FUNDO = {"grupo": "07", "codigo": "03", "pais": "105", "cnpj_cpf": "11.222.333/0001-81",
-         "discriminacao": "Fundo imobiliario de teste", "situacao_anterior": "1000.00", "situacao_atual": "1500.00"}
+         "discriminacao": "Fundo imobiliario de teste", "situacao_anterior": "1000.00", "situacao_atual": "1500.00",
+         "bolsa": {"negociado": False}}
 
 
 def validados(*lista):

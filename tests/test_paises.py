@@ -11,7 +11,7 @@ from irpf_bot_2027.leiautes.irpf2026.paises import BRASIL, PAISES, nome_pais, pa
 BITCOIN, APARTAMENTO = json.loads((DADOS / "bens.json").read_text(encoding="utf-8"))["bens"]
 
 FUNDO_EXTERIOR = {"grupo": "07", "codigo": "99", "pais": "111", "discriminacao": "Fundo X",
-                  "situacao_anterior": "1000.00", "situacao_atual": "2000.00"}
+                  "situacao_anterior": "1000.00", "situacao_atual": "2000.00", "bolsa": {"negociado": False}}
 POUPANCA = {"grupo": "04", "codigo": "01", "pais": "105", "discriminacao": "Poupança",
             "situacao_anterior": "0.00", "situacao_atual": "100.00"}
 

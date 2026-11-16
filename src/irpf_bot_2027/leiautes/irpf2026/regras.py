@@ -23,7 +23,7 @@ Origem:
     SOMENTE_BRASIL                 | Bem.isBemApenasBrasil (a tela trava o país em 105)
     SOMENTE_EXTERIOR               | Bem.isBemApenasExterior (mensagem bem_brasil_nao_permitido)
     CNPJ_OBRIGATORIO               | validador Bem$14 (mensagem bem_cnpj_branco) + Ajuda, "Atenção 1"
-    campos_obrigatorios            | validadores Bem$3 (imóvel), $8/$9 (Renavam/embarcação), $16-$19 (conta),
+    campos_obrigatorios            | validadores Bem$3 (imóvel), $8/$9 (Renavam/embarcação), $16-$19 (conta), $32/$33 (bolsa),
                                    | $22 (dependente), $34-$36 (cripto), ValidadorDataAquisicao, ValidadorRegistroBemImovel
                                    | e mensagens bem_*_branco do irpf.jar!/Mensagens.properties
       Incerto: o que o programa exige de um imóvel no EXTERIOR (ValidadorLocalizacaoBemImovelExterior)
@@ -224,7 +224,7 @@ def campos_aplicaveis(g: str, c: str, pais: str, autocustodiante: bool = False, 
 
     return campos
 
-def campos_obrigatorios(g: str, c: str, pais: str, autocustodiante: bool = False, registrado_cartorio: bool = False, dependente: bool = False) -> set[str]:
+def campos_obrigatorios(g: str, c: str, pais: str, autocustodiante: bool = False, registrado_cartorio: bool = False, dependente: bool = False, bolsa: bool = False) -> set[str]:
     """
     Campos do Registro27 que a tela exige preenchidos para este bem (além dos comuns).
     Args:
@@ -233,11 +233,19 @@ def campos_obrigatorios(g: str, c: str, pais: str, autocustodiante: bool = False
         autocustodiante: Resposta a "É autocustodiante?" (só cripto)
         registrado_cartorio: Resposta a "Registrado no cartório?" (só imóvel)
         dependente: O bem pertence a um dependente
+        bolsa: Resposta a "Negociados em Bolsa?"
     Returns:
         set[str]: Coleção com os campos obrigatórios (sempre um subconjunto de campos_aplicaveis)
     """
     no_brasil = pais == BRASIL
     obrigatorios = set()
+
+    # Validadores Bem$32 ("Negociados em Bolsa" não nulo) e Bem$33 (código de negociação não nulo quando
+    # a resposta é "1"), ambos com nível ERRO: impedem a entrega da declaração.
+    if esta_na_tabela(NEGOCIADO_EM_BOLSA, g, c):
+        obrigatorios.add("BOLSA")
+        if bolsa:
+            obrigatorios.add("COD_NEGOCIACAO")
 
     if g == "01":
         obrigatorios |= IMOVEL_OBRIGATORIO

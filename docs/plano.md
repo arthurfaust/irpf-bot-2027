@@ -102,8 +102,14 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
   dígitos e a conta pagamento); só mudaram IR, 20 e T9, que o programa recalcula (ADR 0002). Em
   "Verificar pendências", os bens só têm o aviso de DV inválido (DVs fictícios), que não impede a entrega.
 
-Demais blocos: `bolsa` (negociado, código de negociação),
-`veiculo` (Renavam, registros de aeronave/embarcação), `exterior` (aplicação financeira e lucros e
+- [x] `bolsa` (16/11/2026, ADR 0012): "Negociados em Bolsa?" obrigatório onde o programa pergunta
+  (no programa, em branco é erro) e código de negociação obrigatório quando sim (até 13 caracteres).
+  Linhas idênticas às de um DBK gravado pelo programa com 6 bens (`tests/dados/bolsa_programa.DBK`).
+- [ ] Busca de ações (03/01: CNPJ + código de negociação) e de 04/04 (código de negociação). Atenção:
+  fundos com o mesmo CNPJ e códigos diferentes (ex.: direitos de subscrição de FII) cairiam em
+  revisão pela chave atual (grupo + CNPJ).
+
+Demais blocos: `veiculo` (Renavam, registros de aeronave/embarcação), `exterior` (aplicação financeira e lucros e
 dividendos; usar `numero(..., permite_negativo=True)` no rendimento ou perda). O bloco `exterior`
 também gera linhas 37: confirmar num teste se o programa as recria a partir da 27 (o teste manual
 indicou que sim).

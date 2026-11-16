@@ -80,10 +80,13 @@ def validar_bem(bem: dict) -> tuple[dict, list[str]]:
     if pais == BRASIL and esta_na_tabela(SOMENTE_EXTERIOR, grupo, codigo):
         erros.append(f"{descricao} só pode estar localizado no exterior; veio {BRASIL} (Brasil)")
 
+    # Sem resposta válida a "Negociados em Bolsa?", o código informado não é acusado de "não se aplica":
+    # o erro que vale é o da pergunta (ausente ou fora do formato).
+    bolsa_para_aplicaveis = campos.get("BOLSA") == 1 or ("BOLSA" not in campos and "COD_NEGOCIACAO" in campos)
     permitidos = campos_aplicaveis(
         grupo, codigo, pais,
         autocustodiante=campos.get("AUTOCUSTODIANTE") == 1,
-        bolsa=campos.get("BOLSA") == 1,
+        bolsa=bolsa_para_aplicaveis,
     )
     local = "no Brasil" if pais == BRASIL else "no exterior"
     for campo in sorted(set(campos) - permitidos):
@@ -95,6 +98,7 @@ def validar_bem(bem: dict) -> tuple[dict, list[str]]:
         autocustodiante=campos.get("AUTOCUSTODIANTE") == 1,
         registrado_cartorio=campos.get("REGISTRADO_CARTORIO") == 1,
         dependente=campos.get("TITULAR_DEPENDENTE") == "D",
+        bolsa=campos.get("BOLSA") == 1,
     )
     for campo in sorted(obrigatorios):
         if campos.get(campo) is not None and str(campos[campo]).strip() != "":

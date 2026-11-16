@@ -25,6 +25,12 @@
       "discriminacao": "Conta corrente no Banco do Brasil",
       "situacao_anterior": "1000.00", "situacao_atual": "1500.00",
       "conta": {"banco": "001", "agencia": "1234", "conta": "98765", "dv": "X", "conta_pagamento": false}
+    },
+    {
+      "grupo": "03", "codigo": "01", "pais": "105", "cnpj_cpf": "33000167000101",
+      "discriminacao": "100 acoes PETR4 na corretora X",
+      "situacao_anterior": "3000.00", "situacao_atual": "3500.00",
+      "bolsa": {"negociado": true, "codigo": "PETR4"}
     }
   ]
 }
