@@ -91,7 +91,16 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
 - [x] `conta` (13/11/2026, ADR 0010): banco, agência, conta, DV e conta pagamento; libera poupança e
   conta corrente. As linhas geradas são idênticas às de um DBK gravado pelo programa com 6 contas
   (`tests/dados/contas_programa.DBK`). Na tela de bens não há campo Operação da Caixa.
-- [ ] Busca de conta: grupo + código + banco + agência + conta sem zeros à esquerda.
+- [x] Busca de conta (16/11/2026, ADR 0011): grupo + código + banco + agência + conta sem zeros à
+  esquerda; conta com DV ou campo em branco no DBK = chave incompleta (revisão).
+- [x] Roteiro manual `tests/manual/contas/` (teste1_inserir → teste2_atualizar), como fundos e cripto.
+- [x] **Confirmado no programa IRPF 2026 (16/11/2026)**: as duas saídas do roteiro de contas foram
+  restauradas. teste1: 4 contas novas, totais 3.900,00/5.000,00. teste2: corrente BB, poupança Caixa
+  e poupança Itaú atualizadas (situação anterior mantida), Nubank e corrente Caixa novas, corrente
+  Itaú intacta (não informada), totais 3.900,00/8.150,00. Ida e volta: restauradas e gravadas de novo
+  pelo programa, as linhas 27 voltaram idênticas byte a byte (inclusive a conta da Caixa com 12
+  dígitos e a conta pagamento); só mudaram IR, 20 e T9, que o programa recalcula (ADR 0002). Em
+  "Verificar pendências", os bens só têm o aviso de DV inválido (DVs fictícios), que não impede a entrega.
 
 Demais blocos: `bolsa` (negociado, código de negociação),
 `veiculo` (Renavam, registros de aeronave/embarcação), `exterior` (aplicação financeira e lucros e

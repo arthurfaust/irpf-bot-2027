@@ -108,7 +108,7 @@ def test_chave_incompleta_no_dbk_manda_o_bem_do_json_para_revisao(caplog):
     incompletos = [b for b in resultado.nao_informados if b.chave_incompleta]
     assert [(b.grupo, b.codigo) for b in incompletos] == [("08", "01")]
     texto = "\n".join(t for _, t in bens.relatorio(resultado))
-    assert "dados da chave em branco no DBK" in texto
+    assert "dados da chave em branco ou fora do formato no DBK" in texto
 
 
 def test_chave_incompleta_de_outro_tipo_nao_bloqueia():

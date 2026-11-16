@@ -155,7 +155,7 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
             continue
 
         if chave_bem and da_entrada(procurar_incompletos(arquivo, identificar(campos).tipo)):
-            logger.warning("%s: não encontrado, mas o DBK tem bem do mesmo tipo com dados da chave em branco; "
+            logger.warning("%s: não encontrado, mas o DBK tem bem do mesmo tipo com dados da chave em branco ou fora do formato; "
                            "não foi gravado (revisão).", descricao)
             resultado.revisao.append(numero)
             continue
@@ -196,7 +196,7 @@ def relatorio(resultado: Resultado) -> list[tuple[int, str]]:
             if bem.com_busca:
                 aviso = ""
             elif bem.chave_incompleta:
-                aviso = " - dados da chave em branco no DBK: confira e complete no programa"
+                aviso = " - dados da chave em branco ou fora do formato no DBK: confira e complete no programa"
             else:
                 aviso = " - tipo sem busca automática: confira se o JSON não o lançou de novo"
             linhas.append((logging.WARNING, f"    {bem.descrever()}{aviso}"))

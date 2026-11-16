@@ -3,17 +3,21 @@ Procura, no DBK, o lançamento que corresponde a um bem do JSON.
 
 O DBK de entrada é a cópia de segurança com a declaração do ano anterior importada, então a maior
 parte dos bens já existe e só precisa da situação atual. A busca usa uma chave por tipo de bem
-(decisões em docs/adr/0006 e 0007):
+(decisões em docs/adr/0006, 0007 e 0011):
 
     | Bem                                        | Chave                                          |
     |--------------------------------------------|------------------------------------------------|
     | Fundos nacionais (grupo 07, exceto 99)     | grupo + CNPJ do fundo                          |
+    | Poupança (04/01) e conta corrente (06/01)  | grupo + código + banco + agência + conta (*)   |
     | Cripto 08/01-03, autocustodiante           | grupo + código + ativo + "AUTO"                |
     | Cripto 08/01-03, custodiado no Brasil      | grupo + código + ativo + CNPJ do custodiante   |
     | Cripto custodiado no exterior, NFT, outros | sem busca: lançamento novo                     |
     | Demais                                     | sem busca: lançamento novo                     |
 
 "Ativo" é a sigla da altcoin (08/02) ou da stablecoin (08/03); vazio no bitcoin (08/01).
+(*) Banco, agência e conta sem zeros à esquerda: a mesma conta da Caixa aparece com 12 dígitos no DBK
+gravado pelo programa e pode voltar sem os zeros. O grupo e o código entram porque, em vários
+bancos, a poupança tem o mesmo número da conta corrente (confirmado no DBK do programa de 13/11/2026).
 
 Um bem de tipo com busca cujos campos da chave estão vazios no DBK (ex.: cripto de uma declaração
 antiga, sem custodiante) tem "chave incompleta": não é encontrado por nenhum bem do JSON, e o bem
@@ -22,6 +26,7 @@ do JSON do mesmo tipo vai para revisão em vez de ser lançado em duplicidade (f
 Origem:
     - Fundos: os códigos de CNPJ_OBRIGATORIO["07"] (regras da tela), então todo fundo nacional
       gravado pelo programa tem o CNPJ preenchido.
+    - Contas: CONTA_BANCARIA (regras da tela), só no Brasil; campos BANCO, AGENCIA e CONTA.
     - Cripto: CRIPTO_COM_CUSTODIANTE e o campo CNPJ só no Brasil (regras da tela); campos
       AUTOCUSTODIANTE, ALTCOIN e STABLECOIN do registro 27.
     - A escolha das chaves é do projeto.
@@ -30,7 +35,7 @@ Origem:
 from dataclasses import dataclass
 
 from irpf_bot_2027.dbk import ArquivoDBK
-from irpf_bot_2027.leiautes.atual import BRASIL, CNPJ_OBRIGATORIO, Registro27, esta_na_tabela
+from irpf_bot_2027.leiautes.atual import BRASIL, CNPJ_OBRIGATORIO, CONTA_BANCARIA, Registro27, esta_na_tabela
 
 GRUPO_FUNDOS = "07"
 GRUPO_CRIPTO = "08"
@@ -41,6 +46,18 @@ class Identificacao:
     tipo: tuple          # bens do mesmo tipo (ex.: ("08", "01")): usado para achar chaves incompletas
     chave: tuple | None  # chave completa, ou None se algum campo dela está vazio
 
+def sem_zeros_a_esquerda(texto) -> str:
+    """"0567" -> "567"; "000" -> "" (campo numérico não preenchido no DBK)."""
+    return str(texto or "").strip().lstrip("0")
+
+def chave_da_conta(grupo: str, codigo: str, campos: dict) -> tuple | None:
+    """grupo + código + banco + agência + conta, sem zeros à esquerda; None se algum está vazio ou se
+    a conta do DBK tem algo além de dígitos (ex.: "12345-6", digitada com o DV numa declaração antiga)."""
+    banco, agencia, conta = (sem_zeros_a_esquerda(campos.get(nome)) for nome in ("BANCO", "AGENCIA", "CONTA"))
+    if not (banco and agencia and conta) or not conta.isdigit():
+        return None
+    return (grupo, codigo, banco, agencia, conta)
+
 def identificar(campos: dict) -> Identificacao | None:
     """Identificação do bem (campos do JSON já validados ou lidos de uma linha 27 com
     Registro27.ler_tudo), ou None se o tipo não tem busca."""
@@ -49,6 +66,9 @@ def identificar(campos: dict) -> Identificacao | None:
 
     if grupo == GRUPO_FUNDOS and esta_na_tabela(CNPJ_OBRIGATORIO, grupo, codigo) and pais == BRASIL:
         return Identificacao((grupo,), (grupo, cnpj) if cnpj else None)
+
+    if esta_na_tabela(CONTA_BANCARIA, grupo, codigo) and pais == BRASIL:
+        return Identificacao((grupo, codigo), chave_da_conta(grupo, codigo, campos))
 
     if grupo == GRUPO_CRIPTO and codigo in CAMPO_DO_ATIVO:
         campo_ativo = CAMPO_DO_ATIVO[codigo]

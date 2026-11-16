@@ -16,6 +16,7 @@ escreva um novo ADR que o substitui e marque o antigo como "Substituído por NNN
 | [0008](0008-tipos-barrados-ate-ter-bloco.md) | Tipos de bem barrados até o JSON ter o bloco deles | Substituído em parte por 0010 |
 | [0009](0009-busca-so-nos-bens-da-entrada.md) | A busca olha só os bens do DBK de entrada | Aceito |
 | [0010](0010-bloco-conta.md) | Bloco `conta` libera poupança e conta corrente | Aceito |
+| [0011](0011-chave-da-conta.md) | Chave da busca de poupança e conta corrente | Aceito |
 
 Para um ADR novo, copie [modelo.md](modelo.md), use o próximo número e acrescente a linha acima.
 As decisões de 0002 a 0005 e 0008 foram tomadas até 10/11/2026 e registradas aqui em 11/11/2026, a

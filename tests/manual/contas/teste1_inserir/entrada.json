@@ -1,0 +1,29 @@
+{
+  "cpf": "77039677008",
+  "bens": [
+    {
+      "grupo": "06", "codigo": "01", "pais": "105", "cnpj_cpf": "00.000.000/0001-91",
+      "discriminacao": "Conta corrente BB",
+      "situacao_anterior": "1000.00", "situacao_atual": "1500.00",
+      "conta": {"banco": "001", "agencia": "1234", "conta": "98765", "dv": "X"}
+    },
+    {
+      "grupo": "04", "codigo": "01", "pais": "105", "cnpj_cpf": "00.360.305/0001-04",
+      "discriminacao": "Poupanca Caixa",
+      "situacao_anterior": "2000.00", "situacao_atual": "2500.00",
+      "conta": {"banco": "104", "agencia": "567", "conta": "4321", "dv": "9"}
+    },
+    {
+      "grupo": "06", "codigo": "01", "pais": "105", "cnpj_cpf": "60.701.190/0001-04",
+      "discriminacao": "Conta corrente Itau",
+      "situacao_anterior": "400.00", "situacao_atual": "450.00",
+      "conta": {"banco": "341", "agencia": "0350", "conta": "11223", "dv": "4"}
+    },
+    {
+      "grupo": "04", "codigo": "01", "pais": "105", "cnpj_cpf": "60.701.190/0001-04",
+      "discriminacao": "Poupanca Itau - mesmo numero da corrente",
+      "situacao_anterior": "500.00", "situacao_atual": "550.00",
+      "conta": {"banco": "341", "agencia": "0350", "conta": "11223", "dv": "4"}
+    }
+  ]
+}

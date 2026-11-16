@@ -1,0 +1,35 @@
+{
+  "cpf": "77039677008",
+  "bens": [
+    {
+      "grupo": "06", "codigo": "01", "pais": "105", "cnpj_cpf": "00.000.000/0001-91",
+      "discriminacao": "Conta corrente BB - discriminacao nova (nao deve mudar)",
+      "situacao_anterior": "1000.00", "situacao_atual": "3000.00",
+      "conta": {"banco": "1", "agencia": "1234", "conta": "98765", "dv": "X"}
+    },
+    {
+      "grupo": "04", "codigo": "01", "pais": "105", "cnpj_cpf": "00.360.305/0001-04",
+      "discriminacao": "Poupanca Caixa",
+      "situacao_anterior": "1999.99", "situacao_atual": "2800.00",
+      "conta": {"banco": "104", "agencia": "0567", "conta": "000000004321", "dv": "9"}
+    },
+    {
+      "grupo": "04", "codigo": "01", "pais": "105", "cnpj_cpf": "60.701.190/0001-04",
+      "discriminacao": "Poupanca Itau - mesmo numero da corrente",
+      "situacao_anterior": "500.00", "situacao_atual": "900.00",
+      "conta": {"banco": "341", "agencia": "350", "conta": "11223", "dv": "4"}
+    },
+    {
+      "grupo": "06", "codigo": "01", "pais": "105", "cnpj_cpf": "18.236.120/0001-58",
+      "discriminacao": "Conta pagamento Nubank - nova nesta declaracao",
+      "situacao_anterior": "0.00", "situacao_atual": "650.00",
+      "conta": {"banco": "260", "agencia": "1", "conta": "7654321", "dv": "5", "conta_pagamento": true}
+    },
+    {
+      "grupo": "06", "codigo": "01", "pais": "105", "cnpj_cpf": "00.360.305/0001-04",
+      "discriminacao": "Conta corrente Caixa - nova nesta declaracao",
+      "situacao_anterior": "0.00", "situacao_atual": "350.00",
+      "conta": {"banco": "104", "agencia": "567", "conta": "123456789", "dv": "0"}
+    }
+  ]
+}
