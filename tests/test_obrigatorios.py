@@ -129,12 +129,11 @@ def test_acoes_no_exterior_dispensam_cnpj():
     assert erros == []
 
 
-@pytest.mark.parametrize(
-    ("grupo", "codigo", "campo"),
-    [("02", "01", "RENAVAM"), ("02", "03", "REG_EMBARCACAO")],
-    ids=["veiculo", "embarcacao"],
-)
-def test_bens_que_exigem_campos_ainda_nao_suportados(grupo, codigo, campo):
-    bem = {**BASE, "grupo": grupo, "codigo": codigo}
-    _, erros = validar_bem(bem)
-    assert any(f"exige o campo {campo}, que ainda não pode ser informado no JSON" in erro for erro in erros), erros
+def test_todo_campo_obrigatorio_pode_ser_informado_no_json():
+    """Desde o bloco veiculo (ADR 0014), nenhum tipo de bem exige campo sem caminho no JSON."""
+    for grupo, dados in GRUPOS.items():
+        for codigo in dados["codigos"]:
+            for pais in ("105", "111"):
+                bem = {**BASE, "grupo": grupo, "codigo": codigo, "pais": pais}
+                _, erros = validar_bem(bem)
+                assert not any("ainda não pode ser informado no JSON" in erro for erro in erros), (grupo, codigo, erros)

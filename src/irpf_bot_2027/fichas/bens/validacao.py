@@ -16,7 +16,7 @@ from irpf_bot_2027.comum.texto import caracteres_fora_do_latin1, normalizar_text
 from irpf_bot_2027.fichas.bens.entrada import converter_campos, informado_no_json, origem_no_json
 from irpf_bot_2027.leiautes.atual import (
     BRASIL, SOMENTE_BRASIL, SOMENTE_EXTERIOR, Registro27, banco_existe, campos_aplicaveis, campos_obrigatorios, codigo_existe, esta_na_tabela,
-    nome_codigo, nome_pais, pais_existe,
+    nome_codigo, nome_pais, pais_existe, renavam_valido,
 )
 
 def verificar_formato(bem: dict, campos: dict) -> list[str]:
@@ -70,6 +70,10 @@ def validar_bem(bem: dict) -> tuple[dict, list[str]]:
         return campos, erros + [f"grupo/código {grupo}/{codigo} não existe"]
     if not pais_existe(pais):
         return campos, erros + [f"país {pais} não existe na tabela do programa"]
+
+    if (grupo, codigo, pais) == ("02", "01", BRASIL) and "RENAVAM" in campos and not renavam_valido(campos["RENAVAM"]):
+        erros.append("'veiculo.renavam': Renavam inválido; esperado 9 ou 11 dígitos, só números, "
+                     "com o dígito verificador correto")
 
     if "BANCO" in campos and not banco_existe(campos["BANCO"]):
         erros.append(f"'conta.banco': banco {campos['BANCO']} não existe na tabela de bancos do programa")

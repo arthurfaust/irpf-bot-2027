@@ -114,7 +114,13 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
   restauradas e gravadas de novo; as linhas 27 voltaram idênticas byte a byte (5 de 5 e 7 de 7); só
   mudaram IR, 20 e T9, que o programa recalcula (ADR 0002).
 
-Demais blocos: `veiculo` (Renavam, registros de aeronave/embarcação), `exterior` (aplicação financeira e lucros e
+- [x] `veiculo` (16/11/2026, ADR 0014): Renavam (conferido com o algoritmo do programa), registro de
+  aeronave e de embarcação; registro do veículo com menos de 11 caracteres ganha zeros à esquerda,
+  também no exterior. Linhas idênticas às de um DBK gravado pelo programa com 5 bens
+  (`tests/dados/veiculo_programa.DBK`). Nenhum tipo de bem fica mais barrado (ADR 0008 substituído).
+- [ ] Busca de veículo, aeronave e embarcação pelo registro.
+
+Demais blocos: `exterior` (aplicação financeira e lucros e
 dividendos; usar `numero(..., permite_negativo=True)` no rendimento ou perda). O bloco `exterior`
 também gera linhas 37: confirmar num teste se o programa as recria a partir da 27 (o teste manual
 indicou que sim).

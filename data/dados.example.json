@@ -31,6 +31,12 @@
       "discriminacao": "100 acoes PETR4 na corretora X",
       "situacao_anterior": "3000.00", "situacao_atual": "3500.00",
       "bolsa": {"negociado": true, "codigo": "PETR4"}
+    },
+    {
+      "grupo": "02", "codigo": "01", "pais": "105",
+      "discriminacao": "Automovel marca X modelo Y ano 2020",
+      "situacao_anterior": "50000.00", "situacao_atual": "50000.00",
+      "veiculo": {"renavam": "12345678900"}
     }
   ]
 }

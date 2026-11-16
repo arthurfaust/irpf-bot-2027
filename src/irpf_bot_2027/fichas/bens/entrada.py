@@ -24,6 +24,9 @@ Origem dos códigos gravados:
         - Bloco bolsa (DBK gravado pelo programa em 16/11/2026, tests/dados/bolsa_programa.DBK):
           IN_BOLSA 1 = sim, 0 = não (descrição do campo no mapeamentoTxt.xml); código de negociação em
           maiúsculas, em branco quando não é negociado; código com 13 caracteres aceito.
+        - Bloco veiculo (DBK gravado pelo programa em 16/11/2026, tests/dados/veiculo_programa.DBK):
+          Renavam e registro estrangeiro do veículo em NR_RENAVAN (veja ajustar_registro_veiculo);
+          registros de aeronave e embarcação como digitados (com hífen).
 
     - Chaves e blocos do JSON: 
         - Formato definido por este projeto (não vem do programa).
@@ -96,6 +99,12 @@ MAPA_BLOCOS = {
     "bolsa": {                                      # ações, BDRs/opções (04/04) e fundos com a pergunta
         "negociado": "BOLSA",                       # true | false: "Negociados em Bolsa?" (obrigatório onde aparece)
         "codigo": "COD_NEGOCIACAO",                 # código de negociação (ex.: "PETR4"), obrigatório se negociado
+    },
+    "veiculo": {                                    # bens móveis registráveis (grupo 02)
+        "renavam": "RENAVAM",                       # 02/01: Renavam no Brasil (9 ou 11 dígitos); no exterior,
+                                                    # o registro do veículo no país (a tela chama de "Registro de Veículo")
+        "registro_aeronave": "REG_AERONAVE",        # 02/02
+        "registro_embarcacao": "REG_EMBARCACAO",    # 02/03
     },
 }
 
@@ -183,6 +192,23 @@ def codigo_negociacao(valor) -> str:
         raise ValueError(f"o código de negociação tem no máximo {TAMANHO_COD_NEGOCIACAO} caracteres")
     return texto
 
+def texto_de_registro(valor) -> str:
+    """Registro de veículo, aeronave ou embarcação: texto (o tamanho é conferido na validação)."""
+    if isinstance(valor, bool) or not isinstance(valor, (str, int)) or not str(valor).strip():
+        raise ValueError("esperado o número do registro como texto")
+    return str(valor).strip()
+
+def ajustar_registro_veiculo(campos: dict) -> None:
+    """Veículo (02/01), no Brasil ou no exterior: registro com menos de 11 caracteres ganha zeros à
+    esquerda até 11, como o programa grava.
+
+    Origem: observador Bem$11 do IRPF 2026 (registro de 02/01 com 1 a 10 caracteres é completado com
+    zeros à esquerda até 11) e DBK gravado pelo programa em 16/11/2026: Renavam 987654322 gravado como
+    00987654322 e o registro estrangeiro ABC1234-FL como 0ABC1234-FL.
+    """
+    if (campos.get("GRUPO"), campos.get("CODIGO")) == ("02", "01") and "RENAVAM" in campos:
+        campos["RENAVAM"] = campos["RENAVAM"].rjust(11, "0")
+
 def ajustar_conta_caixa(campos: dict, erros: list[str]) -> None:
     """Conta da Caixa: completa com zeros à esquerda até 12 dígitos, como o programa grava.
 
@@ -207,6 +233,9 @@ CONVERSOES = {
     "CONTA_PAGAMENTO": sim_nao,
     "BOLSA": sim_nao,
     "COD_NEGOCIACAO": codigo_negociacao,
+    "RENAVAM": texto_de_registro,
+    "REG_AERONAVE": texto_de_registro,
+    "REG_EMBARCACAO": texto_de_registro,
     "VALOR_ANTERIOR": valor_em_reais,
     "VALOR_ATUAL": valor_em_reais,
     "AREA": partial(numero, casas=1),               # área com 1 casa decimal (N11,1 no leiaute)
@@ -272,6 +301,7 @@ def converter_campos(bem: dict) -> tuple[dict, list[str]]:
                 erros.append(f"campo desconhecido '{chave}.{subchave}'")
 
     ajustar_conta_caixa(campos, erros)
+    ajustar_registro_veiculo(campos)
 
     for chave in CAMPOS_OBRIGATORIOS:
         if bem.get(chave) is None or str(bem[chave]).strip() == "":

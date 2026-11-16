@@ -30,7 +30,7 @@ def test_apartamento_converte_campos_do_bloco():
         ({**BITCOIN, "cripto": {"autocustodiante": True, "altcoin": "ETH"}}, "'cripto.altcoin' não se aplica"),
         ({**APARTAMENTO, "pais": "111"}, "'imovel.iptu' não se aplica"),
         ({**APARTAMENTO, "imovel": {"vagas": 2}}, "campo desconhecido 'imovel.vagas'"),
-        ({**APARTAMENTO, "veiculo": {"placa": "X"}}, "bloco desconhecido 'veiculo'"),
+        ({**APARTAMENTO, "automovel": {"placa": "X"}}, "bloco desconhecido 'automovel'"),
         ({**APARTAMENTO, "imovel": {"unidade": "metros"}}, 'esperado "m2" ou "ha"'),
         ({**BITCOIN, "cripto": {"autocustodiante": "nao"}}, "esperado true ou false"),
         ({**BITCOIN, "pertence_a": {"tipo": "X"}}, 'esperado "T" ou "D"'),

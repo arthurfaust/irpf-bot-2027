@@ -139,7 +139,26 @@ IMOVEL_OBRIGATORIO = {"LOGRADOURO", "AREA", "UNIDADE_AREA"}
 IMOVEL_OBRIGATORIO_NO_BRASIL = {"CEP", "UF", "COD_MUNICIPIO", "MUNICIPIO"}
 
 # Registro obrigatório dos bens móveis no Brasil (Renavam do veículo e registro da embarcação; o da aeronave não é).
-REGISTRO_MOVEL_OBRIGATORIO_NO_BRASIL = {"01": "RENAVAM", "03": "REG_EMBARCACAO"}
+# Bem$8: Renavam do veículo no Brasil (ERRO); Bem$9: registro da aeronave ou da embarcação no Brasil
+# (AVISO; o bot exige também, como os demais avisos de campo em branco).
+REGISTRO_MOVEL_OBRIGATORIO_NO_BRASIL = {"01": "RENAVAM", "02": "REG_AERONAVE", "03": "REG_EMBARCACAO"}
+
+def renavam_valido(renavam: str) -> bool:
+    """Renavam com 9 ou 11 dígitos e o dígito verificador (o último) correto.
+
+    Origem: ValidadorRenavam.validaRenavam do IRPF 2026 (nível ERRO, só 02/01 no Brasil): 9 dígitos
+    ganham "00" na frente; dos 10 primeiros, invertidos, soma-se dígito x peso (2 a 9, depois 2 e 3);
+    DV = 11 - soma % 11, e 0 quando o resultado é 10 ou 11.
+    """
+    if len(renavam) == 9 and renavam.isdigit():
+        renavam = "00" + renavam
+    if len(renavam) != 11 or not renavam.isdigit():
+        return False
+    invertido = renavam[:10][::-1]
+    pesos = [2, 3, 4, 5, 6, 7, 8, 9, 2, 3]
+    soma = sum(int(d) * p for d, p in zip(invertido, pesos))
+    dv = 11 - soma % 11
+    return (0 if dv >= 10 else dv) == int(renavam[-1])
 
 def esta_na_tabela(tabela: dict, grupo: str, codigo: str) -> bool:
     """True se o par grupo/código aparece na tabela (TODOS vale para qualquer código)."""
