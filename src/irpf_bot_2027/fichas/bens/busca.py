@@ -3,10 +3,13 @@ Procura, no DBK, o lançamento que corresponde a um bem do JSON.
 
 O DBK de entrada é a cópia de segurança com a declaração do ano anterior importada, então a maior
 parte dos bens já existe e só precisa da situação atual. A busca usa uma chave por tipo de bem
-(decisões em docs/adr/0006, 0007 e 0011):
+(decisões em docs/adr/0006, 0007, 0011 e 0013):
 
     | Bem                                        | Chave                                          |
     |--------------------------------------------|------------------------------------------------|
+    | Ações no Brasil (03/01)                    | grupo + código + CNPJ + código de negociação   |
+    |                                            | (vazio se não é negociada em bolsa) (**)       |
+    | Ativos negociados em bolsa (04/04)         | grupo + código + código de negociação          |
     | Fundos nacionais (grupo 07, exceto 99)     | grupo + CNPJ do fundo                          |
     | Poupança (04/01) e conta corrente (06/01)  | grupo + código + banco + agência + conta (*)   |
     | Cripto 08/01-03, autocustodiante           | grupo + código + ativo + "AUTO"                |
@@ -18,6 +21,9 @@ parte dos bens já existe e só precisa da situação atual. A busca usa uma cha
 (*) Banco, agência e conta sem zeros à esquerda: a mesma conta da Caixa aparece com 12 dígitos no DBK
 gravado pelo programa e pode voltar sem os zeros. O grupo e o código entram porque, em vários
 bancos, a poupança tem o mesmo número da conta corrente (confirmado no DBK do programa de 13/11/2026).
+(**) O código de negociação separa ON e PN da mesma empresa. Ação do JSON não encontrada, com outra
+ação do mesmo CNPJ no DBK ("família"), vai para revisão: pode ser a mesma ação declarada antes sem o
+código ou com outro código.
 
 Um bem de tipo com busca cujos campos da chave estão vazios no DBK (ex.: cripto de uma declaração
 antiga, sem custodiante) tem "chave incompleta": não é encontrado por nenhum bem do JSON, e o bem
@@ -27,6 +33,8 @@ Origem:
     - Fundos: os códigos de CNPJ_OBRIGATORIO["07"] (regras da tela), então todo fundo nacional
       gravado pelo programa tem o CNPJ preenchido.
     - Contas: CONTA_BANCARIA (regras da tela), só no Brasil; campos BANCO, AGENCIA e CONTA.
+    - Ações e 04/04: CNPJ_OBRIGATORIO["03"] e TEM_CNPJ_CPF (04/04 não tem CNPJ); campos BOLSA e
+      COD_NEGOCIACAO do registro 27 (ADR 0012).
     - Cripto: CRIPTO_COM_CUSTODIANTE e o campo CNPJ só no Brasil (regras da tela); campos
       AUTOCUSTODIANTE, ALTCOIN e STABLECOIN do registro 27.
     - A escolha das chaves é do projeto.
@@ -41,10 +49,23 @@ GRUPO_FUNDOS = "07"
 GRUPO_CRIPTO = "08"
 CAMPO_DO_ATIVO = {"01": None, "02": "ALTCOIN", "03": "STABLECOIN"}    # cripto com busca: código -> campo
 
+ACOES = ("03", "01")
+ATIVOS_EM_BOLSA = ("04", "04")                                        # BDRs, opções e outros (sem CNPJ)
+
 @dataclass(frozen=True)
 class Identificacao:
     tipo: tuple          # bens do mesmo tipo (ex.: ("08", "01")): usado para achar chaves incompletas
     chave: tuple | None  # chave completa, ou None se algum campo dela está vazio
+    familia: tuple | None = None    # bens que podem ser o mesmo apesar da chave diferente (ações: mesmo CNPJ)
+
+def identificar_acao(grupo: str, codigo: str, campos: dict) -> Identificacao:
+    """Ação no Brasil: CNPJ + código de negociação (vazio se não é negociada em bolsa)."""
+    cnpj = campos.get("CNPJ_CPF", "")
+    negociado = str(campos.get("BOLSA", "")) == "1"
+    cod = str(campos.get("COD_NEGOCIACAO", "")).strip().upper()
+    if not cnpj or (negociado and not cod):
+        return Identificacao((grupo, codigo), None)
+    return Identificacao((grupo, codigo), (grupo, codigo, cnpj, cod if negociado else ""), familia=(grupo, codigo, cnpj))
 
 def sem_zeros_a_esquerda(texto) -> str:
     """"0567" -> "567"; "000" -> "" (campo numérico não preenchido no DBK)."""
@@ -66,6 +87,15 @@ def identificar(campos: dict) -> Identificacao | None:
 
     if grupo == GRUPO_FUNDOS and esta_na_tabela(CNPJ_OBRIGATORIO, grupo, codigo) and pais == BRASIL:
         return Identificacao((grupo,), (grupo, cnpj) if cnpj else None)
+
+    if (grupo, codigo) == ACOES and pais == BRASIL:
+        return identificar_acao(grupo, codigo, campos)
+
+    if (grupo, codigo) == ATIVOS_EM_BOLSA and pais == BRASIL:
+        if str(campos.get("BOLSA", "")) != "1":
+            return None                                      # sem código de negociação não há o que comparar
+        cod = str(campos.get("COD_NEGOCIACAO", "")).strip().upper()
+        return Identificacao((grupo, codigo), (grupo, codigo, cod) if cod else None)
 
     if esta_na_tabela(CONTA_BANCARIA, grupo, codigo) and pais == BRASIL:
         return Identificacao((grupo, codigo), chave_da_conta(grupo, codigo, campos))
@@ -95,6 +125,17 @@ def identificar_linha(linha: str) -> Identificacao | None:
 def procurar(arquivo: ArquivoDBK, chave: tuple) -> list[int]:
     """Posições (a partir de 0) das linhas 27 do DBK com a chave."""
     return [i for i in arquivo.indices(Registro27.TIPO) if chave_busca(Registro27.ler_tudo(arquivo.linhas[i])) == chave]
+
+def procurar_semelhantes(arquivo: ArquivoDBK, identificacao: Identificacao) -> list[int]:
+    """Posições das linhas 27 da mesma família (ex.: ação com o mesmo CNPJ), mas com outra chave."""
+    if identificacao.familia is None:
+        return []
+    posicoes = []
+    for i in arquivo.indices(Registro27.TIPO):
+        outra = identificar_linha(arquivo.linhas[i])
+        if outra and outra.familia == identificacao.familia and outra.chave != identificacao.chave:
+            posicoes.append(i)
+    return posicoes
 
 def procurar_incompletos(arquivo: ArquivoDBK, tipo: tuple) -> list[int]:
     """Posições das linhas 27 do DBK do mesmo tipo, mas com a chave incompleta."""

@@ -16,7 +16,9 @@ from collections import Counter
 from dataclasses import dataclass, field
 
 from irpf_bot_2027.dbk import ArquivoDBK
-from irpf_bot_2027.fichas.bens.busca import chave_busca, identificar, procurar, procurar_incompletos
+from irpf_bot_2027.fichas.bens.busca import (
+    chave_busca, identificar, procurar, procurar_incompletos, procurar_semelhantes,
+)
 from irpf_bot_2027.fichas.bens.entrada import CAMPOS_SIMPLES
 from irpf_bot_2027.fichas.bens.validacao import validar_bem
 from irpf_bot_2027.leiautes.atual import BRASIL, TITULAR_OU_DEPENDENTE, Registro27, esta_na_tabela, nome_codigo
@@ -108,7 +110,8 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
     Se dois bens do JSON têm a mesma chave e ela existe no DBK, os dois vão para revisão; se ela não
     existe, os dois são lançados, com aviso.
     Se nada foi encontrado, mas o DBK tem bem do mesmo tipo com a chave incompleta, o bem do JSON
-    vai para revisão (pode ser o mesmo bem; lançá-lo criaria duplicidade).
+    vai para revisão (pode ser o mesmo bem; lançá-lo criaria duplicidade). O mesmo vale para uma
+    ação não encontrada quando o DBK tem outra ação do mesmo CNPJ (outro código de negociação ou sem ele).
     Os bens que já estavam no DBK e não foram atualizados vão para Resultado.nao_informados;
     nunca são zerados nem apagados.
     """
@@ -157,6 +160,12 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
         if chave_bem and da_entrada(procurar_incompletos(arquivo, identificar(campos).tipo)):
             logger.warning("%s: não encontrado, mas o DBK tem bem do mesmo tipo com dados da chave em branco ou fora do formato; "
                            "não foi gravado (revisão).", descricao)
+            resultado.revisao.append(numero)
+            continue
+
+        if chave_bem and da_entrada(procurar_semelhantes(arquivo, identificar(campos))):
+            logger.warning("%s: não encontrado, mas o DBK tem bem do mesmo tipo e CNPJ com outro código de "
+                           "negociação (ou sem ele); não foi gravado (revisão).", descricao)
             resultado.revisao.append(numero)
             continue
 
