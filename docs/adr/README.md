@@ -18,6 +18,7 @@ escreva um novo ADR que o substitui e marque o antigo como "Substituído por NNN
 | [0010](0010-bloco-conta.md) | Bloco `conta` libera poupança e conta corrente | Aceito |
 | [0011](0011-chave-da-conta.md) | Chave da busca de poupança e conta corrente | Aceito |
 | [0012](0012-bloco-bolsa.md) | Bloco `bolsa` com a pergunta "Negociados em Bolsa?" obrigatória | Aceito |
+| [0013](0013-chave-das-acoes.md) | Chave da busca de ações e de ativos negociados em bolsa | Aceito |
 
 Para um ADR novo, copie [modelo.md](modelo.md), use o próximo número e acrescente a linha acima.
 As decisões de 0002 a 0005 e 0008 foram tomadas até 10/11/2026 e registradas aqui em 11/11/2026, a

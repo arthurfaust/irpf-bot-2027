@@ -105,9 +105,14 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
 - [x] `bolsa` (16/11/2026, ADR 0012): "Negociados em Bolsa?" obrigatório onde o programa pergunta
   (no programa, em branco é erro) e código de negociação obrigatório quando sim (até 13 caracteres).
   Linhas idênticas às de um DBK gravado pelo programa com 6 bens (`tests/dados/bolsa_programa.DBK`).
-- [ ] Busca de ações (03/01: CNPJ + código de negociação) e de 04/04 (código de negociação). Atenção:
-  fundos com o mesmo CNPJ e códigos diferentes (ex.: direitos de subscrição de FII) cairiam em
-  revisão pela chave atual (grupo + CNPJ).
+- [x] Busca de ações (16/11/2026, ADR 0013): 03/01 por CNPJ + código de negociação (vazio se não
+  negociada), 04/04 pelo código; ação não encontrada com outra do mesmo CNPJ no DBK vai para revisão.
+- [ ] Fundos com o mesmo CNPJ e códigos diferentes (ex.: direitos de subscrição de FII) continuam em
+  revisão pela chave grupo + CNPJ (limitação registrada no ADR 0013).
+- [x] Roteiro manual `tests/manual/bolsa/` (teste1_inserir → teste2_atualizar), como os anteriores.
+- [x] **Confirmado no programa IRPF 2026 (16/11/2026)**: as duas saídas do roteiro de bolsa foram
+  restauradas e gravadas de novo; as linhas 27 voltaram idênticas byte a byte (5 de 5 e 7 de 7); só
+  mudaram IR, 20 e T9, que o programa recalcula (ADR 0002).
 
 Demais blocos: `veiculo` (Renavam, registros de aeronave/embarcação), `exterior` (aplicação financeira e lucros e
 dividendos; usar `numero(..., permite_negativo=True)` no rendimento ou perda). O bloco `exterior`
