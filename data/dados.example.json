@@ -37,6 +37,14 @@
       "discriminacao": "Automovel marca X modelo Y ano 2020",
       "situacao_anterior": "50000.00", "situacao_atual": "50000.00",
       "veiculo": {"renavam": "12345678900"}
+    },
+    {
+      "grupo": "07", "codigo": "99", "pais": "249",
+      "discriminacao": "Cotas do fundo X na corretora Y (EUA)",
+      "situacao_anterior": "20000.00", "situacao_atual": "21000.00",
+      "bolsa": {"negociado": false},
+      "exterior": {"lucro_prejuizo": "-250.00", "imposto_pago": "0.00",
+                   "dividendos_recebidos": "300.00", "imposto_dividendos": "45.00"}
     }
   ]
 }

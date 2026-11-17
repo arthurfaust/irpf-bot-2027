@@ -22,6 +22,7 @@ escreva um novo ADR que o substitui e marque o antigo como "Substituído por NNN
 | [0014](0014-bloco-veiculo.md) | Bloco `veiculo` libera veículo, aeronave e embarcação | Aceito |
 | [0015](0015-chave-dos-bens-moveis.md) | Chave da busca de veículo, aeronave e embarcação | Aceito |
 | [0016](0016-campos-do-bem-encontrado.md) | O que muda num bem encontrado no DBK além da situação atual | Aceito |
+| [0017](0017-bloco-exterior.md) | Bloco `exterior`: valores do ano das aplicações e dividendos no exterior | Aceito |
 
 Para um ADR novo, copie [modelo.md](modelo.md), use o próximo número e acrescente a linha acima.
 As decisões de 0002 a 0005 e 0008 foram tomadas até 10/11/2026 e registradas aqui em 11/11/2026, a

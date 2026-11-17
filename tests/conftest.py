@@ -7,7 +7,7 @@ DADOS = Path(__file__).resolve().parent / "dados"
 
 # DBKs gerados pelo próprio programa IRPF 2026 (cópias de segurança).
 DBKS_DO_PROGRAMA = [DADOS / "entrada.DBK", DADOS / "programa_com_imovel.DBK", DADOS / "contas_programa.DBK",
-                    DADOS / "bolsa_programa.DBK", DADOS / "veiculo_programa.DBK"]
+                    DADOS / "bolsa_programa.DBK", DADOS / "veiculo_programa.DBK", DADOS / "exterior_programa.DBK"]
 
 
 def ler_linhas(caminho: Path) -> list[str]:

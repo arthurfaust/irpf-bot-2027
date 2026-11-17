@@ -61,7 +61,7 @@ Andamento (11/11/2026):
   cripto (onde a quantidade muda todo ano), a do DBK nos demais (com aviso); campo em branco no DBK
   recebe o do JSON; preenchido e diferente (inclusive grupo/código/país) fica o do DBK, com aviso e o
   bem na linha "CONFERIR" do relatório. Mais adiante, a IA pode montar a discriminação.
-- [ ] Quadros do exterior (rendimento e imposto do ano) na atualização: com o bloco `exterior`.
+- [x] Quadros do exterior (rendimento e imposto do ano) na atualização: sempre os do JSON (ADR 0017).
 
 1. Tipo inicial: fundos nacionais (decidido). Conta corrente/poupança têm a chave mais confiável
    (banco + agência + conta), mas dependem do bloco `conta` (fase 4).
@@ -127,10 +127,13 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
   restauradas e gravadas de novo; as linhas 27 voltaram idênticas byte a byte (5 de 5 e 7 de 7, totais
   320.000,00/400.000,00 e 320.000,00/462.000,00); só mudaram IR, 20 e T9 (ADR 0002).
 
-Demais blocos: `exterior` (aplicação financeira e lucros e
-dividendos; usar `numero(..., permite_negativo=True)` no rendimento ou perda). O bloco `exterior`
-também gera linhas 37: confirmar num teste se o programa as recria a partir da 27 (o teste manual
-indicou que sim).
+- [x] `exterior` (17/11/2026, ADR 0017): lucro ou prejuízo (aceita negativo), imposto pago, lucros e
+  dividendos recebidos e imposto sobre eles. Linhas idênticas às de um DBK gravado pelo programa com
+  4 bens (`tests/dados/exterior_programa.DBK`). O bot grava só a 27; as linhas 24 (exclusivo, código
+  13) e 37 (demonstrativo) ficam para o programa.
+- [ ] Roteiro manual `tests/manual/exterior/` com ida e volta: confirmar que a restauração recria as
+  linhas 24 e 37 e o imposto da Lei 14.754.
+- [ ] Busca dos bens do exterior (conta, ações, fundo, cripto custodiada): hoje entram como novos todo ano.
 
 ### Fase 5 — preparação para o IRPF 2027
 

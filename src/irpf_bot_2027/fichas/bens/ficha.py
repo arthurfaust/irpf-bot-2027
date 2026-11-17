@@ -80,8 +80,10 @@ GRUPOS_DISCRIMINACAO_DO_JSON = {"07", "08"}
 INDICADORES = {"BOLSA", "USUFRUTO", "AUTOCUSTODIANTE", "CONTA_PAGAMENTO"}
 # Indicadores cujo "não informado" é 2 (leiaute: NM_IND_REG_IMOV e NM_UNID).
 NAO_INFORMADO = {"REGISTRADO_CARTORIO": "2", "UNIDADE_AREA": "2"}
+# Valores do ano no exterior (ADR 0017): como a situação atual, sempre os do JSON quando informados.
+VALORES_DO_ANO = {"AF_RENDIMENTO", "AF_IMPOSTO", "LD_RECEBIDO", "LD_IMPOSTO"}
 # Tratados à parte: situação atual (gravada), situação anterior (nunca muda), discriminação (regra acima).
-TRATADOS_A_PARTE = {"VALOR_ATUAL", "VALOR_ANTERIOR", "DISCRIMINACAO"}
+TRATADOS_A_PARTE = {"VALOR_ATUAL", "VALOR_ANTERIOR", "DISCRIMINACAO"} | VALORES_DO_ANO
 # Nunca preenchidos nem trocados; diferença só gera aviso.
 SO_AVISAR = {"GRUPO", "CODIGO", "PAIS"}
 
@@ -116,6 +118,7 @@ class Atualizacao:
     preenchidos: list[str] = field(default_factory=list)    # estavam em branco no DBK
     diferentes: list[str] = field(default_factory=list)     # preenchidos e diferentes: mantido o do DBK
     discriminacao_substituida: bool = False
+    valores_do_ano: list[str] = field(default_factory=list)  # valores do exterior gravados (diferentes do DBK)
 
 def atualizar_linha(linha: str, campos: dict) -> Atualizacao:
     """Linha 27 existente atualizada com o bem do JSON.
@@ -123,6 +126,7 @@ def atualizar_linha(linha: str, campos: dict) -> Atualizacao:
     - VALOR_ATUAL: sempre o do JSON. VALOR_ANTERIOR: nunca muda (vem da declaração anterior).
     - DISCRIMINACAO: a do JSON nos tipos em que a quantidade muda todo ano (discriminacao_do_json);
       nos demais, a do DBK, e a diferença vai para `diferentes`.
+    - Valores do ano no exterior (VALORES_DO_ANO): os do JSON, quando informados (ADR 0017).
     - Grupo, código e país: nunca mudam; diferença vai para `diferentes`.
     - Demais campos do JSON que a tela mostra para o bem do DBK: em branco no DBK, recebem o valor do
       JSON; preenchidos e diferentes, ficam como estão e vão para `diferentes`.
@@ -140,6 +144,12 @@ def atualizar_linha(linha: str, campos: dict) -> Atualizacao:
 
     aplicaveis = campos_aplicaveis(lido["GRUPO"], lido["CODIGO"], lido["PAIS"],
                                    autocustodiante=lido["AUTOCUSTODIANTE"] == "1", bolsa=lido["BOLSA"] == "1")
+    for nome in sorted(VALORES_DO_ANO & set(campos) & aplicaveis):
+        campo = getattr(Registro27, nome)
+        if campo.formatar(campos[nome]) != campo.ler(linha):
+            linha = campo.gravar(linha, campos[nome])
+            atualizacao.valores_do_ano.append(nome)
+
     for nome, valor in campos.items():
         if nome in TRATADOS_A_PARTE or (nome not in SO_AVISAR and nome not in aplicaveis):
             continue
@@ -244,6 +254,9 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
             logger.info("%s: situação atual atualizada na linha %d", descricao, posicao + 1)
             if atualizacao.discriminacao_substituida:
                 logger.info("  discriminação substituída pela do JSON")
+            if atualizacao.valores_do_ano:
+                logger.info("  valores do ano no exterior gravados: %s",
+                            ", ".join(origem_no_json(bem, n) or n for n in atualizacao.valores_do_ano))
             if atualizacao.preenchidos:
                 logger.info("  preenchidos (estavam em branco no DBK): %s",
                             ", ".join(origem_no_json(bem, n) or n for n in atualizacao.preenchidos))

@@ -27,6 +27,9 @@ Origem dos códigos gravados:
         - Bloco veiculo (DBK gravado pelo programa em 16/11/2026, tests/dados/veiculo_programa.DBK):
           Renavam e registro estrangeiro do veículo em NR_RENAVAN (veja ajustar_registro_veiculo);
           registros de aeronave e embarcação como digitados (com hífen).
+        - Bloco exterior (DBK gravado pelo programa em 17/11/2026, tests/dados/exterior_programa.DBK):
+          prejuízo gravado com "-" na primeira posição (-250,00 = "-000000025000"). As linhas 24
+          (rendimento exclusivo, código 13) e 37 (demonstrativo) são calculadas pelo programa.
 
     - Chaves e blocos do JSON: 
         - Formato definido por este projeto (não vem do programa).
@@ -105,6 +108,12 @@ MAPA_BLOCOS = {
                                                     # o registro do veículo no país (a tela chama de "Registro de Veículo")
         "registro_aeronave": "REG_AERONAVE",        # 02/02
         "registro_embarcacao": "REG_EMBARCACAO",    # 02/03
+    },
+    "exterior": {                                   # bens no exterior: valores do ano (Lei 14.754/2023)
+        "lucro_prejuizo": "AF_RENDIMENTO",          # aplicação financeira: lucro, ou prejuízo com "-" (ex.: "-250.00")
+        "imposto_pago": "AF_IMPOSTO",               # imposto pago no exterior sobre a aplicação
+        "dividendos_recebidos": "LD_RECEBIDO",      # lucros e dividendos recebidos
+        "imposto_dividendos": "LD_IMPOSTO",         # imposto pago no exterior sobre lucros e dividendos
     },
 }
 
@@ -233,6 +242,10 @@ CONVERSOES = {
     "CONTA_PAGAMENTO": sim_nao,
     "BOLSA": sim_nao,
     "COD_NEGOCIACAO": codigo_negociacao,
+    "AF_RENDIMENTO": partial(numero, casas=2, permite_negativo=True),   # Bem.lucroPrejuizo é Valor (aceita negativo)
+    "AF_IMPOSTO": valor_em_reais,                                       # os outros três são ValorPositivo
+    "LD_RECEBIDO": valor_em_reais,
+    "LD_IMPOSTO": valor_em_reais,
     "RENAVAM": texto_de_registro,
     "REG_AERONAVE": texto_de_registro,
     "REG_EMBARCACAO": texto_de_registro,
