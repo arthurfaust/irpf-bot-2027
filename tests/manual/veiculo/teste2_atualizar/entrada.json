@@ -1,0 +1,41 @@
+{
+  "cpf": "77039677008",
+  "bens": [
+    {
+      "grupo": "02", "codigo": "01", "pais": "105",
+      "discriminacao": "Carro - discriminacao nova (nao deve mudar)",
+      "situacao_anterior": "50000.00", "situacao_atual": "45000.00",
+      "veiculo": {"renavam": "12345678900"}
+    },
+    {
+      "grupo": "02", "codigo": "01", "pais": "105",
+      "discriminacao": "Moto Renavam 9 digitos",
+      "situacao_anterior": "29999.99", "situacao_atual": "27000.00",
+      "veiculo": {"renavam": "00987654322"}
+    },
+    {
+      "grupo": "02", "codigo": "02", "pais": "105",
+      "discriminacao": "Aeronave de teste",
+      "situacao_anterior": "200000.00", "situacao_atual": "190000.00",
+      "veiculo": {"registro_aeronave": "PTABC"}
+    },
+    {
+      "grupo": "02", "codigo": "01", "pais": "249",
+      "discriminacao": "Carro no exterior",
+      "situacao_anterior": "0.00", "situacao_atual": "85000.00",
+      "veiculo": {"renavam": "abc1234fl"}
+    },
+    {
+      "grupo": "02", "codigo": "01", "pais": "105",
+      "discriminacao": "Carro novo nesta declaracao",
+      "situacao_anterior": "0.00", "situacao_atual": "60000.00",
+      "veiculo": {"renavam": "00639456170"}
+    },
+    {
+      "grupo": "02", "codigo": "03", "pais": "105",
+      "discriminacao": "Jet ski novo nesta declaracao",
+      "situacao_anterior": "0.00", "situacao_atual": "15000.00",
+      "veiculo": {"registro_embarcacao": "JET-123"}
+    }
+  ]
+}

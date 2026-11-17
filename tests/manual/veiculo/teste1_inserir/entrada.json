@@ -1,0 +1,35 @@
+{
+  "cpf": "77039677008",
+  "bens": [
+    {
+      "grupo": "02", "codigo": "01", "pais": "105",
+      "discriminacao": "Carro Renavam 11 digitos",
+      "situacao_anterior": "50000.00", "situacao_atual": "50000.00",
+      "veiculo": {"renavam": "12345678900"}
+    },
+    {
+      "grupo": "02", "codigo": "01", "pais": "105",
+      "discriminacao": "Moto Renavam 9 digitos",
+      "situacao_anterior": "30000.00", "situacao_atual": "30000.00",
+      "veiculo": {"renavam": "987654322"}
+    },
+    {
+      "grupo": "02", "codigo": "01", "pais": "249",
+      "discriminacao": "Carro no exterior",
+      "situacao_anterior": "0.00", "situacao_atual": "80000.00",
+      "veiculo": {"renavam": "ABC1234-FL"}
+    },
+    {
+      "grupo": "02", "codigo": "02", "pais": "105",
+      "discriminacao": "Aeronave de teste",
+      "situacao_anterior": "200000.00", "situacao_atual": "200000.00",
+      "veiculo": {"registro_aeronave": "PT-ABC"}
+    },
+    {
+      "grupo": "02", "codigo": "03", "pais": "105",
+      "discriminacao": "Lancha de teste",
+      "situacao_anterior": "40000.00", "situacao_atual": "40000.00",
+      "veiculo": {"registro_embarcacao": "1234567890"}
+    }
+  ]
+}
