@@ -1,8 +1,9 @@
 # irpf-bot-2027
 
 Bot que insere lançamentos da declaração de IRPF direto no arquivo `.DBK` (cópia de segurança do
-programa IRPF da Receita), a partir de um JSON com os dados do cliente. Hoje cobre a ficha Bens e
-Direitos (registro 27) com o leiaute do IRPF 2026; o alvo final é o IRPF 2027.
+programa IRPF da Receita), a partir de um JSON com os dados do cliente. Hoje cobre as fichas Bens e
+Direitos (registro 27) e Rendimentos Tributáveis Recebidos de PJ pelo Titular (registro 21) com o
+leiaute do IRPF 2026; o alvo final é o IRPF 2027.
 
 Plano e pendências: [docs/plano.md](docs/plano.md). Decisões de arquitetura: [docs/adr/](docs/adr/README.md).
 Leia os dois antes de começar uma tarefa.
@@ -47,12 +48,14 @@ src/irpf_bot_2027/
 ├── main.py           orquestra: lê DBK → confere exercício → lê JSON → valida tudo → insere → grava
 ├── config.py         .env;  config_log.py: logs no terminal e em logs/
 ├── dbk/              genérico, não muda entre anos: Campo, Registro (base), ArquivoDBK
-├── comum/            conversões (sim/não, dígitos, datas, números) e normalização de texto
+├── comum/            conversões (sim/não, dígitos, datas, números), texto, CPF/CNPJ (documentos.py)
 ├── leiautes/
 │   ├── atual.py      ÚNICO ponto de importação do leiaute (troca de ano = mudar os imports daqui)
-│   └── irpf2026/     cabeçalho, registro 27, tabela de grupos/códigos, países, bancos, regras da tela
+│   └── irpf2026/     cabeçalho, registros 21 e 27, tabela de grupos/códigos, países, bancos, regras da tela
 └── fichas/
-    ├── __init__.py   FICHAS = (bens,): cada ficha expõe NOME, CHAVE_JSON, validar(), inserir()
+    ├── __init__.py   FICHAS = (rendimentos_pj, bens): cada ficha expõe NOME, CHAVE_JSON,
+    │                 validar(itens, cpf_declarante), inserir(), relatorio()
+    ├── rendimentos_pj/ ficha.py: validação, busca pelo CPF/CNPJ da fonte, inserção (registro 21)
     └── bens/         entrada.py (JSON → campos), validacao.py, busca.py (chave e busca no DBK),
                       ficha.py (atualização, montagem e inserção)
 tools/visualizador_dbk.html   abre um DBK e mostra os campos de cada linha

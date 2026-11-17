@@ -1,0 +1,20 @@
+{
+  "cpf": "770.396.770-08",
+  "rendimentos_pj": [
+    {
+      "cnpj_cpf": "33.000.167/0001-01", "nome": "EMPRESA TESTE UM LTDA",
+      "rendimentos": "85000.00", "contribuicao_previdenciaria": "9000.00", "imposto_retido": "12000.00",
+      "decimo_terceiro": "7000.00", "irrf_decimo_terceiro": "600.00"
+    },
+    {
+      "cnpj_cpf": "60.701.190/0001-04", "nome": "EMPRESA TESTE DOIS SA",
+      "rendimentos": "20000.00", "contribuicao_previdenciaria": "0.00", "imposto_retido": "1500.00",
+      "decimo_terceiro": "0.00", "irrf_decimo_terceiro": "0.00"
+    },
+    {
+      "cnpj_cpf": "111.444.777-35", "nome": "PESSOA FISICA TESTE",
+      "rendimentos": "5000.00", "contribuicao_previdenciaria": "0.00", "imposto_retido": "0.00",
+      "decimo_terceiro": "0.00", "irrf_decimo_terceiro": "0.00"
+    }
+  ]
+}

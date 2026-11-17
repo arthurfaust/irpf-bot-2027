@@ -154,6 +154,18 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
   linhas 27 idênticas byte a byte (6 de 6 e 8 de 8), totais 569.000,00/570.200,00 e
   569.000,00/1.261.200,00.
 
+### Fase 4b — outras fichas (antes da fase 5; reservar janeiro para a fase 5)
+
+Decidido em 17/11/2026: fazer as fichas mais comuns antes da preparação para 2027.
+
+- [x] Rendimentos Tributáveis Recebidos de PJ pelo Titular (registro 21, ADR 0020): validação (CPF/CNPJ
+  com dígito, diferente do declarante, nome, valores), busca pelo CPF/CNPJ (fonte sem valores no DBK
+  é preenchida; com valores, revisão). Linhas idênticas às de um DBK do programa com 3 fontes.
+- [ ] Roteiro manual `tests/manual/rendpj/` com ida e volta: o programa recria a linha 24 do 13º e os
+  totais? A importação da declaração anterior traz as fontes sem valores? (pergunta ao Arthur)
+- [ ] Pagamentos efetuados (26), dependentes (25), rendimentos de PJ de dependentes (32), isentos e
+  exclusivos (23, 24, 83-89), dívidas (28).
+
 ### Fase 5 — preparação para o IRPF 2027
 
 O programa costuma sair entre o fim de fevereiro e março; adiante esta fase se a data se aproximar.
@@ -168,7 +180,6 @@ O programa costuma sair entre o fim de fevereiro e março; adiante esta fase se 
 
 ### Depois
 
-- Outras fichas (rendimentos, dependentes, dívidas, pagamentos) em `fichas/`.
 - JSON Schema gerado das regras, para a IA devolver o JSON no formato certo (saída estruturada).
 
 ## Decisões tomadas

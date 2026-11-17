@@ -1,5 +1,12 @@
 {
   "cpf": "77039677008",
+  "rendimentos_pj": [
+    {
+      "cnpj_cpf": "33.000.167/0001-01", "nome": "Empresa X Ltda",
+      "rendimentos": "85000.00", "contribuicao_previdenciaria": "9000.00", "imposto_retido": "12000.00",
+      "decimo_terceiro": "7000.00", "irrf_decimo_terceiro": "600.00"
+    }
+  ],
   "bens": [
     {
       "grupo": "08", "codigo": "01", "pais": "105",

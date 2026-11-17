@@ -63,7 +63,7 @@ def main() -> None:
         if not itens:
             continue
         logger.info("%s: %d item(ns) no JSON", ficha.NOME, len(itens))
-        dados_validados, erros_ficha = ficha.validar(itens)
+        dados_validados, erros_ficha = ficha.validar(itens, arquivo.cpf_declarante)
         validados.append((ficha, itens, dados_validados))
         erros.extend(f"{ficha.NOME} > {erro}" for erro in erros_ficha)
 

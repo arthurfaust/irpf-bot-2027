@@ -31,8 +31,8 @@ logger = logging.getLogger(__name__)
 NOME = "Bens e Direitos"            # nome da ficha no programa, usado nos logs
 CHAVE_JSON = "bens"                 # nome da lista no JSON do cliente
 
-def validar(bens: list[dict]) -> tuple[list[dict], list[str]]:
-    """Valida todos os bens.
+def validar(bens: list[dict], cpf_declarante: str | None = None) -> tuple[list[dict], list[str]]:
+    """Valida todos os bens. (cpf_declarante faz parte da interface das fichas; não é usado aqui.)
 
     Returns:
         - campos de cada bem vindos do JSON, já convertidos (mesma ordem da lista de entrada);

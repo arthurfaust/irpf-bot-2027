@@ -10,6 +10,7 @@ from irpf_bot_2027.leiautes.irpf2026 import ANO_CALENDARIO, EXERCICIO
 from irpf_bot_2027.leiautes.irpf2026.bancos import CAIXA, banco_existe, nome_banco
 from irpf_bot_2027.leiautes.irpf2026.cabecalho import CabecalhoIR, controle_cabecalho, verificar_exercicio
 from irpf_bot_2027.leiautes.irpf2026.paises import BRASIL, nome_pais, pais_existe
+from irpf_bot_2027.leiautes.irpf2026.registro21 import Registro21
 from irpf_bot_2027.leiautes.irpf2026.registro27 import Registro27
 from irpf_bot_2027.leiautes.irpf2026.regras import (
     CNPJ_OBRIGATORIO, CONTA_BANCARIA, REGISTRO_BEM_MOVEL, REGISTRO_IMOVEL, SOMENTE_BRASIL, SOMENTE_EXTERIOR,
@@ -19,7 +20,7 @@ from irpf_bot_2027.leiautes.irpf2026.regras import (
 from irpf_bot_2027.leiautes.irpf2026.tabela_bens import codigo_existe, nome_codigo
 
 __all__ = [
-    "ANO_CALENDARIO", "EXERCICIO", "CabecalhoIR", "controle_cabecalho", "verificar_exercicio", "Registro27",
+    "ANO_CALENDARIO", "EXERCICIO", "CabecalhoIR", "controle_cabecalho", "verificar_exercicio", "Registro21", "Registro27",
     "BRASIL", "nome_pais", "pais_existe",
     "CAIXA", "banco_existe", "nome_banco",
     "CNPJ_OBRIGATORIO", "CONTA_BANCARIA", "REGISTRO_BEM_MOVEL", "REGISTRO_IMOVEL", "tem_cnpj_cpf", "SOMENTE_BRASIL", "SOMENTE_EXTERIOR", "TITULAR_OU_DEPENDENTE", "campos_aplicaveis",
