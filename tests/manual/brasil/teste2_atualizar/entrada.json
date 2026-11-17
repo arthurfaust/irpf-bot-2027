@@ -1,0 +1,69 @@
+{
+  "cpf": "77039677008",
+  "bens": [
+    {
+      "grupo": "01", "codigo": "11", "pais": "105",
+      "discriminacao": "Apartamento em Curitiba (IPTU)",
+      "situacao_anterior": "350000.00", "situacao_atual": "380000.00",
+      "imovel": {
+        "logradouro": "Rua X", "numero": "100", "bairro": "Centro", "cep": "80000000",
+        "uf": "PR", "cod_municipio": "7535", "municipio": "Curitiba",
+        "area": "75.5", "unidade": "m2", "data_aquisicao": "2019-05-10",
+        "iptu": "123.456", "registrado_cartorio": true, "matricula": "9999", "cartorio": "1 RI"
+      }
+    },
+    {
+      "grupo": "01", "codigo": "12", "pais": "105",
+      "discriminacao": "Casa em Curitiba (so matricula)",
+      "situacao_anterior": "200000.00", "situacao_atual": "210000.00",
+      "imovel": {
+        "logradouro": "Rua Y", "numero": "200", "bairro": "Batel", "cep": "80420000",
+        "uf": "PR", "cod_municipio": "7535", "municipio": "Curitiba",
+        "area": "150.0", "unidade": "m2", "data_aquisicao": "2015-08-20",
+        "registrado_cartorio": true, "matricula": "5555", "cartorio": "2 RI"
+      }
+    },
+    {
+      "grupo": "04", "codigo": "02", "pais": "105", "cnpj_cpf": "60701190000104",
+      "discriminacao": "CDB no Itau",
+      "situacao_anterior": "10000.00", "situacao_atual": "12000.00"
+    },
+    {
+      "grupo": "02", "codigo": "06", "pais": "105",
+      "discriminacao": "Joia - anel de ouro (sem identificador: revisao)",
+      "situacao_anterior": "3000.00", "situacao_atual": "3000.00"
+    },
+    {
+      "grupo": "04", "codigo": "02", "pais": "105", "cnpj_cpf": "00.000.000/0001-91",
+      "discriminacao": "CDB no Banco do Brasil - aplicacao 1 (mesmo banco duas vezes: revisao)",
+      "situacao_anterior": "5000.00", "situacao_atual": "3000.00"
+    },
+    {
+      "grupo": "04", "codigo": "02", "pais": "105", "cnpj_cpf": "00.000.000/0001-91",
+      "discriminacao": "CDB no Banco do Brasil - aplicacao 2 (mesmo banco duas vezes: revisao)",
+      "situacao_anterior": "0.00", "situacao_atual": "2500.00"
+    },
+    {
+      "grupo": "01", "codigo": "11", "pais": "105",
+      "discriminacao": "Apartamento em Sao Paulo - novo nesta declaracao",
+      "situacao_anterior": "0.00", "situacao_atual": "500000.00",
+      "imovel": {
+        "logradouro": "Avenida Paulista", "numero": "1000", "bairro": "Bela Vista", "cep": "01310100",
+        "uf": "SP", "cod_municipio": "7107", "municipio": "Sao Paulo",
+        "area": "90.0", "unidade": "m2", "data_aquisicao": "2025-06-15",
+        "iptu": "777777", "registrado_cartorio": true, "matricula": "123", "cartorio": "4 RI"
+      }
+    },
+    {
+      "grupo": "01", "codigo": "15", "pais": "105",
+      "discriminacao": "Sala comercial em Curitiba - nova, sem IPTU nem matricula",
+      "situacao_anterior": "0.00", "situacao_atual": "150000.00",
+      "imovel": {
+        "logradouro": "Rua Z", "numero": "300", "bairro": "Centro", "cep": "80010000",
+        "uf": "PR", "cod_municipio": "7535", "municipio": "Curitiba",
+        "area": "40.0", "unidade": "m2", "data_aquisicao": "2025-02-01",
+        "registrado_cartorio": false
+      }
+    }
+  ]
+}

@@ -149,7 +149,8 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
 - [x] Demais bens do Brasil (17/11/2026, ADR 0019): imóvel pelo IPTU/CIB/CEI ou matrícula + cartório
   (família: mesmo código e município); bens com CNPJ/CPF por grupo + código + CNPJ; os sem
   identificador vão para revisão se o DBK tem bem do mesmo grupo e código. Todo bem tem busca agora.
-- [ ] Roteiro manual de imóveis e bens com CNPJ no Brasil e confirmação no programa.
+- [x] Roteiro manual `tests/manual/brasil/` (imóveis, CDBs, joia, quotas; teste1_inserir → teste2_atualizar).
+- [ ] Confirmação no programa do roteiro `brasil`, com ida e volta.
 
 ### Fase 5 — preparação para o IRPF 2027
 
