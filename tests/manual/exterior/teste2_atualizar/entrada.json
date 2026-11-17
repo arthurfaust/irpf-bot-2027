@@ -1,0 +1,12 @@
+{
+  "cpf": "77039677008",
+  "bens": [
+    {
+      "grupo": "08", "codigo": "01", "pais": "249",
+      "discriminacao": "BTC em carteira propria (exterior) - valores do ano novos",
+      "situacao_anterior": "3000.00", "situacao_atual": "4500.00",
+      "cripto": {"autocustodiante": true},
+      "exterior": {"lucro_prejuizo": "800.00", "imposto_pago": "20.00"}
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "cpf": "77039677008",
+  "bens": [
+    {
+      "grupo": "06", "codigo": "01", "pais": "249",
+      "discriminacao": "Conta corrente no exterior",
+      "situacao_anterior": "5000.00", "situacao_atual": "6000.00",
+      "exterior": {"lucro_prejuizo": "100.00", "imposto_pago": "0.00"}
+    },
+    {
+      "grupo": "03", "codigo": "01", "pais": "249",
+      "discriminacao": "Acoes no exterior",
+      "situacao_anterior": "10000.00", "situacao_atual": "9000.00",
+      "bolsa": {"negociado": true, "codigo": "AAPL"},
+      "exterior": {"lucro_prejuizo": "-250.00", "imposto_pago": "0.00",
+                   "dividendos_recebidos": "300.00", "imposto_dividendos": "45.00"}
+    },
+    {
+      "grupo": "07", "codigo": "99", "pais": "249",
+      "discriminacao": "Fundo no exterior",
+      "situacao_anterior": "20000.00", "situacao_atual": "21000.00",
+      "bolsa": {"negociado": false},
+      "exterior": {"lucro_prejuizo": "1000.00", "imposto_pago": "50.00"}
+    },
+    {
+      "grupo": "08", "codigo": "01", "pais": "249",
+      "discriminacao": "BTC em carteira propria (exterior)",
+      "situacao_anterior": "3000.00", "situacao_atual": "4000.00",
+      "cripto": {"autocustodiante": true},
+      "exterior": {"lucro_prejuizo": "500.00"}
+    }
+  ]
+}

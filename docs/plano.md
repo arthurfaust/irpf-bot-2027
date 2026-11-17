@@ -131,8 +131,9 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
   dividendos recebidos e imposto sobre eles. Linhas idênticas às de um DBK gravado pelo programa com
   4 bens (`tests/dados/exterior_programa.DBK`). O bot grava só a 27; as linhas 24 (exclusivo, código
   13) e 37 (demonstrativo) ficam para o programa.
-- [ ] Roteiro manual `tests/manual/exterior/` com ida e volta: confirmar que a restauração recria as
-  linhas 24 e 37 e o imposto da Lei 14.754.
+- [x] Roteiro manual `tests/manual/exterior/` (teste1_inserir → teste2_atualizar).
+- [ ] Confirmação no programa, com ida e volta: a restauração recria as linhas 24 e 37 e o imposto da
+  Lei 14.754?
 - [ ] Busca dos bens do exterior (conta, ações, fundo, cripto custodiada): hoje entram como novos todo ano.
 
 ### Fase 5 — preparação para o IRPF 2027
