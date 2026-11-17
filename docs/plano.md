@@ -132,8 +132,10 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
   4 bens (`tests/dados/exterior_programa.DBK`). O bot grava só a 27; as linhas 24 (exclusivo, código
   13) e 37 (demonstrativo) ficam para o programa.
 - [x] Roteiro manual `tests/manual/exterior/` (teste1_inserir → teste2_atualizar).
-- [ ] Confirmação no programa, com ida e volta: a restauração recria as linhas 24 e 37 e o imposto da
-  Lei 14.754?
+- [x] **Confirmado no programa IRPF 2026 (17/11/2026)**, com ida e volta: a restauração do DBK do bot
+  (só linhas 27) recriou a linha 24 (exclusivo, código 13: 1.555,00 no teste1 e 1.835,00 no teste2)
+  e as 5 linhas 37, iguais às do DBK digitado na tela; as linhas 27 voltaram idênticas (4 de 4 nos
+  dois testes). A decisão do ADR 0017 de não gravar 24 e 37 está confirmada.
 - [ ] Busca dos bens do exterior (conta, ações, fundo, cripto custodiada): hoje entram como novos todo ano.
 
 ### Fase 5 — preparação para o IRPF 2027
