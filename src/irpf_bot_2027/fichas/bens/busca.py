@@ -3,10 +3,11 @@ Procura, no DBK, o lançamento que corresponde a um bem do JSON.
 
 O DBK de entrada é a cópia de segurança com a declaração do ano anterior importada, então a maior
 parte dos bens já existe e só precisa da situação atual. A busca usa uma chave por tipo de bem
-(decisões em docs/adr/0006, 0007, 0011 e 0013):
+(decisões em docs/adr/0006, 0007, 0011, 0013 e 0015):
 
     | Bem                                        | Chave                                          |
     |--------------------------------------------|------------------------------------------------|
+    | Veículo, aeronave, embarcação (02/01-03)   | grupo + código + país + registro (***)         |
     | Ações no Brasil (03/01)                    | grupo + código + CNPJ + código de negociação   |
     |                                            | (vazio se não é negociada em bolsa) (**)       |
     | Ativos negociados em bolsa (04/04)         | grupo + código + código de negociação          |
@@ -24,6 +25,9 @@ bancos, a poupança tem o mesmo número da conta corrente (confirmado no DBK do 
 (**) O código de negociação separa ON e PN da mesma empresa. Ação do JSON não encontrada, com outra
 ação do mesmo CNPJ no DBK ("família"), vai para revisão: pode ser a mesma ação declarada antes sem o
 código ou com outro código.
+(***) Registro (Renavam, registro estrangeiro do veículo, de aeronave ou de embarcação) em maiúsculas,
+só com letras e números e sem zeros à esquerda: o programa completa com zeros o registro do veículo
+(ADR 0014), e o mesmo registro pode ter sido digitado com ou sem hífen.
 
 Um bem de tipo com busca cujos campos da chave estão vazios no DBK (ex.: cripto de uma declaração
 antiga, sem custodiante) tem "chave incompleta": não é encontrado por nenhum bem do JSON, e o bem
@@ -33,6 +37,8 @@ Origem:
     - Fundos: os códigos de CNPJ_OBRIGATORIO["07"] (regras da tela), então todo fundo nacional
       gravado pelo programa tem o CNPJ preenchido.
     - Contas: CONTA_BANCARIA (regras da tela), só no Brasil; campos BANCO, AGENCIA e CONTA.
+    - Veículo, aeronave e embarcação: REGISTRO_BEM_MOVEL (regras da tela); campos RENAVAM,
+      REG_AERONAVE e REG_EMBARCACAO do registro 27.
     - Ações e 04/04: CNPJ_OBRIGATORIO["03"] e TEM_CNPJ_CPF (04/04 não tem CNPJ); campos BOLSA e
       COD_NEGOCIACAO do registro 27 (ADR 0012).
     - Cripto: CRIPTO_COM_CUSTODIANTE e o campo CNPJ só no Brasil (regras da tela); campos
@@ -43,12 +49,15 @@ Origem:
 from dataclasses import dataclass
 
 from irpf_bot_2027.dbk import ArquivoDBK
-from irpf_bot_2027.leiautes.atual import BRASIL, CNPJ_OBRIGATORIO, CONTA_BANCARIA, Registro27, esta_na_tabela
+from irpf_bot_2027.leiautes.atual import (
+    BRASIL, CNPJ_OBRIGATORIO, CONTA_BANCARIA, REGISTRO_BEM_MOVEL, Registro27, esta_na_tabela,
+)
 
 GRUPO_FUNDOS = "07"
 GRUPO_CRIPTO = "08"
 CAMPO_DO_ATIVO = {"01": None, "02": "ALTCOIN", "03": "STABLECOIN"}    # cripto com busca: código -> campo
 
+GRUPO_BENS_MOVEIS = "02"
 ACOES = ("03", "01")
 ATIVOS_EM_BOLSA = ("04", "04")                                        # BDRs, opções e outros (sem CNPJ)
 
@@ -79,6 +88,10 @@ def chave_da_conta(grupo: str, codigo: str, campos: dict) -> tuple | None:
         return None
     return (grupo, codigo, banco, agencia, conta)
 
+def normalizar_registro(valor) -> str:
+    """"0ABC1234-FL" -> "ABC1234FL"; "00987654322" -> "987654322"; "pt-abc" -> "PTABC"."""
+    return "".join(c for c in str(valor or "").upper() if c.isalnum()).lstrip("0")
+
 def identificar(campos: dict) -> Identificacao | None:
     """Identificação do bem (campos do JSON já validados ou lidos de uma linha 27 com
     Registro27.ler_tudo), ou None se o tipo não tem busca."""
@@ -87,6 +100,11 @@ def identificar(campos: dict) -> Identificacao | None:
 
     if grupo == GRUPO_FUNDOS and esta_na_tabela(CNPJ_OBRIGATORIO, grupo, codigo) and pais == BRASIL:
         return Identificacao((grupo,), (grupo, cnpj) if cnpj else None)
+
+    if grupo == GRUPO_BENS_MOVEIS and codigo in REGISTRO_BEM_MOVEL:
+        registro = normalizar_registro(campos.get(REGISTRO_BEM_MOVEL[codigo]))
+        tipo = (grupo, codigo, pais)                         # o país separa os tipos: no exterior o registro é opcional
+        return Identificacao(tipo, (grupo, codigo, pais, registro) if registro else None)
 
     if (grupo, codigo) == ACOES and pais == BRASIL:
         return identificar_acao(grupo, codigo, campos)

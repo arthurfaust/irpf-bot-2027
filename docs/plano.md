@@ -118,7 +118,10 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
   aeronave e de embarcação; registro do veículo com menos de 11 caracteres ganha zeros à esquerda,
   também no exterior. Linhas idênticas às de um DBK gravado pelo programa com 5 bens
   (`tests/dados/veiculo_programa.DBK`). Nenhum tipo de bem fica mais barrado (ADR 0008 substituído).
-- [ ] Busca de veículo, aeronave e embarcação pelo registro.
+- [x] Busca de veículo, aeronave e embarcação (17/11/2026, ADR 0015): grupo + código + país +
+  registro (maiúsculas, só letras e números, sem zeros à esquerda).
+- [x] Roteiro manual `tests/manual/veiculo/` (teste1_inserir → teste2_atualizar), como os anteriores.
+- [ ] Confirmação no programa: restaurar as duas saídas do roteiro de veículos.
 
 Demais blocos: `exterior` (aplicação financeira e lucros e
 dividendos; usar `numero(..., permite_negativo=True)` no rendimento ou perda). O bloco `exterior`
