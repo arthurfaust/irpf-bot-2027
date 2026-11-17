@@ -2,11 +2,52 @@
   "cpf": "77039677008",
   "bens": [
     {
+      "grupo": "03", "codigo": "01", "pais": "249",
+      "discriminacao": "Acoes no exterior",
+      "situacao_anterior": "10000.00", "situacao_atual": "9500.00",
+      "bolsa": {"negociado": true, "codigo": "aapl"},
+      "exterior": {"lucro_prejuizo": "-100.00", "imposto_pago": "0.00",
+                   "dividendos_recebidos": "400.00", "imposto_dividendos": "60.00"}
+    },
+    {
       "grupo": "08", "codigo": "01", "pais": "249",
-      "discriminacao": "BTC em carteira propria (exterior) - valores do ano novos",
+      "discriminacao": "BTC em carteira propria (exterior)",
       "situacao_anterior": "3000.00", "situacao_atual": "4500.00",
       "cripto": {"autocustodiante": true},
       "exterior": {"lucro_prejuizo": "800.00", "imposto_pago": "20.00"}
+    },
+    {
+      "grupo": "06", "codigo": "01", "pais": "249",
+      "discriminacao": "Conta corrente no exterior - sem identificador (revisao)",
+      "situacao_anterior": "5000.00", "situacao_atual": "7000.00",
+      "exterior": {"lucro_prejuizo": "150.00"}
+    },
+    {
+      "grupo": "07", "codigo": "99", "pais": "249",
+      "discriminacao": "Fundo no exterior - nao negociado, sem identificador (revisao)",
+      "situacao_anterior": "20000.00", "situacao_atual": "22000.00",
+      "bolsa": {"negociado": false},
+      "exterior": {"lucro_prejuizo": "1200.00", "imposto_pago": "60.00"}
+    },
+    {
+      "grupo": "06", "codigo": "01", "pais": "023",
+      "discriminacao": "Conta corrente na Alemanha - nova nesta declaracao",
+      "situacao_anterior": "0.00", "situacao_atual": "2000.00",
+      "exterior": {"lucro_prejuizo": "10.00"}
+    },
+    {
+      "grupo": "08", "codigo": "01", "pais": "249",
+      "discriminacao": "BTC em corretora no exterior - novo nesta declaracao",
+      "situacao_anterior": "0.00", "situacao_atual": "1500.00",
+      "cripto": {"autocustodiante": false},
+      "exterior": {"lucro_prejuizo": "50.00"}
+    },
+    {
+      "grupo": "01", "codigo": "11", "pais": "249",
+      "discriminacao": "Apartamento em Miami - novo nesta declaracao",
+      "situacao_anterior": "0.00", "situacao_atual": "100000.00",
+      "imovel": {"logradouro": "Ocean Drive", "numero": "100", "area": "80.0", "unidade": "m2",
+                 "data_aquisicao": "2025-03-10"}
     }
   ]
 }

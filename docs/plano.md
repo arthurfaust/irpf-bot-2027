@@ -139,6 +139,13 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
 - [x] Busca dos bens do exterior (17/11/2026, ADR 0018): ações/fundo negociados pelo código, cripto
   custodiada pelo ativo, imóvel pelo endereço (sempre com o país); os sem identificador vão para
   revisão se o DBK já tem bem do mesmo grupo, código e país.
+- [x] Roteiro manual do exterior atualizado para a busca (teste2: atualiza ações e BTC, manda conta e
+  fundo não negociado para revisão, lança conta na Alemanha, BTC em corretora e imóvel).
+- [x] **Confirmado no programa IRPF 2026 (17/11/2026)**, novo teste2 do exterior com ida e volta: 7 de
+  7 linhas 27 idênticas (inclusive o apartamento em Miami, primeiro imóvel no exterior gravado pelo
+  bot), linha 24 recriada com 2.130,00 (o valor previsto) e 7 linhas 37; totais 38.000,00/144.500,00.
+  "Verificar pendências" sem nenhum item em Bens e Direitos: o imóvel no exterior com logradouro,
+  número, área, unidade e data de aquisição basta (fecha a pendência do ADR 0008).
 - [ ] Bens sem busca no Brasil (imóveis, joias, quotas etc.): estender a regra do ADR 0018?
 
 ### Fase 5 — preparação para o IRPF 2027
