@@ -20,7 +20,11 @@ parte dos bens já existe e só precisa da situação atual. A busca usa uma cha
     | Imóvel no exterior                         | grupo + código + país + logradouro + número    |
     | Demais bens no exterior                    | sem identificador: revisão se o DBK tem bem do |
     |                                            | mesmo grupo, código e país; senão, novo (****) |
-    | Demais bens no Brasil (NFT, imóvel etc.)   | sem busca: lançamento novo                     |
+    | Imóvel no Brasil (ADR 0019)                | grupo + código + país + IPTU/CIB/CEI do código,|
+    |                                            | senão matrícula + cartório; família: mesmo     |
+    |                                            | código e município                             |
+    | Demais bens do Brasil com CNPJ/CPF         | grupo + código + país + CNPJ/CPF (ADR 0019)    |
+    | Demais bens no Brasil                      | sem identificador, como no exterior (ADR 0019) |
 
 "Ativo" é a sigla da altcoin (08/02) ou da stablecoin (08/03); vazio no bitcoin (08/01).
 (*) Banco, agência e conta sem zeros à esquerda: a mesma conta da Caixa aparece com 12 dígitos no DBK
@@ -57,7 +61,8 @@ from dataclasses import dataclass
 
 from irpf_bot_2027.dbk import ArquivoDBK
 from irpf_bot_2027.leiautes.atual import (
-    BRASIL, CNPJ_OBRIGATORIO, CONTA_BANCARIA, REGISTRO_BEM_MOVEL, Registro27, esta_na_tabela,
+    BRASIL, CNPJ_OBRIGATORIO, CONTA_BANCARIA, REGISTRO_BEM_MOVEL, REGISTRO_IMOVEL, Registro27, esta_na_tabela,
+    tem_cnpj_cpf,
 )
 
 GRUPO_FUNDOS = "07"
@@ -75,7 +80,7 @@ class Identificacao:
     tipo: tuple          # bens do mesmo tipo (ex.: ("08", "01")): usado para achar chaves incompletas
     chave: tuple | None  # chave completa, ou None se algum campo dela está vazio
     familia: tuple | None = None    # bens que podem ser o mesmo apesar da chave diferente (ações: mesmo CNPJ)
-    sem_identificador: bool = False # bem do exterior sem campo que o identifique (ADR 0018)
+    sem_identificador: bool = False # bem sem campo que o identifique (ADR 0018 e 0019)
 
 def identificar_acao(grupo: str, codigo: str, campos: dict) -> Identificacao:
     """Ação no Brasil: CNPJ + código de negociação (vazio se não é negociada em bolsa)."""
@@ -106,6 +111,21 @@ def normalizar_registro(valor) -> str:
     """"0ABC1234-FL" -> "ABC1234FL"; "00987654322" -> "987654322"; "pt-abc" -> "PTABC"."""
     return "".join(c for c in str(valor or "").upper() if c.isalnum()).lstrip("0")
 
+def identificar_imovel_no_brasil(grupo: str, codigo: str, pais: str, campos: dict) -> Identificacao:
+    """Registro do código (IPTU, CIB no rural, CEI/CNO na construção); sem ele, matrícula + cartório.
+    Família: imóveis do mesmo código no mesmo município (ADR 0019)."""
+    tipo = (grupo, codigo, pais)
+    familia = (grupo, codigo, pais, sem_zeros_a_esquerda(campos.get("COD_MUNICIPIO")))
+    campo_registro = REGISTRO_IMOVEL.get(codigo, "IPTU")
+    registro = normalizar_registro(campos.get(campo_registro)) if campo_registro else ""
+    if registro:
+        return Identificacao(tipo, (grupo, codigo, pais, campo_registro, registro), familia=familia)
+    matricula = normalizar_registro(campos.get("MATRICULA"))
+    if matricula:
+        chave = (grupo, codigo, pais, "MATRICULA", matricula, so_letras_e_numeros(campos.get("CARTORIO")))
+        return Identificacao(tipo, chave, familia=familia)
+    return Identificacao(tipo, None, sem_identificador=True)
+
 def identificar(campos: dict) -> Identificacao | None:
     """Identificação do bem (campos do JSON já validados ou lidos de uma linha 27 com
     Registro27.ler_tudo), ou None se o tipo não tem busca."""
@@ -126,6 +146,9 @@ def identificar(campos: dict) -> Identificacao | None:
         cod = str(campos.get("COD_NEGOCIACAO", "")).strip().upper()
         return Identificacao((grupo, codigo, pais), (grupo, codigo, pais, cod) if cod else None)
 
+    if pais == BRASIL and grupo == GRUPO_IMOVEIS:
+        return identificar_imovel_no_brasil(grupo, codigo, pais, campos)
+
     if pais != BRASIL and grupo == GRUPO_IMOVEIS:
         logradouro = so_letras_e_numeros(campos.get("LOGRADOURO"))
         tipo = (grupo, codigo, pais)
@@ -136,8 +159,8 @@ def identificar(campos: dict) -> Identificacao | None:
         return identificar_acao(grupo, codigo, campos)
 
     if (grupo, codigo) == ATIVOS_EM_BOLSA and pais == BRASIL:
-        if str(campos.get("BOLSA", "")) != "1":
-            return None                                      # sem código de negociação não há o que comparar
+        if str(campos.get("BOLSA", "")) != "1":              # sem código de negociação não há o que comparar
+            return Identificacao((grupo, codigo, pais), None, sem_identificador=True)
         cod = str(campos.get("COD_NEGOCIACAO", "")).strip().upper()
         return Identificacao((grupo, codigo), (grupo, codigo, cod) if cod else None)
 
@@ -156,8 +179,14 @@ def identificar(campos: dict) -> Identificacao | None:
             return Identificacao((grupo, codigo, pais), (grupo, codigo, ativo, "EXTERIOR", pais))
         return Identificacao(tipo, (grupo, codigo, ativo, cnpj) if cnpj else None)
 
-    if pais and pais != BRASIL:
-        return Identificacao((grupo, codigo, pais), None, sem_identificador=True)
+    tipo = (grupo, codigo, pais)
+    if pais == BRASIL and tem_cnpj_cpf(grupo, codigo, True, str(campos.get("AUTOCUSTODIANTE", "")) == "1"):
+        if cnpj:                                             # quotas, títulos, créditos, consórcio, VGBL... (ADR 0019)
+            return Identificacao(tipo, (grupo, codigo, pais, cnpj))
+        return Identificacao(tipo, None, sem_identificador=True)
+
+    if pais:                                                 # sem campo que identifique o bem (ADR 0018 e 0019)
+        return Identificacao(tipo, None, sem_identificador=True)
 
     return None
 

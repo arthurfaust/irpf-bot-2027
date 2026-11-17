@@ -184,7 +184,7 @@ def test_relatorio_resume_e_nao_tem_dados_do_cliente():
 
     assert "0 atualizado(s), 1 novo(s), 1 para revisão" in texto
     assert "REVISÃO, não gravados (bens do JSON): 1" in texto
-    assert "07/03" in texto and "tipo sem busca automática" in texto
+    assert "07/03" in texto and "bem sem campo identificador" in texto       # os 07/99 do entrada.DBK (ADR 0018)
     for dado in (CNPJ, "Fundo imobiliario", "1500", "11.222.333"):
         assert dado not in texto
     niveis = {nivel for nivel, t in bens.relatorio(resultado) if "REVISÃO" in t}

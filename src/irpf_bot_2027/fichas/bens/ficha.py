@@ -174,7 +174,7 @@ class BemDoDBK:
     codigo: str
     com_busca: bool             # tem chave completa: um bem do JSON o encontraria (busca.py)
     chave_incompleta: bool = False   # o tipo tem busca, mas falta algum campo da chave no DBK
-    sem_identificador: bool = False  # bem do exterior sem campo que o identifique (ADR 0018)
+    sem_identificador: bool = False  # bem sem campo que o identifique (ADR 0018 e 0019)
 
     def descrever(self) -> str:
         return f"chave {self.chave} ({self.grupo}/{self.codigo}, {nome_codigo(self.grupo, self.codigo)})"
@@ -210,7 +210,8 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
     Se nada foi encontrado, mas o DBK tem bem do mesmo tipo com a chave incompleta, o bem do JSON
     vai para revisão (pode ser o mesmo bem; lançá-lo criaria duplicidade). O mesmo vale para uma
     ação não encontrada quando o DBK tem outra ação do mesmo CNPJ (outro código de negociação ou sem ele)
-    e para o bem do exterior sem campo identificador quando o DBK tem bem do mesmo grupo, código e país.
+    e para o imóvel não encontrado quando o DBK tem outro do mesmo código no mesmo município; o bem sem
+    campo identificador vai para revisão quando o DBK tem bem do mesmo grupo, código e país.
     Os bens que já estavam no DBK e não foram atualizados vão para Resultado.nao_informados;
     nunca são zerados nem apagados.
     """
@@ -280,14 +281,15 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
             continue
 
         if chave_bem and da_entrada(procurar_semelhantes(arquivo, identificar(campos))):
-            logger.warning("%s: não encontrado, mas o DBK tem bem do mesmo tipo e CNPJ com outro código de "
-                           "negociação (ou sem ele); não foi gravado (revisão).", descricao)
+            semelhante = ("imóvel do mesmo código no mesmo município com outro registro ou matrícula"
+                          if bem["grupo"] == "01" else "bem do mesmo tipo e CNPJ com outro código de negociação (ou sem ele)")
+            logger.warning("%s: não encontrado, mas o DBK tem %s; não foi gravado (revisão).", descricao, semelhante)
             resultado.revisao.append(numero)
             continue
 
         identificacao = identificar(campos)
         if identificacao and identificacao.sem_identificador and da_entrada(procurar_mesmo_tipo(arquivo, identificacao.tipo)):
-            logger.warning("%s: bem do exterior sem campo identificador e o DBK já tem bem do mesmo grupo, código "
+            logger.warning("%s: bem sem campo identificador e o DBK já tem bem do mesmo grupo, código "
                            "e país; não foi gravado (revisão).", descricao)
             resultado.revisao.append(numero)
             continue
@@ -331,7 +333,7 @@ def relatorio(resultado: Resultado) -> list[tuple[int, str]]:
             if bem.com_busca:
                 aviso = ""
             elif bem.sem_identificador:
-                aviso = " - bem do exterior sem campo identificador: confira e atualize no programa"
+                aviso = " - bem sem campo identificador: confira e atualize no programa"
             elif bem.chave_incompleta:
                 aviso = " - dados da chave em branco ou fora do formato no DBK: confira e complete no programa"
             else:

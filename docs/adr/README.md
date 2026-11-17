@@ -24,6 +24,7 @@ escreva um novo ADR que o substitui e marque o antigo como "Substituído por NNN
 | [0016](0016-campos-do-bem-encontrado.md) | O que muda num bem encontrado no DBK além da situação atual | Aceito |
 | [0017](0017-bloco-exterior.md) | Bloco `exterior`: valores do ano das aplicações e dividendos no exterior | Aceito |
 | [0018](0018-busca-dos-bens-no-exterior.md) | Busca dos bens no exterior | Aceito |
+| [0019](0019-busca-dos-demais-bens-no-brasil.md) | Busca dos demais bens do Brasil | Aceito |
 
 Para um ADR novo, copie [modelo.md](modelo.md), use o próximo número e acrescente a linha acima.
 As decisões de 0002 a 0005 e 0008 foram tomadas até 10/11/2026 e registradas aqui em 11/11/2026, a

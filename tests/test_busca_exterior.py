@@ -118,4 +118,4 @@ def test_acao_negociada_com_acao_sem_codigo_no_dbk_vai_para_revisao():
 def test_relatorio_dos_bens_do_dbk_sem_identificador():
     resultado = gravar(dbk_do_programa(), com(ACOES, situacao_atual="1.00"))
     texto = "\n".join(t for _, t in bens.relatorio(resultado))
-    assert texto.count("bem do exterior sem campo identificador: confira e atualize no programa") == 2
+    assert texto.count("bem sem campo identificador: confira e atualize no programa") == 2

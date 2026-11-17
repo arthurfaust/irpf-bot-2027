@@ -146,7 +146,10 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
   bot), linha 24 recriada com 2.130,00 (o valor previsto) e 7 linhas 37; totais 38.000,00/144.500,00.
   "Verificar pendências" sem nenhum item em Bens e Direitos: o imóvel no exterior com logradouro,
   número, área, unidade e data de aquisição basta (fecha a pendência do ADR 0008).
-- [ ] Bens sem busca no Brasil (imóveis, joias, quotas etc.): estender a regra do ADR 0018?
+- [x] Demais bens do Brasil (17/11/2026, ADR 0019): imóvel pelo IPTU/CIB/CEI ou matrícula + cartório
+  (família: mesmo código e município); bens com CNPJ/CPF por grupo + código + CNPJ; os sem
+  identificador vão para revisão se o DBK tem bem do mesmo grupo e código. Todo bem tem busca agora.
+- [ ] Roteiro manual de imóveis e bens com CNPJ no Brasil e confirmação no programa.
 
 ### Fase 5 — preparação para o IRPF 2027
 

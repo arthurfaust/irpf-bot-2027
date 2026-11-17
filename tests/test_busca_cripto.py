@@ -52,8 +52,9 @@ def test_chave_da_cripto(bem, chave):
     assert chave_busca(validados(bem)[0]) == chave
 
 
-def test_nft_no_brasil_nao_tem_busca():
-    assert chave_busca(validados({**BTC_CUSTODIADO, "codigo": "10"})[0]) is None
+def test_nft_custodiado_no_brasil_e_procurado_pelo_cnpj_do_custodiante():
+    """ADR 0019: bens do Brasil com CNPJ ainda sem chave própria usam grupo + código + CNPJ."""
+    assert chave_busca(validados({**BTC_CUSTODIADO, "codigo": "10"})[0]) == ("08", "10", "105", CUSTODIANTE)
     # cripto custodiada no exterior: tests/test_busca_exterior.py (ADR 0018)
 
 
