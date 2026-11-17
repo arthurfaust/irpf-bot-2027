@@ -11,7 +11,7 @@ escreva um novo ADR que o substitui e marque o antigo como "Substituído por NNN
 | [0003](0003-json-amigavel-com-conversor.md) | JSON amigável + conversor, em vez do formato do DBK | Aceito |
 | [0004](0004-leiaute-isolado-em-atual.md) | Leiaute do ano isolado em `leiautes/atual.py` | Aceito |
 | [0005](0005-validar-tudo-antes-de-gravar.md) | Validar tudo antes de gravar; CPF do JSON conferido | Aceito |
-| [0006](0006-busca-e-atualizacao-de-bens.md) | Procurar o bem no DBK e atualizar em vez de lançar | Aceito |
+| [0006](0006-busca-e-atualizacao-de-bens.md) | Procurar o bem no DBK e atualizar em vez de lançar | Substituído em parte por 0016 |
 | [0007](0007-chave-da-cripto-e-chave-incompleta.md) | Chave da cripto e salvaguarda de chave incompleta | Aceito |
 | [0008](0008-tipos-barrados-ate-ter-bloco.md) | Tipos de bem barrados até o JSON ter o bloco deles | Substituído por 0010, 0012 e 0014 |
 | [0009](0009-busca-so-nos-bens-da-entrada.md) | A busca olha só os bens do DBK de entrada | Aceito |
@@ -21,6 +21,7 @@ escreva um novo ADR que o substitui e marque o antigo como "Substituído por NNN
 | [0013](0013-chave-das-acoes.md) | Chave da busca de ações e de ativos negociados em bolsa | Aceito |
 | [0014](0014-bloco-veiculo.md) | Bloco `veiculo` libera veículo, aeronave e embarcação | Aceito |
 | [0015](0015-chave-dos-bens-moveis.md) | Chave da busca de veículo, aeronave e embarcação | Aceito |
+| [0016](0016-campos-do-bem-encontrado.md) | O que muda num bem encontrado no DBK além da situação atual | Aceito |
 
 Para um ADR novo, copie [modelo.md](modelo.md), use o próximo número e acrescente a linha acima.
 As decisões de 0002 a 0005 e 0008 foram tomadas até 10/11/2026 e registradas aqui em 11/11/2026, a

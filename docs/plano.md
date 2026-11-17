@@ -57,9 +57,11 @@ Andamento (11/11/2026):
   Z e BTC no exterior lançados como novos, USDT repetido no JSON mantido como estava (revisão), totais
   4.500,00/15.700,00. Fundos: A e B atualizados, C novo, D repetido no JSON lançado duas vezes, totais
   15.000,00/27.000,00.
-- [ ] Bem encontrado com código diferente do JSON (o B de fundos veio como 07/03 e ficou 07/01 no
-  DBK) não gera aviso: tratar junto com os campos anuais.
-- [ ] Demais tipos de bem; campos anuais (discriminação, quadros do exterior) na atualização.
+- [x] Campos do bem encontrado (17/11/2026, ADR 0016): discriminação do JSON em ações, BDRs, fundos e
+  cripto (onde a quantidade muda todo ano), a do DBK nos demais (com aviso); campo em branco no DBK
+  recebe o do JSON; preenchido e diferente (inclusive grupo/código/país) fica o do DBK, com aviso e o
+  bem na linha "CONFERIR" do relatório. Mais adiante, a IA pode montar a discriminação.
+- [ ] Quadros do exterior (rendimento e imposto do ano) na atualização: com o bloco `exterior`.
 
 1. Tipo inicial: fundos nacionais (decidido). Conta corrente/poupança têm a chave mais confiável
    (banco + agência + conta), mas dependem do bloco `conta` (fase 4).

@@ -21,7 +21,10 @@ from irpf_bot_2027.fichas.bens.busca import (
 )
 from irpf_bot_2027.fichas.bens.entrada import CAMPOS_SIMPLES
 from irpf_bot_2027.fichas.bens.validacao import validar_bem
-from irpf_bot_2027.leiautes.atual import BRASIL, TITULAR_OU_DEPENDENTE, Registro27, esta_na_tabela, nome_codigo
+from irpf_bot_2027.fichas.bens.entrada import origem_no_json
+from irpf_bot_2027.leiautes.atual import (
+    BRASIL, TITULAR_OU_DEPENDENTE, Registro27, campos_aplicaveis, esta_na_tabela, nome_codigo,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -66,11 +69,92 @@ def montar_linha(bem: dict, campos: dict, cpf: str, chave: int) -> str:
 
     return Registro27.gravar_cod_controle(linha)       # sempre por último
 
-def atualizar_linha(linha: str, campos: dict) -> str:
-    """Linha 27 existente com a situação atual do JSON. Nada mais muda: VALOR_ANTERIOR vem da
-    declaração anterior e nunca é alterado."""
+# --- atualização de um bem encontrado (docs/adr/0016) ---
+
+# Tipos em que a discriminação traz a quantidade, que muda todo ano: a do JSON substitui a do DBK.
+# Escolha do projeto (ADR 0016): ações, BDRs/opções, fundos e criptoativos.
+DISCRIMINACAO_DO_JSON = {("03", "01"), ("04", "04")}
+GRUPOS_DISCRIMINACAO_DO_JSON = {"07", "08"}
+
+# Indicadores sim/não: 0 é a resposta "Não", não um campo vazio.
+INDICADORES = {"BOLSA", "USUFRUTO", "AUTOCUSTODIANTE", "CONTA_PAGAMENTO"}
+# Indicadores cujo "não informado" é 2 (leiaute: NM_IND_REG_IMOV e NM_UNID).
+NAO_INFORMADO = {"REGISTRADO_CARTORIO": "2", "UNIDADE_AREA": "2"}
+# Tratados à parte: situação atual (gravada), situação anterior (nunca muda), discriminação (regra acima).
+TRATADOS_A_PARTE = {"VALOR_ATUAL", "VALOR_ANTERIOR", "DISCRIMINACAO"}
+# Nunca preenchidos nem trocados; diferença só gera aviso.
+SO_AVISAR = {"GRUPO", "CODIGO", "PAIS"}
+
+def discriminacao_do_json(grupo: str, codigo: str) -> bool:
+    return grupo in GRUPOS_DISCRIMINACAO_DO_JSON or (grupo, codigo) in DISCRIMINACAO_DO_JSON
+
+def vazio_no_dbk(nome: str, texto: str) -> bool:
+    if nome in NAO_INFORMADO:
+        return texto == NAO_INFORMADO[nome]
+    if nome in INDICADORES:
+        return False
+    if getattr(Registro27, nome).tipo == "N":
+        return texto.strip("0") == ""
+    return texto.strip() == ""
+
+def equivalentes(nome: str, gravado_pelo_json: str, no_dbk: str) -> bool:
+    """Mesmo valor, ignorando o formato: números pelo valor; textos em maiúsculas, só letras e números,
+    sem zeros à esquerda (ex.: conta "000000004321" = "4321", "PT-ABC" = "PTABC")."""
+    if getattr(Registro27, nome).tipo == "N":
+        return int(gravado_pelo_json) == int(no_dbk)
+    def normalizar(texto: str) -> str:
+        return "".join(c for c in texto.upper() if c.isalnum()).lstrip("0")
+    return normalizar(gravado_pelo_json) == normalizar(no_dbk)
+
+def mesmo_texto(a: str, b: str) -> bool:
+    return " ".join(a.upper().split()) == " ".join(b.upper().split())
+
+@dataclass
+class Atualizacao:
+    """O que atualizar_linha mudou ou encontrou de diferente (nomes de campos do Registro27)."""
+    linha: str
+    preenchidos: list[str] = field(default_factory=list)    # estavam em branco no DBK
+    diferentes: list[str] = field(default_factory=list)     # preenchidos e diferentes: mantido o do DBK
+    discriminacao_substituida: bool = False
+
+def atualizar_linha(linha: str, campos: dict) -> Atualizacao:
+    """Linha 27 existente atualizada com o bem do JSON.
+
+    - VALOR_ATUAL: sempre o do JSON. VALOR_ANTERIOR: nunca muda (vem da declaração anterior).
+    - DISCRIMINACAO: a do JSON nos tipos em que a quantidade muda todo ano (discriminacao_do_json);
+      nos demais, a do DBK, e a diferença vai para `diferentes`.
+    - Grupo, código e país: nunca mudam; diferença vai para `diferentes`.
+    - Demais campos do JSON que a tela mostra para o bem do DBK: em branco no DBK, recebem o valor do
+      JSON; preenchidos e diferentes, ficam como estão e vão para `diferentes`.
+    """
+    lido = Registro27.ler_tudo(linha)
+    atualizacao = Atualizacao(linha)
     linha = Registro27.VALOR_ATUAL.gravar(linha, campos["VALOR_ATUAL"])
-    return Registro27.gravar_cod_controle(linha)       # sempre por último
+
+    if not mesmo_texto(campos["DISCRIMINACAO"], lido["DISCRIMINACAO"]):
+        if discriminacao_do_json(lido["GRUPO"], lido["CODIGO"]):
+            linha = Registro27.DISCRIMINACAO.gravar(linha, campos["DISCRIMINACAO"])
+            atualizacao.discriminacao_substituida = True
+        else:
+            atualizacao.diferentes.append("DISCRIMINACAO")
+
+    aplicaveis = campos_aplicaveis(lido["GRUPO"], lido["CODIGO"], lido["PAIS"],
+                                   autocustodiante=lido["AUTOCUSTODIANTE"] == "1", bolsa=lido["BOLSA"] == "1")
+    for nome, valor in campos.items():
+        if nome in TRATADOS_A_PARTE or (nome not in SO_AVISAR and nome not in aplicaveis):
+            continue
+        campo = getattr(Registro27, nome)
+        gravado, no_dbk = campo.formatar(valor), campo.ler(linha)
+        if equivalentes(nome, gravado, no_dbk):
+            continue
+        if nome not in SO_AVISAR and vazio_no_dbk(nome, no_dbk):
+            linha = campo.gravar(linha, valor)
+            atualizacao.preenchidos.append(nome)
+        else:
+            atualizacao.diferentes.append(nome)
+
+    atualizacao.linha = Registro27.gravar_cod_controle(linha)       # sempre por último
+    return atualizacao
 
 @dataclass
 class BemDoDBK:
@@ -90,6 +174,7 @@ class Resultado:
     atualizados: list[int] = field(default_factory=list)
     novos: list[int] = field(default_factory=list)
     revisao: list[int] = field(default_factory=list)              # não gravados: decisão humana
+    conferir: list[int] = field(default_factory=list)             # atualizados com campo diferente do DBK
     nao_informados: list[BemDoDBK] = field(default_factory=list)  # no DBK, não atualizados pelo JSON
 
 def bem_do_dbk(linha: str) -> BemDoDBK:
@@ -103,7 +188,7 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
     """Grava os bens (já validados) no arquivo, na ordem do JSON.
 
     Para cada bem com chave de busca (busca.py), procura o lançamento no DBK:
-        1 encontrado  -> atualiza só a situação atual;
+        1 encontrado  -> atualiza a situação atual e completa o lançamento (atualizar_linha, ADR 0016);
         0 encontrados -> lançamento completo, com chave nova (como os bens sem busca);
         2 ou mais     -> não grava nada desse bem; vai para revisão.
     A busca olha só os bens do DBK de entrada, nunca os lançados nesta mesma execução.
@@ -149,11 +234,25 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
         if len(encontrados) == 1:
             posicao = encontrados[0]
             linha = arquivo.linhas[posicao]
+            conferir = []
             if Registro27.VALOR_ANTERIOR.formatar(campos["VALOR_ANTERIOR"]) != Registro27.VALOR_ANTERIOR.ler(linha):
                 logger.warning("%s: a situação anterior do JSON difere da do DBK; mantida a do DBK.", descricao)
-            arquivo.substituir(posicao, atualizar_linha(linha, campos))
+                conferir.append("situacao_anterior")
+            atualizacao = atualizar_linha(linha, campos)
+            arquivo.substituir(posicao, atualizacao.linha)
             chaves_atualizadas.add(int(Registro27.CHAVE.ler(linha)))
             logger.info("%s: situação atual atualizada na linha %d", descricao, posicao + 1)
+            if atualizacao.discriminacao_substituida:
+                logger.info("  discriminação substituída pela do JSON")
+            if atualizacao.preenchidos:
+                logger.info("  preenchidos (estavam em branco no DBK): %s",
+                            ", ".join(origem_no_json(bem, n) or n for n in atualizacao.preenchidos))
+            if atualizacao.diferentes:
+                nomes = [origem_no_json(bem, n) or n for n in atualizacao.diferentes]
+                logger.warning("%s: diferente do DBK, mantido o do DBK: %s", descricao, ", ".join(nomes))
+                conferir += nomes
+            if conferir:
+                resultado.conferir.append(numero)
             resultado.atualizados.append(numero)
             continue
 
@@ -198,6 +297,9 @@ def relatorio(resultado: Resultado) -> list[tuple[int, str]]:
         linhas.append((logging.INFO, f"  lançados como novos (bens do JSON): {numeros(resultado.novos)}"))
     if resultado.revisao:
         linhas.append((logging.WARNING, f"  REVISÃO, não gravados (bens do JSON): {numeros(resultado.revisao)}"))
+    if resultado.conferir:
+        linhas.append((logging.WARNING, "  CONFERIR, atualizados com campo diferente do DBK (mantido o do DBK; "
+                                        f"veja os avisos acima) (bens do JSON): {numeros(resultado.conferir)}"))
     if resultado.nao_informados:
         linhas.append((logging.WARNING, "  REVISÃO, bens do DBK que o JSON não atualizou (nada foi zerado "
                                         "nem apagado; a situação atual continua a do DBK):"))

@@ -1,6 +1,6 @@
 # 0006. Procurar o bem no DBK e atualizar em vez de lançar
 
-- **Status:** Aceito
+- **Status:** Aceito; substituído em parte por 0016 (o que muda num bem encontrado)
 - **Data:** 11/11/2026
 
 ## Contexto

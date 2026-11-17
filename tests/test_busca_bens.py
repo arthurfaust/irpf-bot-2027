@@ -81,12 +81,12 @@ def test_fundo_que_nao_esta_no_dbk_e_lancado_completo():
 
 # --- 1 encontrado ---
 
-def test_fundo_que_esta_no_dbk_tem_so_a_situacao_atual_atualizada():
+def test_fundo_que_esta_no_dbk_tem_a_situacao_atual_e_a_discriminacao_atualizadas():
     arquivo = dbk_com_fundo()
     [antes] = linhas_do_fundo(arquivo)
     total = len(arquivo.linhas)
-    novo = {**FUNDO, "codigo": "03", "situacao_anterior": "1000.00", "situacao_atual": "2345.67",
-            "discriminacao": "Outra descricao"}
+    novo = {**{k: v for k, v in FUNDO.items() if k != "bolsa"}, "codigo": "01",     # DBK: 07/03
+            "situacao_anterior": "1000.00", "situacao_atual": "2345.67", "discriminacao": "Outra descricao"}
 
     resultado = gravar(arquivo, novo)
 
@@ -94,9 +94,11 @@ def test_fundo_que_esta_no_dbk_tem_so_a_situacao_atual_atualizada():
     assert len(arquivo.linhas) == total                                    # nada inserido
     [depois] = linhas_do_fundo(arquivo)
     assert Registro27.VALOR_ATUAL.ler(depois) == "0000000234567"
-    # Só a situação atual e o controle mudam; discriminação e chave ficam as do DBK.
+    # Fundo: a discriminação é a do JSON (ADR 0016); o código diferente (01 no JSON, 03 no DBK) fica o
+    # do DBK e o bem entra em "conferir".
     diferencas = {nome for nome, campo in Registro27.campos().items() if campo.ler(antes) != campo.ler(depois)}
-    assert diferencas == {"VALOR_ATUAL", "CONTROLE"}
+    assert diferencas == {"VALOR_ATUAL", "DISCRIMINACAO", "CONTROLE"}
+    assert resultado.conferir == [1]
     assert Registro27.gravar_cod_controle(depois) == depois
 
 

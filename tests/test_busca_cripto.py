@@ -73,8 +73,9 @@ def test_btc_autocustodiante_atualiza_o_do_dbk_de_teste():
     assert resultado.atualizados == [1] and resultado.novos == []
     depois = arquivo.linhas[posicao]
     diferencas = {nome for nome, campo in Registro27.campos().items() if campo.ler(antes) != campo.ler(depois)}
-    assert diferencas == {"VALOR_ATUAL", "CONTROLE"}
+    assert diferencas == {"VALOR_ATUAL", "DISCRIMINACAO", "CONTROLE"}     # cripto: discriminação do JSON (ADR 0016)
     assert Registro27.VALOR_ATUAL.ler(depois) == "0000000432100"
+    assert Registro27.DISCRIMINACAO.ler(depois).rstrip() == "BTC EM CARTEIRA PROPRIA"
 
 
 def test_altcoin_e_encontrada_pela_sigla_e_pelo_custodiante():

@@ -3,7 +3,7 @@
   "bens": [
     {
       "grupo": "03", "codigo": "01", "pais": "105", "cnpj_cpf": "33.000.167/0001-01",
-      "discriminacao": "Acoes Petrobras PN - discriminacao nova (nao deve mudar)",
+      "discriminacao": "Acoes Petrobras PN - discriminacao nova (acao: substitui a do DBK)",
       "situacao_anterior": "1000.00", "situacao_atual": "1500.00",
       "bolsa": {"negociado": true, "codigo": "petr4"}
     },
