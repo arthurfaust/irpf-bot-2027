@@ -20,6 +20,9 @@ Origem:
       contribuição, 13º e imposto estiverem todos em branco; ColecaoRendPJTitular.getRendimentoVazioPorNIFontePagadora
       (fonte sem valores identificada pelo CPF/CNPJ).
     - Todos os campos obrigatórios no JSON (use "0.00"): escolha do projeto, para a IA não omitir valores.
+      Fonte com os quatro valores principais zerados é recusada, como a pendência do programa.
+    - A importação da declaração anterior traz as fontes com nome e CNPJ e os valores zerados
+      (informado pelo Arthur em 17/11/2026): é o caso que a busca preenche.
 """
 
 import logging
@@ -46,6 +49,8 @@ VALORES = {
     "irrf_decimo_terceiro": "IRRF_DECIMO_TERCEIRO",
 }
 CAMPOS_JSON = {"cnpj_cpf": "NI_PAGADOR", "nome": "NOME_PAGADOR", **VALORES}
+# RendPJTitular.verificaValores: pendência (erro) se estes quatro estão todos em branco.
+OBRIGATORIO_ALGUM_VALOR = ("rendimentos", "contribuicao_previdenciaria", "decimo_terceiro", "imposto_retido")
 
 # --- validação ---
 
@@ -88,6 +93,11 @@ def validar_item(item: dict, cpf_declarante: str | None) -> tuple[dict, list[str
             campos[nome_campo] = valor
         except ValueError as erro:
             erros.append(f"'{chave}': {erro}")
+
+    principais = [VALORES[chave] for chave in OBRIGATORIO_ALGUM_VALOR]
+    if all(nome in campos for nome in principais) and all(campos[nome] == 0 for nome in principais):
+        erros.append("rendimentos, contribuição previdenciária, 13º salário e imposto retido estão todos "
+                     "zerados (o programa acusa erro \"Faltam valores\")")
     return campos, erros
 
 def validar(itens: list[dict], cpf_declarante: str | None = None) -> tuple[list[dict], list[str]]:

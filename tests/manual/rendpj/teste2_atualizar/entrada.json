@@ -1,0 +1,15 @@
+{
+  "cpf": "77039677008",
+  "rendimentos_pj": [
+    {
+      "cnpj_cpf": "33.000.167/0001-01", "nome": "Empresa Teste Um Ltda - ja tem valores (revisao)",
+      "rendimentos": "90000.00", "contribuicao_previdenciaria": "9500.00", "imposto_retido": "13000.00",
+      "decimo_terceiro": "7500.00", "irrf_decimo_terceiro": "650.00"
+    },
+    {
+      "cnpj_cpf": "00.000.000/0001-91", "nome": "Banco Teste - nova",
+      "rendimentos": "3000.00", "contribuicao_previdenciaria": "0.00", "imposto_retido": "450.00",
+      "decimo_terceiro": "0.00", "irrf_decimo_terceiro": "0.00"
+    }
+  ]
+}

@@ -161,8 +161,11 @@ Decidido em 17/11/2026: fazer as fichas mais comuns antes da preparação para 2
 - [x] Rendimentos Tributáveis Recebidos de PJ pelo Titular (registro 21, ADR 0020): validação (CPF/CNPJ
   com dígito, diferente do declarante, nome, valores), busca pelo CPF/CNPJ (fonte sem valores no DBK
   é preenchida; com valores, revisão). Linhas idênticas às de um DBK do programa com 3 fontes.
-- [ ] Roteiro manual `tests/manual/rendpj/` com ida e volta: o programa recria a linha 24 do 13º e os
-  totais? A importação da declaração anterior traz as fontes sem valores? (pergunta ao Arthur)
+- [x] A importação da declaração anterior traz as fontes com nome e CNPJ e os valores zerados
+  (Arthur, 17/11/2026). Fonte do JSON com os quatro valores principais zerados passa a ser recusada.
+- [x] Roteiro manual `tests/manual/rendpj/`: teste1 parte de um DBK que simula a importação (2 fontes
+  sem valores) e preenche as duas + lança uma nova; teste2 manda para revisão a que já tem valores.
+- [ ] Confirmação no programa, com ida e volta: recria a linha 24 do 13º e os totais?
 - [ ] Pagamentos efetuados (26), dependentes (25), rendimentos de PJ de dependentes (32), isentos e
   exclusivos (23, 24, 83-89), dívidas (28).
 

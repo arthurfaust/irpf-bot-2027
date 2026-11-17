@@ -66,6 +66,9 @@ def test_controle_das_linhas_do_programa():
     ({"nome": ""}, "campo obrigatório 'nome' não informado"),
     ({"decimo_terceiro": None}, "campo obrigatório 'decimo_terceiro' não informado"),
     ({"salario": "1.00"}, "campo desconhecido 'salario'"),
+    ({"rendimentos": "0.00", "contribuicao_previdenciaria": "0", "imposto_retido": "0.00", "decimo_terceiro": "0.00"},
+     "rendimentos, contribuição previdenciária, 13º salário e imposto retido estão todos zerados "
+     "(o programa acusa erro \"Faltam valores\")"),
 ])
 def test_validacao(mudanca, erro):
     fonte = {k: v for k, v in {**UM, **mudanca}.items() if v is not None}
