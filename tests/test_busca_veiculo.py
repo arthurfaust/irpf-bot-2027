@@ -119,8 +119,14 @@ def test_veiculo_sem_registro_no_exterior_nao_bloqueia_os_do_brasil():
     assert resultado.novos == [1]
 
 
-def test_veiculo_do_json_sem_registro_no_exterior_e_lancado_como_novo():
+def test_veiculo_do_json_sem_registro_no_exterior_vai_para_revisao():
+    """Sem registro, o veículo do exterior não tem identificador; o DBK já tem um veículo nos EUA (ADR 0018)."""
     arquivo = dbk_do_programa()
     sem_registro = {k: v for k, v in CARRO_EXTERIOR.items() if k != "veiculo"}
     resultado = gravar(arquivo, sem_registro)
-    assert resultado.novos == [1]
+    assert resultado.revisao == [1]
+
+
+def test_veiculo_do_json_sem_registro_em_outro_pais_e_lancado_como_novo():
+    sem_registro = {**{k: v for k, v in CARRO_EXTERIOR.items() if k != "veiculo"}, "pais": "023"}
+    assert gravar(dbk_do_programa(), sem_registro).novos == [1]

@@ -15,8 +15,12 @@ parte dos bens já existe e só precisa da situação atual. A busca usa uma cha
     | Poupança (04/01) e conta corrente (06/01)  | grupo + código + banco + agência + conta (*)   |
     | Cripto 08/01-03, autocustodiante           | grupo + código + ativo + "AUTO"                |
     | Cripto 08/01-03, custodiado no Brasil      | grupo + código + ativo + CNPJ do custodiante   |
-    | Cripto custodiado no exterior, NFT, outros | sem busca: lançamento novo                     |
-    | Demais                                     | sem busca: lançamento novo                     |
+    | Cripto 08/01-03, custodiado no exterior    | grupo + código + ativo + "EXTERIOR" + país     |
+    | Ações e fundo (07/99) no exterior, negoc.  | grupo + código + país + código de negociação   |
+    | Imóvel no exterior                         | grupo + código + país + logradouro + número    |
+    | Demais bens no exterior                    | sem identificador: revisão se o DBK tem bem do |
+    |                                            | mesmo grupo, código e país; senão, novo (****) |
+    | Demais bens no Brasil (NFT, imóvel etc.)   | sem busca: lançamento novo                     |
 
 "Ativo" é a sigla da altcoin (08/02) ou da stablecoin (08/03); vazio no bitcoin (08/01).
 (*) Banco, agência e conta sem zeros à esquerda: a mesma conta da Caixa aparece com 12 dígitos no DBK
@@ -28,6 +32,9 @@ código ou com outro código.
 (***) Registro (Renavam, registro estrangeiro do veículo, de aeronave ou de embarcação) em maiúsculas,
 só com letras e números e sem zeros à esquerda: o programa completa com zeros o registro do veículo
 (ADR 0014), e o mesmo registro pode ter sido digitado com ou sem hífen.
+(****) ADR 0018: conta, ação ou fundo não negociado, títulos, créditos, VGBL, veículo sem registro etc.
+no exterior não têm campo que os identifique; lançar de novo duplicaria o bem do ano anterior.
+Endereço e código de negociação são comparados em maiúsculas, só com letras e números.
 
 Um bem de tipo com busca cujos campos da chave estão vazios no DBK (ex.: cripto de uma declaração
 antiga, sem custodiante) tem "chave incompleta": não é encontrado por nenhum bem do JSON, e o bem
@@ -60,12 +67,15 @@ CAMPO_DO_ATIVO = {"01": None, "02": "ALTCOIN", "03": "STABLECOIN"}    # cripto c
 GRUPO_BENS_MOVEIS = "02"
 ACOES = ("03", "01")
 ATIVOS_EM_BOLSA = ("04", "04")                                        # BDRs, opções e outros (sem CNPJ)
+GRUPO_IMOVEIS = "01"
+NEGOCIADOS_NO_EXTERIOR = {ACOES, ("07", "99")}                        # ações e fundo no exterior com código
 
 @dataclass(frozen=True)
 class Identificacao:
     tipo: tuple          # bens do mesmo tipo (ex.: ("08", "01")): usado para achar chaves incompletas
     chave: tuple | None  # chave completa, ou None se algum campo dela está vazio
     familia: tuple | None = None    # bens que podem ser o mesmo apesar da chave diferente (ações: mesmo CNPJ)
+    sem_identificador: bool = False # bem do exterior sem campo que o identifique (ADR 0018)
 
 def identificar_acao(grupo: str, codigo: str, campos: dict) -> Identificacao:
     """Ação no Brasil: CNPJ + código de negociação (vazio se não é negociada em bolsa)."""
@@ -88,6 +98,10 @@ def chave_da_conta(grupo: str, codigo: str, campos: dict) -> tuple | None:
         return None
     return (grupo, codigo, banco, agencia, conta)
 
+def so_letras_e_numeros(valor) -> str:
+    """"5th Avenue, 100" -> "5THAVENUE100"."""
+    return "".join(c for c in str(valor or "").upper() if c.isalnum())
+
 def normalizar_registro(valor) -> str:
     """"0ABC1234-FL" -> "ABC1234FL"; "00987654322" -> "987654322"; "pt-abc" -> "PTABC"."""
     return "".join(c for c in str(valor or "").upper() if c.isalnum()).lstrip("0")
@@ -104,7 +118,19 @@ def identificar(campos: dict) -> Identificacao | None:
     if grupo == GRUPO_BENS_MOVEIS and codigo in REGISTRO_BEM_MOVEL:
         registro = normalizar_registro(campos.get(REGISTRO_BEM_MOVEL[codigo]))
         tipo = (grupo, codigo, pais)                         # o país separa os tipos: no exterior o registro é opcional
+        if not registro and pais != BRASIL:
+            return Identificacao(tipo, None, sem_identificador=True)
         return Identificacao(tipo, (grupo, codigo, pais, registro) if registro else None)
+
+    if pais != BRASIL and (grupo, codigo) in NEGOCIADOS_NO_EXTERIOR and str(campos.get("BOLSA", "")) == "1":
+        cod = str(campos.get("COD_NEGOCIACAO", "")).strip().upper()
+        return Identificacao((grupo, codigo, pais), (grupo, codigo, pais, cod) if cod else None)
+
+    if pais != BRASIL and grupo == GRUPO_IMOVEIS:
+        logradouro = so_letras_e_numeros(campos.get("LOGRADOURO"))
+        tipo = (grupo, codigo, pais)
+        return Identificacao(tipo, (grupo, codigo, pais, logradouro, so_letras_e_numeros(campos.get("NUMERO")))
+                             if logradouro else None)
 
     if (grupo, codigo) == ACOES and pais == BRASIL:
         return identificar_acao(grupo, codigo, campos)
@@ -126,9 +152,12 @@ def identificar(campos: dict) -> Identificacao | None:
             return Identificacao(tipo, None)
         if str(campos.get("AUTOCUSTODIANTE", "")) == "1":
             return Identificacao(tipo, (grupo, codigo, ativo, "AUTO"))
-        if pais != BRASIL:
-            return None                                      # custodiado no exterior: não há CNPJ
+        if pais != BRASIL:                                   # custodiado no exterior: não há CNPJ (ADR 0018)
+            return Identificacao((grupo, codigo, pais), (grupo, codigo, ativo, "EXTERIOR", pais))
         return Identificacao(tipo, (grupo, codigo, ativo, cnpj) if cnpj else None)
+
+    if pais and pais != BRASIL:
+        return Identificacao((grupo, codigo, pais), None, sem_identificador=True)
 
     return None
 
@@ -152,6 +181,15 @@ def procurar_semelhantes(arquivo: ArquivoDBK, identificacao: Identificacao) -> l
     for i in arquivo.indices(Registro27.TIPO):
         outra = identificar_linha(arquivo.linhas[i])
         if outra and outra.familia == identificacao.familia and outra.chave != identificacao.chave:
+            posicoes.append(i)
+    return posicoes
+
+def procurar_mesmo_tipo(arquivo: ArquivoDBK, tipo: tuple) -> list[int]:
+    """Posições das linhas 27 do DBK do mesmo tipo (para bem do exterior sem identificador)."""
+    posicoes = []
+    for i in arquivo.indices(Registro27.TIPO):
+        identificacao = identificar_linha(arquivo.linhas[i])
+        if identificacao and identificacao.tipo == tipo:
             posicoes.append(i)
     return posicoes
 

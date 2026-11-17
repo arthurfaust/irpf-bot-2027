@@ -1,6 +1,6 @@
 # 0015. Chave da busca de veículo, aeronave e embarcação
 
-- **Status:** Aceito (complementa 0006 e 0007)
+- **Status:** Aceito (complementa 0006 e 0007); substituído em parte por 0018 (veículo do exterior sem registro)
 - **Data:** 17/11/2026
 
 ## Contexto

@@ -52,12 +52,9 @@ def test_chave_da_cripto(bem, chave):
     assert chave_busca(validados(bem)[0]) == chave
 
 
-@pytest.mark.parametrize("bem", [
-    {**BTC_CUSTODIADO, "pais": "249", "cripto": {"autocustodiante": False}},      # custodiado no exterior
-    {**BTC_CUSTODIADO, "codigo": "10"},                                           # NFT
-], ids=["custodiado_no_exterior", "nft"])
-def test_cripto_sem_busca(bem):
-    assert chave_busca(validados(bem)[0]) is None
+def test_nft_no_brasil_nao_tem_busca():
+    assert chave_busca(validados({**BTC_CUSTODIADO, "codigo": "10"})[0]) is None
+    # cripto custodiada no exterior: tests/test_busca_exterior.py (ADR 0018)
 
 
 # --- 1 encontrado / 0 encontrados ---

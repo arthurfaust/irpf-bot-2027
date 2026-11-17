@@ -76,11 +76,9 @@ def test_linhas_do_programa_tem_as_mesmas_chaves_do_json():
         assert identificar_linha(linha_de(arquivo, bem["discriminacao"])).chave == chave_busca(campos)
 
 
-@pytest.mark.parametrize("bem", [com(PETR4, pais="249", cnpj_cpf=None), com(BDR, bolsa={"negociado": False})],
-                         ids=["acao_no_exterior", "bdr_nao_negociado"])
-def test_sem_busca(bem):
-    bem = {k: v for k, v in bem.items() if v is not None}
-    assert chave_busca(validados(bem)[0]) is None
+def test_bdr_nao_negociado_nao_tem_busca():
+    assert chave_busca(validados(com(BDR, bolsa={"negociado": False}))[0]) is None
+    # ação no exterior: tests/test_busca_exterior.py (ADR 0018)
 
 
 # --- atualização ---

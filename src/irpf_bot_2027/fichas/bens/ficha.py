@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 
 from irpf_bot_2027.dbk import ArquivoDBK
 from irpf_bot_2027.fichas.bens.busca import (
-    chave_busca, identificar, procurar, procurar_incompletos, procurar_semelhantes,
+    chave_busca, identificar, procurar, procurar_incompletos, procurar_mesmo_tipo, procurar_semelhantes,
 )
 from irpf_bot_2027.fichas.bens.entrada import CAMPOS_SIMPLES
 from irpf_bot_2027.fichas.bens.validacao import validar_bem
@@ -174,6 +174,7 @@ class BemDoDBK:
     codigo: str
     com_busca: bool             # tem chave completa: um bem do JSON o encontraria (busca.py)
     chave_incompleta: bool = False   # o tipo tem busca, mas falta algum campo da chave no DBK
+    sem_identificador: bool = False  # bem do exterior sem campo que o identifique (ADR 0018)
 
     def descrever(self) -> str:
         return f"chave {self.chave} ({self.grupo}/{self.codigo}, {nome_codigo(self.grupo, self.codigo)})"
@@ -191,8 +192,10 @@ def bem_do_dbk(linha: str) -> BemDoDBK:
     lido = Registro27.ler_tudo(linha)
     identificacao = identificar(lido)
     com_busca = bool(identificacao and identificacao.chave)
+    sem_identificador = bool(identificacao and identificacao.sem_identificador)
     return BemDoDBK(int(lido["CHAVE"]), lido["GRUPO"], lido["CODIGO"], com_busca,
-                    chave_incompleta=bool(identificacao) and not com_busca)
+                    chave_incompleta=bool(identificacao) and not com_busca and not sem_identificador,
+                    sem_identificador=sem_identificador)
 
 def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -> Resultado:
     """Grava os bens (já validados) no arquivo, na ordem do JSON.
@@ -206,7 +209,8 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
     existe, os dois são lançados, com aviso.
     Se nada foi encontrado, mas o DBK tem bem do mesmo tipo com a chave incompleta, o bem do JSON
     vai para revisão (pode ser o mesmo bem; lançá-lo criaria duplicidade). O mesmo vale para uma
-    ação não encontrada quando o DBK tem outra ação do mesmo CNPJ (outro código de negociação ou sem ele).
+    ação não encontrada quando o DBK tem outra ação do mesmo CNPJ (outro código de negociação ou sem ele)
+    e para o bem do exterior sem campo identificador quando o DBK tem bem do mesmo grupo, código e país.
     Os bens que já estavam no DBK e não foram atualizados vão para Resultado.nao_informados;
     nunca são zerados nem apagados.
     """
@@ -281,6 +285,13 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
             resultado.revisao.append(numero)
             continue
 
+        identificacao = identificar(campos)
+        if identificacao and identificacao.sem_identificador and da_entrada(procurar_mesmo_tipo(arquivo, identificacao.tipo)):
+            logger.warning("%s: bem do exterior sem campo identificador e o DBK já tem bem do mesmo grupo, código "
+                           "e país; não foi gravado (revisão).", descricao)
+            resultado.revisao.append(numero)
+            continue
+
         if chave_bem and chaves_json[chave_bem] > 1:
             logger.warning("%s: outro bem do JSON tem a mesma chave; os dois são lançados como novos, mas "
                            "na próxima declaração cairão em revisão (2 lançamentos com a mesma chave).", descricao)
@@ -319,6 +330,8 @@ def relatorio(resultado: Resultado) -> list[tuple[int, str]]:
         for bem in resultado.nao_informados:
             if bem.com_busca:
                 aviso = ""
+            elif bem.sem_identificador:
+                aviso = " - bem do exterior sem campo identificador: confira e atualize no programa"
             elif bem.chave_incompleta:
                 aviso = " - dados da chave em branco ou fora do formato no DBK: confira e complete no programa"
             else:

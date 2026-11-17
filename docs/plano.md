@@ -136,7 +136,10 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
   (só linhas 27) recriou a linha 24 (exclusivo, código 13: 1.555,00 no teste1 e 1.835,00 no teste2)
   e as 5 linhas 37, iguais às do DBK digitado na tela; as linhas 27 voltaram idênticas (4 de 4 nos
   dois testes). A decisão do ADR 0017 de não gravar 24 e 37 está confirmada.
-- [ ] Busca dos bens do exterior (conta, ações, fundo, cripto custodiada): hoje entram como novos todo ano.
+- [x] Busca dos bens do exterior (17/11/2026, ADR 0018): ações/fundo negociados pelo código, cripto
+  custodiada pelo ativo, imóvel pelo endereço (sempre com o país); os sem identificador vão para
+  revisão se o DBK já tem bem do mesmo grupo, código e país.
+- [ ] Bens sem busca no Brasil (imóveis, joias, quotas etc.): estender a regra do ADR 0018?
 
 ### Fase 5 — preparação para o IRPF 2027
 
