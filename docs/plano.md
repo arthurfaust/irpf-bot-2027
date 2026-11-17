@@ -150,7 +150,9 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
   (família: mesmo código e município); bens com CNPJ/CPF por grupo + código + CNPJ; os sem
   identificador vão para revisão se o DBK tem bem do mesmo grupo e código. Todo bem tem busca agora.
 - [x] Roteiro manual `tests/manual/brasil/` (imóveis, CDBs, joia, quotas; teste1_inserir → teste2_atualizar).
-- [ ] Confirmação no programa do roteiro `brasil`, com ida e volta.
+- [x] **Confirmado no programa IRPF 2026 (17/11/2026)**: roteiro `brasil` restaurado e gravado de novo;
+  linhas 27 idênticas byte a byte (6 de 6 e 8 de 8), totais 569.000,00/570.200,00 e
+  569.000,00/1.261.200,00.
 
 ### Fase 5 — preparação para o IRPF 2027
 
