@@ -121,7 +121,9 @@ dependentes passam de um ano para o outro. A busca deve ser opção de cada fich
 - [x] Busca de veículo, aeronave e embarcação (17/11/2026, ADR 0015): grupo + código + país +
   registro (maiúsculas, só letras e números, sem zeros à esquerda).
 - [x] Roteiro manual `tests/manual/veiculo/` (teste1_inserir → teste2_atualizar), como os anteriores.
-- [ ] Confirmação no programa: restaurar as duas saídas do roteiro de veículos.
+- [x] **Confirmado no programa IRPF 2026 (17/11/2026)**: as duas saídas do roteiro de veículos foram
+  restauradas e gravadas de novo; as linhas 27 voltaram idênticas byte a byte (5 de 5 e 7 de 7, totais
+  320.000,00/400.000,00 e 320.000,00/462.000,00); só mudaram IR, 20 e T9 (ADR 0002).
 
 Demais blocos: `exterior` (aplicação financeira e lucros e
 dividendos; usar `numero(..., permite_negativo=True)` no rendimento ou perda). O bloco `exterior`
