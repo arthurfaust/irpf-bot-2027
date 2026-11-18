@@ -172,7 +172,15 @@ Decidido em 17/11/2026: fazer as fichas mais comuns antes da preparação para 2
   programa), dependente/alimentando pelo CPF nos registros 25/35 do DBK, pensão com CPF e nome do
   alimentando, busca por código + tipo + dependente + beneficiário (igual → revisão). Linhas idênticas
   às de um DBK do programa com 8 pagamentos.
-- [ ] Roteiro manual de pagamentos e confirmação no programa (ordem das linhas, totais, pendências).
+- [x] Roteiro manual `tests/manual/pagamentos/`: teste1 parte de uma base com dependente e alimentanda
+  e lança 8 pagamentos fora da ordem do código (+1 revisão: dependente fora do DBK); teste2 manda 3
+  repetidos para revisão e lança 2.
+- [x] Confirmado no programa em 18/11/2026, com ida e volta: as linhas 26 regravadas são idênticas às
+  do bot nos dois testes, mas o programa as ordena pelo código (no mesmo código, mantém a ordem).
+  Linhas 21, 24, 25 e 35 inalteradas. O bot passou a inserir na posição do código (ADR 0022); as
+  saídas regeradas têm as linhas 26 na mesma ordem dos regravados. Verificar pendências sem nenhum
+  item de Pagamentos Efetuados (parcela não dedutível igual ao valor pago aceita); só as do cadastro
+  da alimentanda ("Alimentando do", tipo de processo), que o bot não preenche.
 - [ ] A importação da declaração anterior traz pagamentos? Se trouxer, como (valores zerados?).
 - [ ] Dependentes (25), rendimentos de PJ de dependentes (32), isentos e exclusivos (23, 24, 83-89),
   dívidas (28), doações efetuadas (26, códigos 40-47, 80, 81).
