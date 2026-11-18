@@ -191,7 +191,14 @@ Decidido em 17/11/2026: fazer as fichas mais comuns antes da preparação para 2
   CPF (encontrado: campos em branco preenchidos, como o tipo que a importação não traz; diferente →
   aviso), novo com a próxima chave. Linhas idênticas às de um DBK do programa com 4 dependentes.
   A ficha roda antes de pagamentos.
-- [ ] Roteiro manual de dependentes e confirmação no programa.
+- [x] Roteiro manual `tests/manual/dependentes/`: teste1 (4 novos + 2 pagamentos deles), teste2 (nome
+  diferente mantido, neto novo com chave 5), teste3 a partir da importada (tipo preenchido, mãe nova).
+- [x] Confirmado no programa em 18/11/2026, com ida e volta: linhas 25 e 26 regravadas idênticas às do
+  bot, exceto o DDD/celular do cônjuge, que o programa descartou porque o titular de teste mora no
+  exterior e o cônjuge "mora com o titular" (regra da tela; registrado na ficha). Pendência "Tipo de
+  dependente" do importado sumiu. Pendência "Nome tem caracteres inválidos" com hífen no nome: o bot
+  passou a recusar nome fora da regra do programa (ValidadorNomeIRPF, `nome_pessoa.py`); os JSONs do
+  roteiro foram corrigidos e as saídas regeradas.
 - [ ] Alimentandos (35), rendimentos de PJ de dependentes (32), isentos e exclusivos (23, 24, 83-89),
   dívidas (28), doações efetuadas (26, códigos 40-47, 80, 81).
 

@@ -55,6 +55,11 @@ def test_linha_igual_a_gravada_pelo_programa(item, chave, linha_do_programa):
     ({"tipo": "12"}, "'tipo': esperado um dos códigos da ficha"),
     ({"tipo": None}, "campo obrigatório 'tipo' não informado"),
     ({"nome": ""}, "campo obrigatório 'nome' não informado"),
+    ({"nome": "Mae Teste - Nova"}, "'nome': só letras e espaços"),     # pendência vista no programa
+    ({"nome": "Joana D'Avila"}, "'nome': só letras e espaços"),
+    ({"nome": "Filho 2"}, "'nome': não pode ter números"),
+    ({"nome": "Espolio de Fulano"}, "'nome': informe o nome sem a palavra ESPÓLIO"),
+    ({"nome": " ".join("ABCDEFGHIJKLMNOP")}, "'nome': tem 16 partes; o máximo é 15"),
     ({"cpf": "777.888.999-42"}, "'cpf': CPF (11 dígitos) inválido"),
     ({"cpf": "770.396.770-08"}, "'cpf': o dependente não pode ser o próprio declarante"),
     ({"data_nascimento": "10/05/2015"}, "'data_nascimento': esperada data no formato \"AAAA-MM-DD\""),
@@ -71,6 +76,10 @@ def test_validacao(mudanca, erro):
     item = {k: v for k, v in {**FILHO, **mudanca}.items() if v is not None}
     _, erros = validar_item(item, CPF)
     assert len(erros) == 1 and erros[0].startswith(erro), erros
+
+
+def test_nome_com_acento_e_aceito():
+    assert validar_item({**FILHO, "nome": "João Conceição Ávila"}, CPF)[1] == []
 
 
 def test_limite_de_idade_do_universitario():

@@ -29,6 +29,11 @@ Origem:
       resposta; e-mail em maiúsculas.
     - Importação da declaração anterior: traz o dependente com a chave, nome, nascimento e CPF e sem o
       tipo (DBK importado do IRPF 2025 em 18/11/2026, tests/dados/pagamentos_importados.DBK).
+    - Nome: regra do ValidadorNomeIRPF (leiautes/irpf2026/nome_pessoa.py); só letras e espaços.
+    - DDD e celular: a tela só os mostra se o titular mora no Brasil ou se o dependente não mora com
+      ele (PainelDependentesDetalhe.configuraIndicadorTitularExterior). Com titular no exterior e
+      "mora com o titular", o programa descarta os dois na restauração (roteiro manual de 18/11/2026).
+      O bot não lê a residência do titular; grava o que veio no JSON.
 """
 
 import logging
@@ -41,7 +46,7 @@ from irpf_bot_2027.comum.conversoes import so_digitos
 from irpf_bot_2027.comum.documentos import cpf_valido
 from irpf_bot_2027.comum.texto import caracteres_fora_do_latin1, normalizar_texto
 from irpf_bot_2027.dbk import ArquivoDBK
-from irpf_bot_2027.leiautes.atual import ANO_CALENDARIO, Registro25, Registro35
+from irpf_bot_2027.leiautes.atual import ANO_CALENDARIO, Registro25, Registro35, erro_nome_pessoa
 from irpf_bot_2027.leiautes.atual import tabela_dependentes as tabela
 
 logger = logging.getLogger(__name__)
@@ -88,6 +93,8 @@ def validar_item(item: dict, cpf_declarante: str | None) -> tuple[dict, list[str
             erros.append(f"'nome': caractere(s) não aceito(s) pelo programa: {', '.join(repr(c) for c in fora)}")
         elif len(nome) > Registro25.NOME.tamanho:
             erros.append(f"'nome': tem {len(nome)} caracteres; o máximo é {Registro25.NOME.tamanho}")
+        elif erro_nome_pessoa(nome):
+            erros.append(f"'nome': {erro_nome_pessoa(nome)}")
         else:
             campos["NOME"] = nome
 
