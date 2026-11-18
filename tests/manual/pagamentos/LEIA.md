@@ -8,3 +8,7 @@
 - teste2: médico do titular, exterior com o mesmo nome e pensão repetidos vão para revisão; o mesmo
   médico para o dependente e um dentista são lançados (o dentista com parcela não dedutível igual ao
   valor pago).
+- teste3 (separado dos outros dois): parte de `importada/`, a declaração importada do IRPF 2025 (os
+  7 pagamentos com valores zerados; cópia de `tests/dados/pagamentos_importados.DBK`). Preenche 6, lança
+  o 36 (novo, entra antes do aluguel) e deixa o aluguel sem valor; no 99 a descrição do JSON é
+  diferente e fica a do DBK (CONFERIR no relatório).

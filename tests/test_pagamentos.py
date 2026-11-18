@@ -135,8 +135,8 @@ def test_pagamento_ja_no_dbk_vai_para_revisao(caplog):
     resultado = gravar(arquivo, MEDICO, {**MEDICO, "cnpj_cpf": "555.666.777-20"})
     assert resultado.revisao == [1] and resultado.novos == [2]
     assert len(arquivo.linhas) == len(antes) + 1
-    assert resultado.dbk_nao_informados == [1, 3, 4, 5, 6, 7, 8]
-    assert "mesmo código, tipo e beneficiário" in caplog.text
+    assert resultado.dbk_nao_informados == [1, 4, 5, 6, 7, 8, 9]          # o novo médico é o item 3
+    assert "mesmo código, tipo e beneficiário, com valores" in caplog.text
 
 
 def test_exterior_e_identificado_pelo_nome():
@@ -151,12 +151,60 @@ def test_dependente_fora_do_dbk_vai_para_revisao():
     assert resultado.sem_vinculado == [1] and arquivo.linhas == antes
 
 
+# --- pagamentos importados da declaração anterior (pagamentos_importados.DBK) ---
+# Importado do IRPF 2025 em 18/11/2026: os mesmos pagamentos de pagamentos_programa.DBK menos o 36,
+# com o valor pago e a parcela não dedutível zerados. A descrição do 99 é "DESCRICAO TESTE 7".
+
+def dbk_importado() -> ArquivoDBK:
+    return ArquivoDBK.ler(DADOS / "pagamentos_importados.DBK")
+
+
+def test_importados_sem_valores():
+    from irpf_bot_2027.fichas.pagamentos.ficha import sem_valores
+    assert all(sem_valores(l) for l in dbk_importado().linhas_do_tipo("26"))
+    assert not any(sem_valores(l) for l in LINHAS)
+
+
+def test_pagamentos_importados_recebem_os_valores_do_json():
+    arquivo = dbk_importado()
+    resultado = gravar(arquivo, *ITENS)
+    assert resultado.preenchidos == [1, 2, 3, 4, 5, 7, 8] and resultado.novos == [6]
+    assert resultado.descricao_mantida == [8] and resultado.revisao == []
+    assert resultado.dbk_sem_valores == [] and resultado.dbk_nao_informados == []
+    gravadas = arquivo.linhas_do_tipo("26")
+    assert gravadas[:7] == LINHAS[:7]                                  # iguais às digitadas no programa
+    assert Registro26.DESCRICAO.ler(gravadas[7]).strip() == "DESCRICAO TESTE 7"    # a do DBK fica
+    assert Registro26.gravar_cod_controle(gravadas[7]) == gravadas[7]
+
+
+def test_pagamento_importado_que_nao_veio_continua_sem_valores():
+    resultado = gravar(dbk_importado(), MEDICO)
+    assert resultado.preenchidos == [1]
+    assert resultado.dbk_sem_valores == [1, 3, 4, 5, 6, 7]
+
+
+def test_dois_do_json_para_um_importado_vao_para_revisao():
+    arquivo = dbk_importado()
+    antes = list(arquivo.linhas)
+    resultado = gravar(arquivo, MEDICO, {**MEDICO, "valor_pago": "300.00"})
+    assert resultado.revisao == [1, 2] and arquivo.linhas == antes
+
+
+def test_novo_antes_dos_importados_nao_desloca_a_busca():
+    """Um pagamento novo de código menor entra antes dos importados; a busca continua achando os demais."""
+    arquivo = dbk_importado()
+    resultado = gravar(arquivo, {**MEDICO, "codigo": "09", "nome": "Fono Teste"}, MEDICO)
+    assert resultado.novos == [1] and resultado.preenchidos == [2]
+    assert [Registro26.CODIGO.ler(l) for l in arquivo.linhas_do_tipo("26")][:3] == ["01", "09", "10"]
+    assert resultado.dbk_sem_valores == [1, 4, 5, 6, 7, 8]          # numeração da ficha já com o 09
+
+
 def test_relatorio_sem_dados_do_cliente():
     resultado = gravar(dbk_do_programa(), MEDICO, {**PLANO, "cpf_dependente_alimentando": "444.555.666-19"},
                        {**ALUGUEL, "cnpj_cpf": "00.000.000/0001-91"})
     texto = "\n".join(t for _, t in pagamentos.relatorio(resultado))
-    assert "1 novo(s), 2 para revisão" in texto
-    assert "itens da ficha): 1, 3, 4, 5, 6, 7, 8" in texto
+    assert "0 preenchido(s), 1 novo(s), 2 para revisão" in texto
+    assert "itens da ficha): 1, 3, 4, 5, 6, 7, 9" in texto
     assert not any(d in texto for d in ("44455566619", "MEDICO", "1500", "LOCADOR"))
 
 
@@ -166,5 +214,5 @@ def test_main_grava_pagamentos_com_as_outras_fichas(tmp_path):
     from test_fichas_e_leiaute import rodar_main
     execucao, saida = rodar_main(tmp_path, {"cpf": CPF, "pagamentos": [MEDICO, ALUGUEL]})
     assert execucao.returncode == 0, execucao.stderr
-    assert "Pagamentos Efetuados: 2 novo(s), 0 para revisão" in execucao.stderr
+    assert "Pagamentos Efetuados: 0 preenchido(s), 2 novo(s), 0 para revisão" in execucao.stderr
     assert ArquivoDBK.ler(saida).linhas_do_tipo("26")[-2:] == [LINHAS[1], LINHAS[6]]

@@ -35,7 +35,7 @@ def main() -> None:
 
     # 1. Ler e conferir o DBK de entrada
     arquivo = ArquivoDBK.ler(config.arquivo_entrada)
-    logger.info("Arquivo de entrada: %s (%d linhas)", config.arquivo_entrada.name, len(arquivo.linhas))
+    logger.info("Arquivo de entrada: %s (%d linhas)", config.arquivo_entrada, len(arquivo.linhas))
 
     erro_exercicio = verificar_exercicio(arquivo)
     if erro_exercicio:
@@ -44,7 +44,7 @@ def main() -> None:
 
     # 2. Ler o JSON do cliente
     dados = json.loads(config.arquivo_dados.read_text(encoding='utf-8'))
-    logger.info("Dados do cliente: %s", config.arquivo_dados.name)
+    logger.info("Dados do cliente: %s", config.arquivo_dados)
 
     erro_cpf = conferir_cpf(dados, arquivo.cpf_declarante)
     if erro_cpf:

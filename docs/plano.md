@@ -181,7 +181,12 @@ Decidido em 17/11/2026: fazer as fichas mais comuns antes da preparação para 2
   saídas regeradas têm as linhas 26 na mesma ordem dos regravados. Verificar pendências sem nenhum
   item de Pagamentos Efetuados (parcela não dedutível igual ao valor pago aceita); só as do cadastro
   da alimentanda ("Alimentando do", tipo de processo), que o bot não preenche.
-- [ ] A importação da declaração anterior traz pagamentos? Se trouxer, como (valores zerados?).
+- [x] A importação da declaração anterior traz os pagamentos com todos os campos e o valor pago e a
+  parcela não dedutível zerados (confirmado importando do IRPF 2025 em 18/11/2026). A busca passou a
+  preencher o pagamento sem valores (ADR 0023); o relatório numera pela ficha já gravada.
+- [x] Roteiro `tests/manual/pagamentos/teste3_importada/` confirmado no programa em 18/11/2026, com ida
+  e volta: as 8 linhas 26 regravadas são idênticas às do bot, na mesma ordem (6 preenchidas, o 36 novo
+  antes do aluguel); só os totais (19 e 20) foram recalculados pelo programa.
 - [ ] Dependentes (25), rendimentos de PJ de dependentes (32), isentos e exclusivos (23, 24, 83-89),
   dívidas (28), doações efetuadas (26, códigos 40-47, 80, 81).
 

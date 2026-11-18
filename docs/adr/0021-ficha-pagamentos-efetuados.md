@@ -1,6 +1,6 @@
 # 0021. Ficha Pagamentos Efetuados
 
-- **Status:** Aceito; substituído em parte por 0022 (posição da linha nova)
+- **Status:** Aceito; substituído em parte por 0022 (posição da linha nova) e 0023 (pagamento já no DBK)
 - **Data:** 18/11/2026
 
 ## Contexto
