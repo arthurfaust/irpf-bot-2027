@@ -2,8 +2,9 @@
 
 Bot que insere lançamentos da declaração de IRPF direto no arquivo `.DBK` (cópia de segurança do
 programa IRPF da Receita), a partir de um JSON com os dados do cliente. Hoje cobre as fichas Bens e
-Direitos (registro 27), Rendimentos Tributáveis Recebidos de PJ pelo Titular (registro 21) e
-Pagamentos Efetuados (registro 26) com o leiaute do IRPF 2026; o alvo final é o IRPF 2027.
+Direitos (registro 27), Rendimentos Tributáveis Recebidos de PJ pelo Titular (registro 21),
+Dependentes (registro 25) e Pagamentos Efetuados (registro 26) com o leiaute do IRPF 2026; o alvo
+final é o IRPF 2027.
 
 Plano e pendências: [docs/plano.md](docs/plano.md). Decisões de arquitetura: [docs/adr/](docs/adr/README.md).
 Leia os dois antes de começar uma tarefa.
@@ -51,12 +52,13 @@ src/irpf_bot_2027/
 ├── comum/            conversões (sim/não, dígitos, datas, números), texto, CPF/CNPJ (documentos.py)
 ├── leiautes/
 │   ├── atual.py      ÚNICO ponto de importação do leiaute (troca de ano = mudar os imports daqui)
-│   └── irpf2026/     cabeçalho, registros 21, 25, 26, 27 e 35, tabelas de bens e de pagamentos,
-│                     países, bancos, regras da tela
+│   └── irpf2026/     cabeçalho, registros 21, 25, 26, 27 e 35, tabelas de bens, de pagamentos e de
+│                     dependentes, países, bancos, regras da tela
 └── fichas/
-    ├── __init__.py   FICHAS = (rendimentos_pj, pagamentos, bens): cada ficha expõe NOME, CHAVE_JSON,
-    │                 validar(itens, cpf_declarante), inserir(), relatorio()
+    ├── __init__.py   FICHAS = (rendimentos_pj, dependentes, pagamentos, bens): cada ficha expõe NOME,
+    │                 CHAVE_JSON, validar(itens, cpf_declarante), inserir(), relatorio()
     ├── rendimentos_pj/ ficha.py: validação, busca pelo CPF/CNPJ da fonte, inserção (registro 21)
+    ├── dependentes/  ficha.py: validação, busca pelo CPF, preenchimento do importado, inserção (25)
     ├── pagamentos/   ficha.py: validação por código, dependente/alimentando pelo CPF, busca, inserção (26)
     └── bens/         entrada.py (JSON → campos), validacao.py, busca.py (chave e busca no DBK),
                       ficha.py (atualização, montagem e inserção)

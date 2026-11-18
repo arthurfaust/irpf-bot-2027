@@ -35,7 +35,7 @@ def test_nova_linha_entra_depois_da_ultima_do_mesmo_tipo():
 QUEBRA_NO_FIM = {"entrada": False, "programa_com_imovel": False, "contas_programa": True, "bolsa_programa": True,
                  "veiculo_programa": True, "exterior_programa": True,
                  "rendpj_programa": True, "pagamentos_programa": True,
-                 "pagamentos_importados": True}
+                 "pagamentos_importados": True, "dependentes_programa": True}
 
 
 @pytest.mark.parametrize("dbk", DBKS_DO_PROGRAMA, ids=lambda dbk: dbk.stem)

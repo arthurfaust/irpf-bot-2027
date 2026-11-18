@@ -7,6 +7,12 @@
       "decimo_terceiro": "7000.00", "irrf_decimo_terceiro": "600.00"
     }
   ],
+  "dependentes": [
+    {
+      "tipo": "21", "nome": "Joao Teste", "cpf": "222.333.444-05", "data_nascimento": "2015-05-10",
+      "mora_com_titular": true
+    }
+  ],
   "pagamentos": [
     {
       "codigo": "10", "tipo": "T", "cnpj_cpf": "444.555.666-19", "nome": "Medico X",

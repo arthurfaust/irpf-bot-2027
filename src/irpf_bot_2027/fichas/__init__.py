@@ -12,9 +12,10 @@ Para acrescentar uma ficha: criar o subpacote com essa forma e incluí-lo em FIC
 A ordem de FICHAS é a ordem em que elas são validadas e inseridas.
 """
 
-from irpf_bot_2027.fichas import bens, pagamentos, rendimentos_pj
+from irpf_bot_2027.fichas import bens, dependentes, pagamentos, rendimentos_pj
 
-FICHAS = (rendimentos_pj, pagamentos, bens)
+# dependentes antes de pagamentos: um dependente novo pode receber pagamentos na mesma execução.
+FICHAS = (rendimentos_pj, dependentes, pagamentos, bens)
 
 # Chaves do JSON que não são de nenhuma ficha, mas são esperadas (não geram aviso).
 CHAVES_JSON_CONHECIDAS = {"cpf"}

@@ -187,7 +187,12 @@ Decidido em 17/11/2026: fazer as fichas mais comuns antes da preparação para 2
 - [x] Roteiro `tests/manual/pagamentos/teste3_importada/` confirmado no programa em 18/11/2026, com ida
   e volta: as 8 linhas 26 regravadas são idênticas às do bot, na mesma ordem (6 preenchidas, o 36 novo
   antes do aluguel); só os totais (19 e 20) foram recalculados pelo programa.
-- [ ] Dependentes (25), rendimentos de PJ de dependentes (32), isentos e exclusivos (23, 24, 83-89),
+- [x] Dependentes (registro 25, ADR 0024): validação (tipos, idade, CPF, contato, raça/cor), busca pelo
+  CPF (encontrado: campos em branco preenchidos, como o tipo que a importação não traz; diferente →
+  aviso), novo com a próxima chave. Linhas idênticas às de um DBK do programa com 4 dependentes.
+  A ficha roda antes de pagamentos.
+- [ ] Roteiro manual de dependentes e confirmação no programa.
+- [ ] Alimentandos (35), rendimentos de PJ de dependentes (32), isentos e exclusivos (23, 24, 83-89),
   dívidas (28), doações efetuadas (26, códigos 40-47, 80, 81).
 
 ### Fase 5 — preparação para o IRPF 2027
