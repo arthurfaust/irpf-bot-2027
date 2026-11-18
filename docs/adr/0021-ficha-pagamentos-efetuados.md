@@ -1,6 +1,6 @@
 # 0021. Ficha Pagamentos Efetuados
 
-- **Status:** Aceito
+- **Status:** Aceito; substituído em parte por 0022 (posição da linha nova)
 - **Data:** 18/11/2026
 
 ## Contexto

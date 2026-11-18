@@ -114,6 +114,21 @@ def test_insere_os_pagamentos_iguais_aos_do_programa():
     assert arquivo.linhas == dbk_do_programa().linhas
 
 
+def test_insere_na_ordem_do_codigo_como_o_programa():
+    """O programa regrava os pagamentos ordenados pelo código e, no mesmo código, na ordem em que
+    estavam (roteiro manual, 18/11/2026). O bot insere já nessa posição."""
+    arquivo = dbk_sem_pagamentos()
+    gravar(arquivo, *reversed(ITENS))
+    assert arquivo.linhas == dbk_do_programa().linhas
+
+    outro_medico = {**MEDICO, "cnpj_cpf": "555.666.777-20"}
+    posicao = arquivo.indices("26")[1]                       # o médico do DBK é o 2º pagamento
+    gravar(arquivo, outro_medico)
+    assert arquivo.indices("26")[2] == posicao + 1
+    assert [Registro26.CODIGO.ler(l) for l in arquivo.linhas_do_tipo("26")] == \
+           ["01", "10", "10", "15", "26", "30", "36", "70", "99"]
+
+
 def test_pagamento_ja_no_dbk_vai_para_revisao(caplog):
     arquivo = dbk_do_programa()
     antes = list(arquivo.linhas)

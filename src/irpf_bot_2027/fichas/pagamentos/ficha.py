@@ -18,7 +18,8 @@ eles no DBK, o pagamento não é gravado (revisão): a ficha de dependentes aind
 
 Busca (docs/adr/0021): o pagamento é identificado por código, tipo, dependente/alimentando e
 CPF/CNPJ do beneficiário (no exterior, sem CPF/CNPJ, pelo nome). Um pagamento igual já no DBK de
-entrada vai para revisão; os demais são lançados.
+entrada vai para revisão; os demais são lançados na posição do código (docs/adr/0022), como o
+programa grava, para que os itens citados no relatório tenham a numeração da tela.
 
 Origem:
     - Campos por código, obrigatoriedade e validações: leiautes/irpf2026/tabela_pagamentos.py
@@ -273,7 +274,7 @@ def inserir(arquivo: ArquivoDBK, itens: list[dict], campos_por_item: list[dict])
                            "não foi gravado (revisão).", descricao)
             resultado.revisao.append(numero)
             continue
-        posicao = arquivo.inserir(Registro26.TIPO, linha)
+        posicao = arquivo.inserir(Registro26.TIPO, linha, ordenar_por=Registro26.CODIGO.ler)
         logger.info("%s inserido na linha %d", descricao, posicao + 1)
         resultado.novos.append(numero)
 

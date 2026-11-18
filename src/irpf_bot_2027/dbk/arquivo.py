@@ -84,8 +84,20 @@ class ArquivoDBK:
                              f"({tipo_da_linha(atual)}) e do mesmo tamanho ({len(atual)})")
         self.linhas[posicao] = linha
 
-    def inserir(self, tipo: str, linha: str) -> int:
-        """Insere a linha na posição certa e devolve a posição (a partir de 0)."""
+    def inserir(self, tipo: str, linha: str, ordenar_por=None) -> int:
+        """Insere a linha na posição certa e devolve a posição (a partir de 0).
+
+        ordenar_por: função linha -> valor comparável, para registros que o programa grava ordenados
+        (ex.: pagamentos pelo código). A linha entra depois da última do mesmo tipo com valor menor ou
+        igual; sem ela, depois da última do tipo.
+        """
         posicao = self.posicao_para(tipo)
+        if ordenar_por is not None:
+            existentes = self.indices(tipo)
+            antes = [i for i in existentes if ordenar_por(self.linhas[i]) <= ordenar_por(linha)]
+            if antes:
+                posicao = antes[-1] + 1
+            elif existentes:
+                posicao = existentes[0]
         self.linhas.insert(posicao, linha)
         return posicao
