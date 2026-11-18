@@ -1,0 +1,16 @@
+{
+  "cpf": "77039677008",
+  "alimentandos": [
+    {"nome": "Maria Teste", "cpf": "333.444.555-08", "data_nascimento": "2012-03-20", "residente": "brasil",
+     "alimentando_de": "770.396.770-08",
+     "decisao_judicial": {"data": "2024-02-10", "processo": "0001234-56.2024.8.26.0100", "vara": "1",
+                          "comarca": "Sao Paulo", "uf": "SP"}}
+  ],
+  "pagamentos": [
+    {"codigo": "30", "cpf_dependente_alimentando": "333.444.555-08", "valor_pago": "15600.00",
+     "descricao": "Descricao teste 4"},
+    {"codigo": "01", "tipo": "A", "cpf_dependente_alimentando": "333.444.555-08",
+     "cnpj_cpf": "60.701.190/0001-04", "nome": "Escola Teste", "valor_pago": "4100.00",
+     "descricao": "Descricao teste 3"}
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "cpf": "77039677008",
+  "alimentandos": [
+    {"nome": "Maria Teste", "cpf": "333.444.555-08", "data_nascimento": "2012-03-20", "residente": "brasil",
+     "alimentando_de": "770.396.770-08",
+     "decisao_judicial": {"data": "2024-02-10", "processo": "0001234-56.2024.8.26.0100", "vara": "2",
+                          "comarca": "Sao Paulo", "uf": "SP"}},
+    {"nome": "Bruno Teste", "cpf": "369.369.369-20", "data_nascimento": "2011-11-11", "residente": "brasil",
+     "alimentando_de": "770.396.770-08",
+     "escritura_publica": {"data": "2020-01-15", "nome_cartorio": "Cartorio Dois", "uf": "RJ"}},
+    {"nome": "Sem Vinculo Teste", "cpf": "456.456.456-00", "data_nascimento": "2013-01-01", "residente": "brasil",
+     "alimentando_de": "123.123.123-87",
+     "decisao_judicial": {"data": "2023-01-01"}}
+  ]
+}

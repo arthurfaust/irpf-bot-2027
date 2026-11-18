@@ -204,7 +204,13 @@ Decidido em 17/11/2026: fazer as fichas mais comuns antes da preparação para 2
   judicial e/ou escritura pública com as datas), busca pelo CPF como nos dependentes (a importada
   recebe nascimento e tipo de processo e fica igual à digitada no programa). A confirmação "atendem aos
   requisitos" não é gravada no DBK (testado no programa); o relatório lembra de marcá-la.
-- [ ] Roteiro manual de alimentandos e confirmação no programa.
+- [x] Roteiro manual `tests/manual/alimentandos/`: teste1 (4 alimentandos, um deles do cônjuge lançado
+  na mesma execução, + pensão e escola), teste2 (vara diferente mantida, novo, revisão por "Alimentando
+  do" desconhecido), teste3 a partir da importada (nascimento e processo preenchidos).
+- [x] Confirmado no programa em 18/11/2026, com ida e volta: linhas 25, 26 e 35 regravadas idênticas às
+  do bot nos três testes. Pendências como esperado: aviso "não relacionado a despesa dedutível" só nos
+  alimentandos sem pagamento; data de nascimento e tipo de processo da importada resolvidos; só sobra
+  a confirmação dos requisitos (não gravada no DBK).
 - [ ] Rendimentos de PJ de dependentes (32), isentos e exclusivos (23, 24, 83-89),
   dívidas (28), doações efetuadas (26, códigos 40-47, 80, 81).
 
