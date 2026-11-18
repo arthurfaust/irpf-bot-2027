@@ -1,0 +1,15 @@
+{
+  "cpf": "77039677008",
+  "pagamentos": [
+    {"codigo": "10", "tipo": "T", "cnpj_cpf": "444.555.666-19", "nome": "Medico Teste - ja existe (revisao)",
+     "valor_pago": "2000.00"},
+    {"codigo": "10", "tipo": "D", "cpf_dependente_alimentando": "222.333.444-05", "cnpj_cpf": "444.555.666-19",
+     "nome": "Medico Teste", "valor_pago": "600.00", "descricao": "Mesmo medico, agora para o Joao (nova)"},
+    {"codigo": "11", "tipo": "T", "cnpj_cpf": "555.666.777-20", "nome": "Dentista Teste - nova",
+     "valor_pago": "1200.00", "parcela_nao_dedutivel": "1200.00"},
+    {"codigo": "15", "tipo": "T", "nome": "Doctor Test", "valor_pago": "100.00", "pais": "249",
+     "descricao": "Mesmo nome no exterior (revisao)"},
+    {"codigo": "30", "cpf_dependente_alimentando": "333.444.555-08", "valor_pago": "14400.00",
+     "descricao": "Pensao repetida (revisao)"}
+  ]
+}
