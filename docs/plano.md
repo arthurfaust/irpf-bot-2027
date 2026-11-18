@@ -168,8 +168,14 @@ Decidido em 17/11/2026: fazer as fichas mais comuns antes da preparação para 2
 - [x] Confirmado no programa em 17/11/2026, com ida e volta: as linhas 21 regravadas são idênticas às
   do bot nos dois testes; o programa recria a linha 24 do 13º (código 1, 7.000,00); o "Faltam
   valores" do DBK importado some depois do teste1 e nenhuma pendência da ficha aparece.
-- [ ] Pagamentos efetuados (26), dependentes (25), rendimentos de PJ de dependentes (32), isentos e
-  exclusivos (23, 24, 83-89), dívidas (28).
+- [x] Pagamentos Efetuados (registro 26, ADR 0021): campos e obrigatoriedade por código (tela do
+  programa), dependente/alimentando pelo CPF nos registros 25/35 do DBK, pensão com CPF e nome do
+  alimentando, busca por código + tipo + dependente + beneficiário (igual → revisão). Linhas idênticas
+  às de um DBK do programa com 8 pagamentos.
+- [ ] Roteiro manual de pagamentos e confirmação no programa (ordem das linhas, totais, pendências).
+- [ ] A importação da declaração anterior traz pagamentos? Se trouxer, como (valores zerados?).
+- [ ] Dependentes (25), rendimentos de PJ de dependentes (32), isentos e exclusivos (23, 24, 83-89),
+  dívidas (28), doações efetuadas (26, códigos 40-47, 80, 81).
 
 ### Fase 5 — preparação para o IRPF 2027
 

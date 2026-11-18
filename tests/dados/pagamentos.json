@@ -1,0 +1,21 @@
+{
+  "cpf": "77039677008",
+  "pagamentos": [
+    {"codigo": "01", "tipo": "A", "cpf_dependente_alimentando": "333.444.555-08", "cnpj_cpf": "60.701.190/0001-04",
+     "nome": "Escola Teste", "valor_pago": "3000.00", "descricao": "Descricao teste 3"},
+    {"codigo": "10", "tipo": "T", "cnpj_cpf": "444.555.666-19", "nome": "Medico Teste",
+     "valor_pago": "1500.00", "parcela_nao_dedutivel": "200.00", "descricao": "Descricao teste 1"},
+    {"codigo": "15", "tipo": "T", "nome": "Doctor Test", "valor_pago": "2000.00", "pais": "249",
+     "descricao": "Descricao teste 5"},
+    {"codigo": "26", "tipo": "D", "cpf_dependente_alimentando": "222.333.444-05", "cnpj_cpf": "33.000.167/0001-01",
+     "nome": "Operadora Teste", "valor_pago": "6000.00", "descricao": "Descricao teste 2"},
+    {"codigo": "30", "cpf_dependente_alimentando": "333.444.555-08", "valor_pago": "12000.00",
+     "descricao": "Descricao teste 4"},
+    {"codigo": "36", "tipo": "T", "cnpj_cpf": "00.000.000/0001-91", "nome": "Previdencia Teste",
+     "valor_pago": "4000.00", "descricao": "Descricao teste 7"},
+    {"codigo": "70", "cnpj_cpf": "555.666.777-20", "nome": "Locador Teste", "valor_pago": "18000.00",
+     "descricao": "Descricao teste 6"},
+    {"codigo": "99", "tipo": "T", "cnpj_cpf": "00.000.000/0001-91", "nome": "Outro Teste", "valor_pago": "500.00",
+     "descricao": "Descricao teste 8"}
+  ]
+}

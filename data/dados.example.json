@@ -7,6 +7,17 @@
       "decimo_terceiro": "7000.00", "irrf_decimo_terceiro": "600.00"
     }
   ],
+  "pagamentos": [
+    {
+      "codigo": "10", "tipo": "T", "cnpj_cpf": "444.555.666-19", "nome": "Medico X",
+      "valor_pago": "1500.00", "parcela_nao_dedutivel": "200.00", "descricao": "Consultas"
+    },
+    {
+      "codigo": "26", "tipo": "D", "cpf_dependente_alimentando": "222.333.444-05",
+      "cnpj_cpf": "33.000.167/0001-01", "nome": "Operadora Y", "valor_pago": "6000.00"
+    },
+    {"codigo": "30", "cpf_dependente_alimentando": "333.444.555-08", "valor_pago": "12000.00"}
+  ],
   "bens": [
     {
       "grupo": "08", "codigo": "01", "pais": "105",

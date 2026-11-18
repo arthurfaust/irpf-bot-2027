@@ -10,8 +10,12 @@ from irpf_bot_2027.leiautes.irpf2026 import ANO_CALENDARIO, EXERCICIO
 from irpf_bot_2027.leiautes.irpf2026.bancos import CAIXA, banco_existe, nome_banco
 from irpf_bot_2027.leiautes.irpf2026.cabecalho import CabecalhoIR, controle_cabecalho, verificar_exercicio
 from irpf_bot_2027.leiautes.irpf2026.paises import BRASIL, nome_pais, pais_existe
+from irpf_bot_2027.leiautes.irpf2026 import tabela_pagamentos
 from irpf_bot_2027.leiautes.irpf2026.registro21 import Registro21
+from irpf_bot_2027.leiautes.irpf2026.registro25 import Registro25
+from irpf_bot_2027.leiautes.irpf2026.registro26 import Registro26
 from irpf_bot_2027.leiautes.irpf2026.registro27 import Registro27
+from irpf_bot_2027.leiautes.irpf2026.registro35 import Registro35
 from irpf_bot_2027.leiautes.irpf2026.regras import (
     CNPJ_OBRIGATORIO, CONTA_BANCARIA, REGISTRO_BEM_MOVEL, REGISTRO_IMOVEL, SOMENTE_BRASIL, SOMENTE_EXTERIOR,
     TITULAR_OU_DEPENDENTE, campos_aplicaveis, campos_obrigatorios,
@@ -27,4 +31,5 @@ __all__ = [
     "campos_obrigatorios",
     "esta_na_tabela", "renavam_valido",
     "codigo_existe", "nome_codigo",
+    "Registro25", "Registro26", "Registro35", "tabela_pagamentos",
 ]
