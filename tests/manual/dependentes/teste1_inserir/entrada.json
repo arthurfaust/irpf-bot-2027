@@ -1,0 +1,19 @@
+{
+  "cpf": "77039677008",
+  "dependentes": [
+    {"tipo": "31", "nome": "Pai Teste", "cpf": "666.777.888-30", "data_nascimento": "1950-03-15"},
+    {"tipo": "21", "nome": "Filho Teste", "cpf": "777.888.999-41", "data_nascimento": "2015-05-10",
+     "mora_com_titular": true, "raca_cor": "parda"},
+    {"tipo": "11", "nome": "Conjuge Teste", "cpf": "888.999.000-78", "data_nascimento": "1985-08-20",
+     "mora_com_titular": true, "email": "conjuge@teste.com", "ddd": "11", "celular": "91234-5678",
+     "raca_cor": "branca"},
+    {"tipo": "22", "nome": "Universitario Teste", "cpf": "123.123.123-87", "data_nascimento": "2003-02-01"}
+  ],
+  "pagamentos": [
+    {"codigo": "26", "tipo": "D", "cpf_dependente_alimentando": "777.888.999-41",
+     "cnpj_cpf": "33.000.167/0001-01", "nome": "Operadora Teste", "valor_pago": "4800.00",
+     "descricao": "Plano do filho (dependente novo nesta execucao)"},
+    {"codigo": "01", "tipo": "D", "cpf_dependente_alimentando": "123.123.123-87",
+     "cnpj_cpf": "60.701.190/0001-04", "nome": "Faculdade Teste", "valor_pago": "9000.00"}
+  ]
+}

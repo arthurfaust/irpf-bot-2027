@@ -198,7 +198,8 @@ Decidido em 17/11/2026: fazer as fichas mais comuns antes da preparação para 2
   exterior e o cônjuge "mora com o titular" (regra da tela; registrado na ficha). Pendência "Tipo de
   dependente" do importado sumiu. Pendência "Nome tem caracteres inválidos" com hífen no nome: o bot
   passou a recusar nome fora da regra do programa (ValidadorNomeIRPF, `nome_pessoa.py`); os JSONs do
-  roteiro foram corrigidos e as saídas regeradas.
+  roteiro foram corrigidos e as saídas regeradas. teste3 restaurado de novo: linhas 25, 26 e 35
+  idênticas e nenhuma pendência de Dependentes.
 - [ ] Alimentandos (35), rendimentos de PJ de dependentes (32), isentos e exclusivos (23, 24, 83-89),
   dívidas (28), doações efetuadas (26, códigos 40-47, 80, 81).
 

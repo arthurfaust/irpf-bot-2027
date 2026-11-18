@@ -1,0 +1,13 @@
+{
+  "cpf": "77039677008",
+  "dependentes": [
+    {"tipo": "21", "nome": "Joao Teste", "cpf": "222.333.444-05", "data_nascimento": "2012-03-20",
+     "mora_com_titular": true, "raca_cor": "parda"},
+    {"tipo": "31", "nome": "Mae Teste Nova", "cpf": "456.456.456-00", "data_nascimento": "1955-11-11"}
+  ],
+  "pagamentos": [
+    {"codigo": "26", "tipo": "D", "cpf_dependente_alimentando": "222.333.444-05",
+     "cnpj_cpf": "33.000.167/0001-01", "nome": "Operadora Teste", "valor_pago": "8400.00",
+     "descricao": "Descricao teste 2"}
+  ]
+}
