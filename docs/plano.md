@@ -200,7 +200,12 @@ Decidido em 17/11/2026: fazer as fichas mais comuns antes da preparação para 2
   passou a recusar nome fora da regra do programa (ValidadorNomeIRPF, `nome_pessoa.py`); os JSONs do
   roteiro foram corrigidos e as saídas regeradas. teste3 restaurado de novo: linhas 25, 26 e 35
   idênticas e nenhuma pendência de Dependentes.
-- [ ] Alimentandos (35), rendimentos de PJ de dependentes (32), isentos e exclusivos (23, 24, 83-89),
+- [x] Alimentandos (registro 35, ADR 0025): validação (nome, CPF, residência, "Alimentando do", decisão
+  judicial e/ou escritura pública com as datas), busca pelo CPF como nos dependentes (a importada
+  recebe nascimento e tipo de processo e fica igual à digitada no programa). A confirmação "atendem aos
+  requisitos" não é gravada no DBK (testado no programa); o relatório lembra de marcá-la.
+- [ ] Roteiro manual de alimentandos e confirmação no programa.
+- [ ] Rendimentos de PJ de dependentes (32), isentos e exclusivos (23, 24, 83-89),
   dívidas (28), doações efetuadas (26, códigos 40-47, 80, 81).
 
 ### Fase 5 — preparação para o IRPF 2027

@@ -13,6 +13,14 @@
       "mora_com_titular": true
     }
   ],
+  "alimentandos": [
+    {
+      "nome": "Maria Teste", "cpf": "333.444.555-08", "data_nascimento": "2012-03-20", "residente": "brasil",
+      "alimentando_de": "770.396.770-08",
+      "decisao_judicial": {"data": "2024-02-10", "processo": "0001234-56.2024.8.26.0100", "vara": "1",
+                           "comarca": "Sao Paulo", "uf": "SP"}
+    }
+  ],
   "pagamentos": [
     {
       "codigo": "10", "tipo": "T", "cnpj_cpf": "444.555.666-19", "nome": "Medico X",
