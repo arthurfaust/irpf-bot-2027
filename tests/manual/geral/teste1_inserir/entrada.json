@@ -82,7 +82,7 @@
         "tipo": "T"
       },
       "conta": {
-        "banco": "001", "agencia": "1234", "conta": "98765", "dv": "X", "conta_pagamento": false
+        "banco": "001", "agencia": "1234", "conta": "98765", "dv": "4", "conta_pagamento": false
       }
     },
     {

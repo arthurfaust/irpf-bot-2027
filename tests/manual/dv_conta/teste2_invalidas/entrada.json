@@ -1,0 +1,309 @@
+{
+ "cpf": "77039677008",
+ "bens": [
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 001 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "001",
+    "agencia": "1234",
+    "conta": "123456",
+    "dv": "1",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 003 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "003",
+    "agencia": "123",
+    "conta": "123456",
+    "dv": "1",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 004 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "004",
+    "agencia": "123",
+    "conta": "123456",
+    "dv": "0",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 021 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "021",
+    "agencia": "1234",
+    "conta": "123456",
+    "dv": "0",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 033 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "033",
+    "agencia": "1234",
+    "conta": "13001234",
+    "dv": "0",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 037 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "037",
+    "agencia": "1234",
+    "conta": "123456",
+    "dv": "1",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 041 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "041",
+    "agencia": "1234",
+    "conta": "350123456",
+    "dv": "0",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 047 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "047",
+    "agencia": "123",
+    "conta": "1234567",
+    "dv": "0",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 070 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "070",
+    "agencia": "1234",
+    "conta": "123456",
+    "dv": "1",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 104 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "104",
+    "agencia": "1234",
+    "conta": "12345678",
+    "dv": "0",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 237 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "237",
+    "agencia": "1234",
+    "conta": "123456",
+    "dv": "1",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 341 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "341",
+    "agencia": "1234",
+    "conta": "12345",
+    "dv": "0",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 389 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "389",
+    "agencia": "1234",
+    "conta": "1234567",
+    "dv": "0",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 422 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "422",
+    "agencia": "123",
+    "conta": "123456",
+    "dv": "0",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 745 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "745",
+    "agencia": "1234",
+    "conta": "1234567",
+    "dv": "0",
+    "conta_pagamento": false
+   }
+  },
+  {
+   "grupo": "06",
+   "codigo": "01",
+   "pais": "105",
+   "cnpj_cpf": "00.000.000/0001-91",
+   "discriminacao": "Conta teste banco 756 (dv invalido)",
+   "situacao_anterior": "0.00",
+   "situacao_atual": "100.00",
+   "pertence_a": {
+    "tipo": "T"
+   },
+   "conta": {
+    "banco": "756",
+    "agencia": "1234",
+    "conta": "1234567",
+    "dv": "0",
+    "conta_pagamento": false
+   }
+  }
+ ]
+}

@@ -53,7 +53,7 @@ src/irpf_bot_2027/
 ├── leiautes/
 │   ├── atual.py      ÚNICO ponto de importação do leiaute (troca de ano = mudar os imports daqui)
 │   └── irpf2026/     cabeçalho, registros 21, 25, 26, 27 e 35, tabelas de bens, de pagamentos e de
-│                     dependentes, nome de pessoa, países, bancos, regras da tela
+│                     dependentes, nome de pessoa, DV da conta, países, bancos, regras da tela
 └── fichas/
     ├── __init__.py   FICHAS = (rendimentos_pj, dependentes, alimentandos, pagamentos, bens): cada ficha
     │                 expõe NOME, CHAVE_JSON, validar(itens, cpf_declarante), inserir(), relatorio()

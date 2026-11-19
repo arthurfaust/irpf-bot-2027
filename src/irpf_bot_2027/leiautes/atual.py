@@ -9,6 +9,7 @@ imports abaixo. Os testes continuam importando irpf2026 diretamente, porque usam
 from irpf_bot_2027.leiautes.irpf2026 import ANO_CALENDARIO, EXERCICIO
 from irpf_bot_2027.leiautes.irpf2026.bancos import CAIXA, banco_existe, nome_banco
 from irpf_bot_2027.leiautes.irpf2026.cabecalho import CabecalhoIR, controle_cabecalho, verificar_exercicio
+from irpf_bot_2027.leiautes.irpf2026.dv_conta import dv_confere
 from irpf_bot_2027.leiautes.irpf2026.nome_pessoa import erro_nome_pessoa
 from irpf_bot_2027.leiautes.irpf2026.paises import BRASIL, nome_pais, pais_existe
 from irpf_bot_2027.leiautes.irpf2026 import tabela_dependentes, tabela_pagamentos
@@ -32,5 +33,5 @@ __all__ = [
     "campos_obrigatorios",
     "esta_na_tabela", "renavam_valido",
     "codigo_existe", "nome_codigo",
-    "Registro25", "Registro26", "Registro35", "tabela_dependentes", "tabela_pagamentos", "erro_nome_pessoa",
+    "Registro25", "Registro26", "Registro35", "tabela_dependentes", "tabela_pagamentos", "erro_nome_pessoa", "dv_confere",
 ]

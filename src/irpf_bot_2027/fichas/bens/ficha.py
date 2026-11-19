@@ -24,7 +24,7 @@ from irpf_bot_2027.fichas.bens.entrada import CAMPOS_SIMPLES
 from irpf_bot_2027.fichas.bens.validacao import validar_bem
 from irpf_bot_2027.fichas.bens.entrada import origem_no_json
 from irpf_bot_2027.leiautes.atual import (
-    BRASIL, TITULAR_OU_DEPENDENTE, Registro27, campos_aplicaveis, esta_na_tabela, nome_codigo,
+    BRASIL, TITULAR_OU_DEPENDENTE, Registro27, campos_aplicaveis, dv_confere, esta_na_tabela, nome_codigo,
 )
 
 logger = logging.getLogger(__name__)
@@ -45,6 +45,12 @@ def validar(bens: list[dict], cpf_declarante: str | None = None) -> tuple[list[d
         campos, erros_bem = validar_bem(bem)
         campos_por_bem.append(campos)
         erros.extend(f"bem {numero}: {erro}" for erro in erros_bem)
+        if not erros_bem and not dv_confere(campos.get("BANCO"), campos.get("AGENCIA"), campos.get("CONTA"),
+                                            campos.get("DV_CONTA")):
+            # No programa é só aviso ("DV da conta inválido"): o bem é gravado do mesmo jeito.
+            logger.warning("Bem %d: o dígito verificador da conta não confere com o cálculo do programa para "
+                           "esse banco (aviso \"DV da conta inválido\" no programa); confira a conta e o dígito.",
+                           numero)
     return campos_por_bem, erros
 
 def proxima_chave(arquivo: ArquivoDBK) -> int:

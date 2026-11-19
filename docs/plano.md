@@ -219,9 +219,12 @@ Decidido em 17/11/2026: fazer as fichas mais comuns antes da preparação para 2
   idênticos nos três testes; teste3 idêntico por inteiro. Nos bens, o programa regravou o cartório
   "1º RI" como "1o RI" (e mudou a posição do imóvel, mantendo a chave). A busca e a comparação do bem
   encontrado passaram a tratar "º"/"ª" como "o"/"a"; confirmado rodando o JSON sobre o regravado.
-- [ ] Dígito verificador da conta (aviso "DV da conta inválido" no programa): validador
-  `ValidadorDvContaCorrente`, com algoritmo próprio para 18 bancos (BB, Caixa, Itaú, Bradesco,
-  Santander, Sicredi, Sicoob...). O bot não confere; o DV do roteiro geral é fictício.
+- [x] Dígito verificador da conta (19/11/2026): cálculo do `ValidadorDvContaCorrente` transcrito em
+  `leiautes/irpf2026/dv_conta.py` (17 bancos com regra, tamanhos de `bancos_calculo_dv.xml`, tabelas de
+  agências do Nordeste e do Banese). Como no programa, DV que não confere só gera **aviso** no log
+  (o bem é gravado). DV do roteiro geral e do exemplo corrigido (BB 98765 → 4).
+- [ ] Roteiro `tests/manual/dv_conta/`: confirmar no programa que as 17 contas "válidas" não têm aviso
+  e as 16 "inválidas" têm.
 - [ ] Rendimentos de PJ de dependentes (32), isentos e exclusivos (23, 24, 83-89),
   dívidas (28), doações efetuadas (26, códigos 40-47, 80, 81).
 
