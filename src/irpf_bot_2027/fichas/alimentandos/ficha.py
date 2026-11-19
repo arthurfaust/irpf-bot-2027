@@ -46,6 +46,7 @@ import logging
 from dataclasses import dataclass, field
 
 from irpf_bot_2027.dbk import ArquivoDBK
+from irpf_bot_2027.fichas import referencia
 from irpf_bot_2027.fichas.alimentandos.exportacao import exportar
 from irpf_bot_2027.fichas.alimentandos.validacao import BLOCOS, validar, validar_item
 from irpf_bot_2027.leiautes.atual import Registro25, Registro35
@@ -54,6 +55,7 @@ logger = logging.getLogger(__name__)
 
 NOME = "Alimentandos"
 CHAVE_JSON = "alimentandos"
+REF = "chave"                       # "dbk": {"chave": N}, a chave do alimentando no DBK (docs/adr/0027)
 
 __all__ = ["CHAVE_JSON", "NOME", "exportar", "inserir", "relatorio", "validar", "validar_item", "montar_linha"]
 
@@ -94,8 +96,9 @@ class Resultado:
     novos: list[int] = field(default_factory=list)
     revisao: list[int] = field(default_factory=list)
     diferentes: list[int] = field(default_factory=list)
+    por_referencia: list[int] = field(default_factory=list)     # achados pelo campo "dbk", não pela busca
     dbk_nao_informados: list[int] = field(default_factory=list)
-    com_alimentandos: bool = False                              # lembrar a confirmação dos requisitos
+    com_alimentandos: bool = False                             # lembrar a confirmação dos requisitos
 
 def inserir(arquivo: ArquivoDBK, itens: list[dict], campos_por_item: list[dict]) -> Resultado:
     resultado = Resultado()
@@ -103,6 +106,10 @@ def inserir(arquivo: ArquivoDBK, itens: list[dict], campos_por_item: list[dict])
     entrada = arquivo.indices(Registro35.TIPO)             # os novos entram depois: posições não mudam
     dependentes = {Registro25.CPF_DEPENDENTE.ler(l).strip() for l in arquivo.linhas_do_tipo(Registro25.TIPO)}
     usados = set()
+    referencias = [referencia.numero(item, REF) for item in itens]
+    repetidas = referencia.repetidas(itens, REF)
+    por_chave = {int(Registro35.CHAVE.ler(arquivo.linhas[p])): (ordem, p) for ordem, p in enumerate(entrada, start=1)}
+    referenciados = {por_chave[r][0] for r in referencias if r in por_chave}
 
     for numero, campos in enumerate(campos_por_item, start=1):
         descricao = f"Alimentando {numero}"
@@ -115,8 +122,31 @@ def inserir(arquivo: ArquivoDBK, itens: list[dict], campos_por_item: list[dict])
                            "(revisão).", descricao)
             resultado.revisao.append(numero)
             continue
-        encontrados = [(ordem, posicao) for ordem, posicao in enumerate(entrada, start=1)
-                       if Registro35.CPF_ALIMENTANDO.ler(arquivo.linhas[posicao]).strip() == campos["CPF_ALIMENTANDO"]]
+        ref = referencias[numero - 1]
+        if ref:                                             # docs/adr/0027: a referência substitui a busca
+            problema = None
+            if numero in repetidas:
+                problema = "outro alimentando do JSON indica o mesmo alimentando do DBK"
+            elif ref not in por_chave:
+                problema = "a chave indicada em 'dbk' não existe no DBK"
+            else:
+                cpf_dbk = Registro35.CPF_ALIMENTANDO.ler(arquivo.linhas[por_chave[ref][1]]).strip()
+                if cpf_dbk and cpf_dbk != campos["CPF_ALIMENTANDO"]:
+                    problema = "o alimentando indicado em 'dbk' tem outro CPF"
+            if problema:
+                logger.warning("%s: %s; não foi gravado (revisão).", descricao, problema)
+                resultado.revisao.append(numero)
+                continue
+            encontrados = [por_chave[ref]]
+            resultado.por_referencia.append(numero)
+        else:
+            encontrados = [(ordem, posicao) for ordem, posicao in enumerate(entrada, start=1)
+                           if Registro35.CPF_ALIMENTANDO.ler(arquivo.linhas[posicao]).strip() == campos["CPF_ALIMENTANDO"]]
+            if any(ordem in referenciados for ordem, _ in encontrados):
+                logger.warning("%s: o alimentando do DBK com esse CPF foi indicado em 'dbk' por outro alimentando "
+                               "do JSON; não foi gravado (revisão).", descricao)
+                resultado.revisao.append(numero)
+                continue
         if len(encontrados) > 1:
             logger.warning("%s: %d alimentandos no DBK com o mesmo CPF; não foi gravado (revisão).",
                            descricao, len(encontrados))
@@ -159,6 +189,9 @@ def relatorio(resultado: Resultado) -> list[tuple[int, str]]:
     if resultado.diferentes:
         linhas.append((logging.WARNING, "  CONFERIR, campos do DBK diferentes do JSON, mantidos (alimentandos do "
                                         f"JSON): {numeros(resultado.diferentes)}"))
+    if resultado.por_referencia:
+        linhas.append((logging.INFO, "  achados pela referência 'dbk', não pela busca (alimentandos do JSON): "
+                                     f"{numeros(resultado.por_referencia)}"))
     if resultado.revisao:
         linhas.append((logging.WARNING, f"  REVISÃO, não gravados (alimentandos do JSON): {numeros(resultado.revisao)}"))
     if resultado.dbk_nao_informados:

@@ -46,6 +46,7 @@ from irpf_bot_2027.comum.conversoes import data_do_dbk, so_digitos
 from irpf_bot_2027.comum.documentos import cpf_valido
 from irpf_bot_2027.comum.texto import caracteres_fora_do_latin1, normalizar_texto
 from irpf_bot_2027.dbk import ArquivoDBK
+from irpf_bot_2027.fichas import referencia
 from irpf_bot_2027.leiautes.atual import ANO_CALENDARIO, Registro25, Registro35, erro_nome_pessoa
 from irpf_bot_2027.leiautes.atual import tabela_dependentes as tabela
 
@@ -53,6 +54,7 @@ logger = logging.getLogger(__name__)
 
 NOME = "Dependentes"
 CHAVE_JSON = "dependentes"
+REF = "chave"                       # "dbk": {"chave": N}, a chave do dependente no DBK (docs/adr/0027)
 
 # JSON -> campo do Registro25
 CAMPOS_JSON = {
@@ -74,11 +76,12 @@ def validar_item(item: dict, cpf_declarante: str | None) -> tuple[dict, list[str
     campos, erros = {}, []
     if not isinstance(item, dict):
         return campos, ["esperado um objeto com os campos do dependente"]
-    for chave in sorted(set(item) - set(CAMPOS_JSON)):
+    for chave in sorted(set(item) - set(CAMPOS_JSON) - {referencia.CAMPO}):
         erros.append(f"campo desconhecido '{chave}'")
     for chave in OBRIGATORIOS:
         if not _informado(item, chave):
             erros.append(f"campo obrigatório '{chave}' não informado")
+    erros += referencia.validar(item, REF)
 
     tipo = str(item.get("tipo", "")).strip()
     if tipo and not tabela.tipo_existe(tipo):
@@ -198,6 +201,7 @@ class Resultado:
     novos: list[int] = field(default_factory=list)
     revisao: list[int] = field(default_factory=list)
     diferentes: list[int] = field(default_factory=list)         # encontrados com campo diferente do JSON
+    por_referencia: list[int] = field(default_factory=list)     # achados pelo campo "dbk", não pela busca
     dbk_nao_informados: list[int] = field(default_factory=list)
 
 def inserir(arquivo: ArquivoDBK, itens: list[dict], campos_por_item: list[dict]) -> Resultado:
@@ -206,6 +210,10 @@ def inserir(arquivo: ArquivoDBK, itens: list[dict], campos_por_item: list[dict])
     entrada = arquivo.indices(Registro25.TIPO)             # os novos entram depois: posições não mudam
     alimentandos = {Registro35.CPF_ALIMENTANDO.ler(l).strip() for l in arquivo.linhas_do_tipo(Registro35.TIPO)}
     usados = set()
+    referencias = [referencia.numero(item, REF) for item in itens]
+    repetidas = referencia.repetidas(itens, REF)
+    por_chave = {int(Registro25.CHAVE.ler(arquivo.linhas[p])): (ordem, p) for ordem, p in enumerate(entrada, start=1)}
+    referenciados = {por_chave[r][0] for r in referencias if r in por_chave}
 
     for numero, campos in enumerate(campos_por_item, start=1):
         descricao = f"Dependente {numero}"
@@ -214,8 +222,31 @@ def inserir(arquivo: ArquivoDBK, itens: list[dict], campos_por_item: list[dict])
             logger.warning("%s: o CPF é de um alimentando do DBK; não foi gravado (revisão).", descricao)
             resultado.revisao.append(numero)
             continue
-        encontrados = [(ordem, posicao) for ordem, posicao in enumerate(entrada, start=1)
-                       if Registro25.CPF_DEPENDENTE.ler(arquivo.linhas[posicao]).strip() == cpf_dependente]
+        ref = referencias[numero - 1]
+        if ref:                                             # docs/adr/0027: a referência substitui a busca
+            problema = None
+            if numero in repetidas:
+                problema = "outro dependente do JSON indica o mesmo dependente do DBK"
+            elif ref not in por_chave:
+                problema = "a chave indicada em 'dbk' não existe no DBK"
+            else:
+                cpf_dbk = Registro25.CPF_DEPENDENTE.ler(arquivo.linhas[por_chave[ref][1]]).strip()
+                if cpf_dbk and cpf_dbk != cpf_dependente:
+                    problema = "o dependente indicado em 'dbk' tem outro CPF"
+            if problema:
+                logger.warning("%s: %s; não foi gravado (revisão).", descricao, problema)
+                resultado.revisao.append(numero)
+                continue
+            encontrados = [por_chave[ref]]
+            resultado.por_referencia.append(numero)
+        else:
+            encontrados = [(ordem, posicao) for ordem, posicao in enumerate(entrada, start=1)
+                           if Registro25.CPF_DEPENDENTE.ler(arquivo.linhas[posicao]).strip() == cpf_dependente]
+            if any(ordem in referenciados for ordem, _ in encontrados):
+                logger.warning("%s: o dependente do DBK com esse CPF foi indicado em 'dbk' por outro dependente "
+                               "do JSON; não foi gravado (revisão).", descricao)
+                resultado.revisao.append(numero)
+                continue
         if len(encontrados) > 1:
             logger.warning("%s: %d dependentes no DBK com o mesmo CPF; não foi gravado (revisão).",
                            descricao, len(encontrados))
@@ -274,6 +305,9 @@ def relatorio(resultado: Resultado) -> list[tuple[int, str]]:
     if resultado.diferentes:
         linhas.append((logging.WARNING, "  CONFERIR, campos do DBK diferentes do JSON, mantidos (dependentes do "
                                         f"JSON): {numeros(resultado.diferentes)}"))
+    if resultado.por_referencia:
+        linhas.append((logging.INFO, "  achados pela referência 'dbk', não pela busca (dependentes do JSON): "
+                                     f"{numeros(resultado.por_referencia)}"))
     if resultado.revisao:
         linhas.append((logging.WARNING, f"  REVISÃO, não gravados (dependentes do JSON): {numeros(resultado.revisao)}"))
     if resultado.dbk_nao_informados:

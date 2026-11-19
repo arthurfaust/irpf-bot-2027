@@ -11,6 +11,7 @@ from datetime import date
 from irpf_bot_2027.comum.conversoes import so_digitos
 from irpf_bot_2027.comum.documentos import cnpj_valido, cpf_valido
 from irpf_bot_2027.comum.texto import caracteres_fora_do_latin1, normalizar_texto
+from irpf_bot_2027.fichas import referencia
 from irpf_bot_2027.leiautes.atual import ANO_CALENDARIO, Registro35, erro_nome_pessoa
 
 CAMPOS_JSON = ("nome", "cpf", "data_nascimento", "residente", "alimentando_de", "decisao_judicial",
@@ -103,11 +104,12 @@ def validar_item(item: dict, cpf_declarante: str | None) -> tuple[dict, list[str
     campos, erros = {}, []
     if not isinstance(item, dict):
         return campos, ["esperado um objeto com os campos do alimentando"]
-    for chave in sorted(set(item) - set(CAMPOS_JSON)):
+    for chave in sorted(set(item) - set(CAMPOS_JSON) - {referencia.CAMPO}):
         erros.append(f"campo desconhecido '{chave}'")
     for chave in OBRIGATORIOS:
         if not _informado(item, chave):
             erros.append(f"campo obrigatório '{chave}' não informado")
+    erros += referencia.validar(item, "chave")
 
     if _informado(item, "nome"):
         nome = _texto(item["nome"], "nome", Registro35.NOME.tamanho, erros)

@@ -9,6 +9,7 @@ PainelPagamentosDetalhe do IRPF 2026, lidas com javap). Valor pago maior que zer
 from irpf_bot_2027.comum.conversoes import so_digitos, valor_em_reais
 from irpf_bot_2027.comum.documentos import cnpj_valido, cpf_valido, ni_valido
 from irpf_bot_2027.comum.texto import caracteres_fora_do_latin1, normalizar_texto
+from irpf_bot_2027.fichas import referencia
 from irpf_bot_2027.leiautes.atual import BRASIL, Registro26, pais_existe
 from irpf_bot_2027.leiautes.atual import tabela_pagamentos as tabela
 
@@ -57,8 +58,9 @@ def validar_item(item: dict, cpf_declarante: str | None) -> tuple[dict, list[str
     campos, erros = {}, []
     if not isinstance(item, dict):
         return campos, ["esperado um objeto com os campos do pagamento"]
-    for chave in sorted(set(item) - set(CAMPOS_JSON)):
+    for chave in sorted(set(item) - set(CAMPOS_JSON) - {referencia.CAMPO}):
         erros.append(f"campo desconhecido '{chave}'")
+    erros += referencia.validar(item, "item")
 
     codigo = str(item.get("codigo", "")).strip()
     if not codigo:

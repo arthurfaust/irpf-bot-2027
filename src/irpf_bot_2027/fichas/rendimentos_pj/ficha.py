@@ -33,12 +33,14 @@ from irpf_bot_2027.comum.conversoes import numero_do_dbk, so_digitos, valor_em_r
 from irpf_bot_2027.comum.documentos import ni_valido
 from irpf_bot_2027.comum.texto import caracteres_fora_do_latin1, normalizar_texto
 from irpf_bot_2027.dbk import ArquivoDBK
+from irpf_bot_2027.fichas import referencia
 from irpf_bot_2027.leiautes.atual import Registro21
 
 logger = logging.getLogger(__name__)
 
 NOME = "Rendimentos Tributáveis Recebidos de PJ pelo Titular"
 CHAVE_JSON = "rendimentos_pj"
+REF = "item"                        # "dbk": {"item": N}, a ordem da fonte na ficha do DBK (docs/adr/0027)
 
 # JSON -> campo do Registro21
 VALORES = {
@@ -59,11 +61,12 @@ def validar_item(item: dict, cpf_declarante: str | None) -> tuple[dict, list[str
     campos, erros = {}, []
     if not isinstance(item, dict):
         return campos, ["esperado um objeto com os campos da fonte pagadora"]
-    for chave in sorted(set(item) - set(CAMPOS_JSON)):
+    for chave in sorted(set(item) - set(CAMPOS_JSON) - {referencia.CAMPO}):
         erros.append(f"campo desconhecido '{chave}'")
     for chave in CAMPOS_JSON:
         if item.get(chave) is None or str(item[chave]).strip() == "":
             erros.append(f"campo obrigatório '{chave}' não informado")
+    erros += referencia.validar(item, REF)
 
     if item.get("cnpj_cpf"):
         ni = so_digitos(item["cnpj_cpf"])
@@ -135,6 +138,7 @@ class Resultado:
     preenchidas: list[int] = field(default_factory=list)          # fonte sem valores no DBK, preenchida
     novas: list[int] = field(default_factory=list)
     revisao: list[int] = field(default_factory=list)
+    por_referencia: list[int] = field(default_factory=list)       # achadas pelo campo "dbk", não pela busca
     dbk_sem_valores: list[int] = field(default_factory=list)      # continuam sem valores: erro no programa
     dbk_nao_informadas: list[int] = field(default_factory=list)   # com valores, não vieram no JSON
 
@@ -142,8 +146,12 @@ def inserir(arquivo: ArquivoDBK, itens: list[dict], campos_por_item: list[dict])
     resultado = Resultado()
     da_entrada = len(arquivo.indices(Registro21.TIPO))     # as novas entram depois das linhas da entrada
     cpf = arquivo.cpf_declarante
-    repetidos = Counter(campos["NI_PAGADOR"] for campos in campos_por_item)
     usadas = set()                                          # ordem (1...) das fontes do DBK preenchidas
+    referencias = [referencia.numero(item, REF) for item in itens]
+    # Fontes do JSON com o mesmo CPF/CNPJ, entre as que dependem da busca (com "dbk", cada uma indica o seu item).
+    repetidos = Counter(campos["NI_PAGADOR"] for campos, ref in zip(campos_por_item, referencias) if not ref)
+    referenciadas = {ref for ref in referencias if ref}
+    repetidas = referencia.repetidas(itens, REF)
 
     def fontes_da_entrada() -> list[int]:
         return arquivo.indices(Registro21.TIPO)[:da_entrada]
@@ -151,8 +159,31 @@ def inserir(arquivo: ArquivoDBK, itens: list[dict], campos_por_item: list[dict])
     for numero, campos in enumerate(campos_por_item, start=1):
         descricao = f"Fonte {numero}"
         ni = campos["NI_PAGADOR"]
-        encontradas = [(ordem, posicao) for ordem, posicao in enumerate(fontes_da_entrada(), start=1)
-                       if Registro21.NI_PAGADOR.ler(arquivo.linhas[posicao]).strip() == ni]
+        ref = referencias[numero - 1]
+        if ref:                                             # docs/adr/0027: a referência substitui a busca
+            problema = None
+            if numero in repetidas:
+                problema = "outra fonte do JSON indica a mesma fonte do DBK"
+            elif ref > len(fontes_da_entrada()):
+                problema = "a fonte indicada em 'dbk' não existe no DBK"
+            else:
+                ni_dbk = Registro21.NI_PAGADOR.ler(arquivo.linhas[fontes_da_entrada()[ref - 1]]).strip()
+                if ni_dbk and ni_dbk != ni:
+                    problema = "a fonte indicada em 'dbk' tem outro CPF/CNPJ"
+            if problema:
+                logger.warning("%s: %s; não foi gravada (revisão).", descricao, problema)
+                resultado.revisao.append(numero)
+                continue
+            encontradas = [(ref, fontes_da_entrada()[ref - 1])]
+            resultado.por_referencia.append(numero)
+        else:
+            encontradas = [(ordem, posicao) for ordem, posicao in enumerate(fontes_da_entrada(), start=1)
+                           if Registro21.NI_PAGADOR.ler(arquivo.linhas[posicao]).strip() == ni]
+            if any(ordem in referenciadas for ordem, _ in encontradas):
+                logger.warning("%s: a fonte do DBK com esse CPF/CNPJ foi indicada em 'dbk' por outra fonte do "
+                               "JSON; não foi gravada (revisão).", descricao)
+                resultado.revisao.append(numero)
+                continue
 
         usadas.update(ordem for ordem, _ in encontradas)     # veio no JSON, mesmo que vá para revisão
         if len(encontradas) > 1:
@@ -211,6 +242,9 @@ def relatorio(resultado: Resultado) -> list[tuple[int, str]]:
         linhas.append((logging.INFO, f"  preenchidas (fontes sem valores do DBK; fontes do JSON): {numeros(resultado.preenchidas)}"))
     if resultado.novas:
         linhas.append((logging.INFO, f"  lançadas como novas (fontes do JSON): {numeros(resultado.novas)}"))
+    if resultado.por_referencia:
+        linhas.append((logging.INFO, "  achadas pela referência 'dbk', não pela busca (fontes do JSON): "
+                                     f"{numeros(resultado.por_referencia)}"))
     if resultado.revisao:
         linhas.append((logging.WARNING, f"  REVISÃO, não gravadas (fontes do JSON): {numeros(resultado.revisao)}"))
     if resultado.dbk_sem_valores:

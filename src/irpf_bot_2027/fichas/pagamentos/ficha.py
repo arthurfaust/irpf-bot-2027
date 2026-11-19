@@ -48,6 +48,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 
 from irpf_bot_2027.dbk import ArquivoDBK
+from irpf_bot_2027.fichas import referencia
 from irpf_bot_2027.fichas.pagamentos.busca import VALORES, chave_busca, sem_valores, vinculado_no_dbk
 from irpf_bot_2027.fichas.pagamentos.exportacao import exportar
 from irpf_bot_2027.fichas.pagamentos.validacao import CPF, TIPOS_JSON, validar, validar_item
@@ -58,6 +59,7 @@ logger = logging.getLogger(__name__)
 
 NOME = "Pagamentos Efetuados"
 CHAVE_JSON = "pagamentos"
+REF = "item"                        # "dbk": {"item": N}, a ordem do pagamento na ficha do DBK (docs/adr/0027)
 
 __all__ = ["CHAVE_JSON", "NOME", "exportar", "inserir", "relatorio", "validar", "validar_item",
            "vinculado_no_dbk", "completar", "montar_linha", "sem_valores"]
@@ -105,6 +107,7 @@ class Resultado:
     novos: list[int] = field(default_factory=list)
     revisao: list[int] = field(default_factory=list)
     sem_vinculado: list[int] = field(default_factory=list)      # dependente/alimentando não está no DBK
+    por_referencia: list[int] = field(default_factory=list)     # achados pelo campo "dbk", não pela busca
     descricao_mantida: list[int] = field(default_factory=list)  # preenchidos com a descrição do DBK
     dbk_sem_valores: list[int] = field(default_factory=list)    # continuam sem valores: erro no programa
     dbk_nao_informados: list[int] = field(default_factory=list) # com valores, não vieram no JSON
@@ -129,14 +132,46 @@ def inserir(arquivo: ArquivoDBK, itens: list[dict], campos_por_item: list[dict])
         completos[numero] = campos
         linhas_completas[numero] = montar_linha(campos, cpf)
 
-    repetidos = Counter(chave_busca(linha) for linha in linhas_completas.values())
+    referencias = [referencia.numero(item, REF) for item in itens]
+    repetidas = referencia.repetidas(itens, REF)
+    referenciados = {ref for ref in referencias if ref}
+    # Pagamentos do JSON com a mesma chave, entre os que dependem da busca (com "dbk", cada um indica o seu).
+    repetidos = Counter(chave_busca(linha) for numero, linha in linhas_completas.items() if not referencias[numero - 1])
     usados = set()                                          # ordem (1...) dos pagamentos do DBK encontrados
 
     for numero, linha in linhas_completas.items():
         descricao = f"Pagamento {numero}"
         chave = chave_busca(linha)
-        encontrados = [(ordem, posicao) for ordem, posicao in enumerate(entrada, start=1)
-                       if chave_busca(arquivo.linhas[posicao]) == chave]
+        ref = referencias[numero - 1]
+        if ref:                                             # docs/adr/0027: a referência substitui a busca
+            problema = None
+            if numero in repetidas:
+                problema = "outro pagamento do JSON indica o mesmo pagamento do DBK"
+            elif ref > len(entrada):
+                problema = "o pagamento indicado em 'dbk' não existe no DBK"
+            else:
+                no_dbk = arquivo.linhas[entrada[ref - 1]]
+                mesmos = all(campo.ler(no_dbk) == campo.ler(linha) for campo in
+                             (Registro26.CODIGO, Registro26.TIPO_PAGAMENTO, Registro26.CHAVE_DEPENDENTE))
+                ni_dbk, ni_json = (Registro26.NI_BENEFICIARIO.ler(l).strip() for l in (no_dbk, linha))
+                if not mesmos:
+                    problema = "o pagamento indicado em 'dbk' tem outro código, tipo ou dependente/alimentando"
+                elif ni_dbk and ni_json and ni_dbk != ni_json:
+                    problema = "o pagamento indicado em 'dbk' tem outro CPF/CNPJ do beneficiário"
+            if problema:
+                logger.warning("%s: %s; não foi gravado (revisão).", descricao, problema)
+                resultado.revisao.append(numero)
+                continue
+            encontrados = [(ref, entrada[ref - 1])]
+            resultado.por_referencia.append(numero)
+        else:
+            encontrados = [(ordem, posicao) for ordem, posicao in enumerate(entrada, start=1)
+                           if chave_busca(arquivo.linhas[posicao]) == chave]
+            if any(ordem in referenciados for ordem, _ in encontrados):
+                logger.warning("%s: o pagamento do DBK com a mesma chave foi indicado em 'dbk' por outro pagamento "
+                               "do JSON; não foi gravado (revisão).", descricao)
+                resultado.revisao.append(numero)
+                continue
         usados.update(ordem for ordem, _ in encontrados)
 
         if len(encontrados) > 1:
@@ -192,9 +227,12 @@ def relatorio(resultado: Resultado) -> list[tuple[int, str]]:
     if resultado.descricao_mantida:
         linhas.append((logging.WARNING, "  CONFERIR, preenchidos com a descrição do DBK, diferente da do JSON "
                                         f"(pagamentos do JSON): {numeros(resultado.descricao_mantida)}"))
+    if resultado.por_referencia:
+        linhas.append((logging.INFO, "  achados pela referência 'dbk', não pela busca (pagamentos do JSON): "
+                                     f"{numeros(resultado.por_referencia)}"))
     if resultado.revisao:
-        linhas.append((logging.WARNING, "  REVISÃO, já existiam no DBK, não gravados (pagamentos do JSON): "
-                                        f"{numeros(resultado.revisao)}"))
+        linhas.append((logging.WARNING, "  REVISÃO, não gravados: já existiam no DBK ou a referência 'dbk' não "
+                                        f"conferiu, veja os avisos acima (pagamentos do JSON): {numeros(resultado.revisao)}"))
     if resultado.sem_vinculado:
         linhas.append((logging.WARNING, "  REVISÃO, dependente/alimentando não encontrado no DBK, não gravados "
                                         f"(pagamentos do JSON): {numeros(resultado.sem_vinculado)}"))

@@ -16,6 +16,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 
 from irpf_bot_2027.dbk import ArquivoDBK
+from irpf_bot_2027.fichas import referencia
 from irpf_bot_2027.fichas.bens.busca import (
     chave_busca, identificar, normalizar_registro, procurar, procurar_incompletos, procurar_mesmo_tipo,
     procurar_semelhantes,
@@ -31,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 NOME = "Bens e Direitos"            # nome da ficha no programa, usado nos logs
 CHAVE_JSON = "bens"                 # nome da lista no JSON do cliente
+REF = "chave"                       # "dbk": {"chave": N}, a chave do bem no DBK (docs/adr/0027)
 
 def validar(bens: list[dict], cpf_declarante: str | None = None) -> tuple[list[dict], list[str]]:
     """Valida todos os bens. (cpf_declarante faz parte da interface das fichas; não é usado aqui.)
@@ -43,6 +45,7 @@ def validar(bens: list[dict], cpf_declarante: str | None = None) -> tuple[list[d
     erros = []
     for numero, bem in enumerate(bens, start=1):
         campos, erros_bem = validar_bem(bem)
+        erros_bem += referencia.validar(bem, REF) if isinstance(bem, dict) else []
         campos_por_bem.append(campos)
         erros.extend(f"bem {numero}: {erro}" for erro in erros_bem)
         if not erros_bem and not dv_confere(campos.get("BANCO"), campos.get("AGENCIA"), campos.get("CONTA"),
@@ -191,6 +194,7 @@ class Resultado:
     novos: list[int] = field(default_factory=list)
     revisao: list[int] = field(default_factory=list)              # não gravados: decisão humana
     conferir: list[int] = field(default_factory=list)             # atualizados com campo diferente do DBK
+    por_referencia: list[int] = field(default_factory=list)       # achados pelo campo "dbk", não pela busca
     nao_informados: list[BemDoDBK] = field(default_factory=list)  # no DBK, não atualizados pelo JSON
 
 def bem_do_dbk(linha: str) -> BemDoDBK:
@@ -233,10 +237,41 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
         encontrado (nem sobrescrito) por outro bem do mesmo JSON."""
         return [p for p in posicoes if int(Registro27.CHAVE.ler(arquivo.linhas[p])) < primeira_chave_nova]
 
+    referencias = [referencia.numero(bem, REF) for bem in bens]
+    repetidas = referencia.repetidas(bens, REF)
+    referenciadas = {ref for ref in referencias if ref}
+    posicao_da_chave = {int(Registro27.CHAVE.ler(arquivo.linhas[p])): p for p in da_entrada(arquivo.indices(Registro27.TIPO))}
+
     for numero, (bem, campos) in enumerate(zip(bens, campos_por_bem), start=1):
         descricao = f"Bem {numero} ({bem['grupo']}/{bem['codigo']}, {nome_codigo(bem['grupo'], bem['codigo'])})"
         chave_bem = chave_busca(campos)
-        encontrados = da_entrada(procurar(arquivo, chave_bem)) if chave_bem else []
+        ref = referencias[numero - 1]
+        if ref:                                         # docs/adr/0027: a referência substitui a busca
+            problema = None
+            if numero in repetidas:
+                problema = "outro bem do JSON indica o mesmo bem do DBK"
+            elif ref not in posicao_da_chave:
+                problema = "a chave indicada em 'dbk' não existe no DBK"
+            else:
+                lido = Registro27.ler_tudo(arquivo.linhas[posicao_da_chave[ref]])
+                chave_dbk = chave_busca(lido)
+                if (lido["GRUPO"], lido["CODIGO"], lido["PAIS"]) != (campos["GRUPO"], campos["CODIGO"], campos["PAIS"]):
+                    problema = "o bem indicado em 'dbk' é de outro grupo, código ou país"
+                elif chave_bem and chave_dbk and chave_bem != chave_dbk:
+                    problema = "o bem indicado em 'dbk' tem outro identificador (ex.: Renavam, IPTU, conta, CNPJ)"
+            if problema:
+                logger.warning("%s: %s; não foi gravado (revisão).", descricao, problema)
+                resultado.revisao.append(numero)
+                continue
+            encontrados = [posicao_da_chave[ref]]
+            resultado.por_referencia.append(numero)
+        else:
+            encontrados = da_entrada(procurar(arquivo, chave_bem)) if chave_bem else []
+            if any(int(Registro27.CHAVE.ler(arquivo.linhas[p])) in referenciadas for p in encontrados):
+                logger.warning("%s: o bem do DBK com a mesma chave foi indicado em 'dbk' por outro bem do JSON; "
+                               "não foi gravado (revisão).", descricao)
+                resultado.revisao.append(numero)
+                continue
 
         if len(encontrados) > 1:
             logger.warning("%s: %d lançamentos no DBK com a mesma chave; não foi gravado (revisão).",
@@ -244,7 +279,7 @@ def inserir(arquivo: ArquivoDBK, bens: list[dict], campos_por_bem: list[dict]) -
             resultado.revisao.append(numero)
             continue
 
-        if encontrados and chaves_json[chave_bem] > 1:
+        if encontrados and not ref and chaves_json[chave_bem] > 1:
             # Dois bens do JSON apontando para o mesmo lançamento: um sobrescreveria o outro.
             logger.warning("%s: outro bem do JSON tem a mesma chave e o DBK tem um lançamento com ela; "
                            "não foi gravado (revisão).", descricao)
@@ -326,6 +361,9 @@ def relatorio(resultado: Resultado) -> list[tuple[int, str]]:
         linhas.append((logging.INFO, f"  atualizados (bens do JSON): {numeros(resultado.atualizados)}"))
     if resultado.novos:
         linhas.append((logging.INFO, f"  lançados como novos (bens do JSON): {numeros(resultado.novos)}"))
+    if resultado.por_referencia:
+        linhas.append((logging.INFO, "  achados pela referência 'dbk', não pela busca (bens do JSON): "
+                                     f"{numeros(resultado.por_referencia)}"))
     if resultado.revisao:
         linhas.append((logging.WARNING, f"  REVISÃO, não gravados (bens do JSON): {numeros(resultado.revisao)}"))
     if resultado.conferir:

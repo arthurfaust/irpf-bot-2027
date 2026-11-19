@@ -57,6 +57,7 @@ src/irpf_bot_2027/
 │   └── irpf2026/     cabeçalho, registros 21, 25, 26, 27 e 35, tabelas de bens, de pagamentos e de
 │                     dependentes, nome de pessoa, DV da conta, países, bancos, regras da tela
 └── fichas/
+    ├── referencia.py campo "dbk" do JSON: formato e referências repetidas (a conferência é de cada ficha)
     ├── __init__.py   FICHAS = (rendimentos_pj, dependentes, alimentandos, pagamentos, bens): cada ficha
     │                 expõe NOME, CHAVE_JSON, validar(itens, cpf_declarante), inserir(), relatorio(),
     │                 exportar(arquivo)

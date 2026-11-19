@@ -4,8 +4,9 @@ Exporta um DBK para JSON, no formato do JSON de entrada do bot (docs/adr/0026).
 Uso (no WSL):  uv run irpf-bot-2027-exportar ENTRADA.DBK SAIDA.json
 
 O JSON tem o "cpf" do declarante e uma lista por ficha (as chaves de fichas/FICHAS), cada item com a
-referência ao item do DBK em "dbk". É a entrada da etapa de IA, que compara o DBK com os documentos
-do cliente; o arquivo tem dados do cliente e deve passar pela anonimização antes de sair do escritório.
+referência ao item do DBK em "dbk", que o bot aceita de volta (docs/adr/0027). É a entrada da etapa de
+IA, que compara o DBK com os documentos do cliente; o arquivo tem dados do cliente e deve passar pela
+anonimização antes de sair do escritório.
 O log mostra só quantos itens cada ficha exportou.
 """
 

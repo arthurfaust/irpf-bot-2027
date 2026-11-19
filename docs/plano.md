@@ -238,8 +238,11 @@ a referência `"dbk"` → o bot confere a referência e grava.
    entrada, com `"dbk": {"chave": N}` (bens, dependentes, alimentandos) ou `{"item": N}` (fontes,
    pagamentos); campo em branco no DBK não sai (ex.: o tipo do dependente importado). Comando
    `uv run irpf-bot-2027-exportar ENTRADA.DBK SAIDA.json`. Ida e volta testada com os DBKs do programa
-   das 5 fichas (`tests/test_exportacao.py`). O bot ainda recusa o campo `"dbk"` (passo 2).
-2. [ ] Campo `"dbk"` no JSON de entrada e a conferência da referência (ADR próprio).
+   das 5 fichas (`tests/test_exportacao.py`).
+2. [x] Campo `"dbk"` no JSON de entrada (19/11/2026, ADR 0027), nas 5 fichas: a referência substitui a
+   busca, depois de conferida (existe, mesmo tipo, mesmo identificador forte, sem duas referências ao
+   mesmo item). Resolve o bem sem identificador e o pagamento no exterior com outro nome. Devolver o
+   JSON exportado ao mesmo DBK não cria nem duplica nada (`tests/test_referencia.py`).
 3. [ ] Prompt e JSON Schema da etapa de IA (fora do bot).
 - Anonimização (software do escritório): mesmo código para o mesmo dado, normalizado antes; validar o
   enquadramento na LGPD com quem cuida disso (ADR 0026).
