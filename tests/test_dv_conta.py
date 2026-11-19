@@ -1,8 +1,8 @@
 """Dígito verificador da conta (leiautes/irpf2026/dv_conta.py, transcrito do ValidadorDvContaCorrente).
 
-CONTAS são as do roteiro manual tests/manual/dv_conta/ (teste1_validas). Confirmação no programa: a
-restauração do teste1 não pode ter o aviso "DV da conta inválido"; a do teste2 (mesmas contas com outro
-dígito) deve ter o aviso em todos os bens.
+CONTAS são as do roteiro manual tests/manual/dv_conta/ (teste1_validas). Confirmado no programa em
+19/11/2026: a restauração do teste1 não teve nenhum aviso "DV da conta inválido"; a do teste2 (mesmas
+contas com outro dígito) teve o aviso em todos os 16 bens.
 """
 
 import logging

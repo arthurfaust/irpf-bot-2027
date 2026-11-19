@@ -223,8 +223,9 @@ Decidido em 17/11/2026: fazer as fichas mais comuns antes da preparação para 2
   `leiautes/irpf2026/dv_conta.py` (17 bancos com regra, tamanhos de `bancos_calculo_dv.xml`, tabelas de
   agências do Nordeste e do Banese). Como no programa, DV que não confere só gera **aviso** no log
   (o bem é gravado). DV do roteiro geral e do exemplo corrigido (BB 98765 → 4).
-- [ ] Roteiro `tests/manual/dv_conta/`: confirmar no programa que as 17 contas "válidas" não têm aviso
-  e as 16 "inválidas" têm.
+- [x] Roteiro `tests/manual/dv_conta/` confirmado no programa em 19/11/2026: as 17 contas "válidas"
+  (uma por banco) sem nenhum aviso e as 16 "inválidas" com o aviso "Dígito verificador da conta corrente
+  inválido" em todas; regravados idênticos às saídas do bot. Algoritmos dos 17 bancos confirmados.
 - [ ] Rendimentos de PJ de dependentes (32), isentos e exclusivos (23, 24, 83-89),
   dívidas (28), doações efetuadas (26, códigos 40-47, 80, 81).
 
