@@ -29,9 +29,11 @@ uv run pytest            # testes; rode antes de sugerir qualquer commit
 uv run irpf-bot-2027     # executa com os caminhos do config/.env
 uv run irpf-bot-2027-exportar ENTRADA.DBK SAIDA.json   # DBK -> JSON (entrada da etapa de IA, ADR 0026)
 uv run irpf-bot-2027-esquema docs/ia   # regera os JSON Schemas; rode ao mudar regra ou tabela (ADR 0028)
+uv sync --extra ia && uv run irpf-bot-2027-ia --dbk E.DBK --documentos PASTA --saida S.json   # etapa de IA (ADR 0029; gasta créditos)
 ```
 
-Etapa de IA (fora do bot): `docs/ia/prompt.md` e os esquemas gerados em `docs/ia/`.
+Etapa de IA (fora do bot): `src/irpf_bot_2027/ia/`, `docs/ia/prompt.md` e os esquemas gerados em `docs/ia/`.
+Credencial: `ant auth login` ou `ANTHROPIC_API_KEY`. Os testes usam um provedor falso; nunca chame a API real sem o Arthur aprovar.
 
 `config/.env` define `RAW_FILE`, `OUTPUT_FILE`, `CLIENT_DATA` e `LOG_LEVEL` (veja `config/.env.example`).
 Chamado pelo Windows (`wsl.exe ... bash -lc '...'`), o `$?` sempre aparece como 0; confira códigos de
@@ -53,6 +55,8 @@ src/irpf_bot_2027/
 ├── main.py           orquestra: lê DBK → confere exercício → lê JSON → valida tudo → insere → grava
 ├── exportar.py       comando DBK → JSON (chama exportar() de cada ficha)
 ├── esquema.py        gera os JSON Schemas de docs/ia/ das tabelas e constantes da validação
+├── ia/               etapa de IA (extra `ia`): pseudonimizacao.py (códigos do DBK, só em memória),
+│                     provedores.py (Provedor/Conversa; Claude), etapa.py (pedido, conferência, correção)
 ├── config.py         .env;  config_log.py: logs no terminal e em logs/
 ├── dbk/              genérico, não muda entre anos: Campo, Registro (base), ArquivoDBK
 ├── comum/            conversões (sim/não, dígitos, datas, números), texto, CPF/CNPJ (documentos.py)

@@ -7,9 +7,10 @@ permitir); depois de desfeita a anonimização, o JSON precisa passar em `docs/i
 que é o que o bot recebe. Os dois são gerados do código (`uv run irpf-bot-2027-esquema docs/ia`).
 Ano: IRPF 2026, ano-calendário 2025.
 
-Fluxo completo: `irpf-bot-2027-exportar` (DBK → JSON) → anonimização (software do escritório) → esta
-etapa → desfazer a anonimização → `irpf-bot-2027` (confere e grava). Se o bot recusar o JSON, as
-mensagens de erro (sem dados do cliente) voltam para esta etapa, na seção "Correção".
+Quem usa este prompt é o comando `uv run irpf-bot-2027-ia` (src/irpf_bot_2027/ia/, docs/adr/0029): ele
+exporta e pseudonimiza o DBK, manda os documentos (já anonimizados pelo software do escritório), confere
+a resposta, devolve os erros à IA e desfaz os códigos. **O texto do prompt é o que vem depois da linha
+`---` abaixo**; o que está antes é nota para quem mantém o projeto.
 
 ---
 
@@ -21,13 +22,23 @@ qualquer coisa fora do formato e devolve a lista de erros para você corrigir.
 
 ## Entrada
 
-1. **Documentos do cliente**, vários, cada um identificado pelo nome do arquivo (ex.: `informe_banco_a.pdf`,
-   `recibos_medico.pdf`, `extrato_corretora.pdf`). Os dados de pessoas físicas e os identificadores que
-   levam a elas (CPF, nome, endereço, conta, Renavam...) foram **trocados por códigos** (ex.:
-   `CPF_0007`, `NOME_0003`). O mesmo dado tem sempre o mesmo código em todos os documentos e no JSON do
-   DBK. CNPJs e valores vêm reais.
+1. **Documentos do cliente**, vários, anexados na ordem da lista que vem no pedido, cada um com o nome
+   do arquivo (ex.: `informe_banco_a.pdf`, `recibos_medico.pdf`, `extrato_corretora.pdf`). Os dados de
+   pessoas físicas e os identificadores que levam a elas (CPF, nome, endereço, número de conta...) foram
+   **apagados**: no lugar deles há um espaço vazio ou uma tarja. CNPJs, nomes de empresas, datas e
+   valores vêm reais. Os documentos podem estar em outra língua (ex.: confirmações de corretora em
+   inglês); os valores em moeda estrangeira continuam na moeda do documento.
 2. **JSON do DBK**: a declaração como está hoje (em geral, a importada do ano anterior), no mesmo
-   formato da saída, com a mesma anonimização. Cada item traz `"dbk"` (a chave ou a ordem dele).
+   formato da saída. Os dados sensíveis dele foram **trocados por códigos** (ex.: `CPF_0003`,
+   `NOME_0002`, `CONTA_0001`, `NUM_0004` para números dentro de textos). Cada item traz `"dbk"` (a chave
+   ou a ordem dele).
+
+Como os dados sensíveis foram apagados dos documentos, o casamento com o DBK se faz pelo que sobrou: instituição
+(CNPJ, nome), natureza do bem ou do pagamento, ativo, país, datas, valores e a situação do ano anterior.
+Num item que casa com o DBK, **copie os códigos dele** (`"cpf": "CPF_0003"`): o escritório os troca de
+volta pelos dados reais. **Nunca invente um código** que não está no JSON do DBK. Num item novo cujo
+identificador foi apagado no documento (ex.: o número de uma conta nova), deixe o campo de fora e
+registre a falta em `pendencias`: o bot vai apontar o campo obrigatório e o contador o completa.
 
 ## Saída
 
@@ -86,8 +97,8 @@ Num item com `"dbk"`:
 
 - Valores em reais como texto com ponto decimal e sem milhar: `"1234.56"`. Zero é `"0.00"`.
 - Datas `"AAAA-MM-DD"`. Códigos sempre como texto: `"01"`, `"105"`.
-- Códigos de anonimização copiados **exatamente** como aparecem (`"CPF_0007"`), sem "corrigir" nem
-  formatar: o escritório os desfaz antes de o JSON chegar ao bot.
+- Códigos do JSON do DBK copiados **exatamente** como aparecem (`"CPF_0003"`), sem "corrigir" nem
+  formatar: eles são trocados de volta pelos dados reais antes de o JSON chegar ao bot.
 - Nomes de pessoas (dependente, alimentando) só com letras e espaços.
 - Rendimentos de PJ: um item por informe; os cinco valores sempre presentes.
 - Bens: os blocos (`conta`, `imovel`, `veiculo`, `bolsa`, `cripto`, `exterior`, `pertence_a`) dependem

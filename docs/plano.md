@@ -248,10 +248,15 @@ a referência `"dbk"` → o bot confere a referência e grava.
    DBK); `docs/ia/esquema_entrada.json` (bot) e `esquema_ia.json` (saída da IA, com os códigos da
    anonimização), gerados do código e conferidos pelos testes; o bot aceita `"origem"` em cada item e
    `"pendencias"` no topo.
-4. [ ] Escolher provedor/modelo e o script que monta a chamada (documentos + DBK exportado + prompt) e
-   desfaz a anonimização (fora do bot); testar com documentos reais anonimizados.
-- Anonimização (software do escritório): mesmo código para o mesmo dado, normalizado antes; validar o
-  enquadramento na LGPD com quem cuida disso (ADR 0026).
+4. [x] Script da chamada (19/11/2026, ADR 0029): `uv run irpf-bot-2027-ia` (extra `ia`), provedor
+   trocável começando pelo Claude (`claude-opus-5-5`), documentos pela Files API (expiram em 1 hora,
+   apagados no fim), pseudonimização própria do JSON do DBK (o software do escritório apaga os dados
+   dos PDFs em vez de trocá-los por códigos), conferência e até 3 rodadas de correção. Testado com
+   provedor falso (`tests/test_ia.py`).
+5. [ ] Rodar com documentos reais anonimizados (gasta créditos da API) e ajustar o prompt; ver se o
+   casamento sem identificadores (dependentes, pagamentos a pessoas físicas) se sustenta.
+- Anonimização (software do escritório): apaga o dado (ADR 0029); validar o enquadramento na LGPD com
+  quem cuida disso (ADR 0026).
 
 ### Fase 5 — preparação para o IRPF 2027
 

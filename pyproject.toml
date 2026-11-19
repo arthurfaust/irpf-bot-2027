@@ -15,6 +15,13 @@ dependencies = [
 irpf-bot-2027 = "irpf_bot_2027.main:main"
 irpf-bot-2027-exportar = "irpf_bot_2027.exportar:main"
 irpf-bot-2027-esquema = "irpf_bot_2027.esquema:main"
+irpf-bot-2027-ia = "irpf_bot_2027.ia.etapa:main"
+
+[project.optional-dependencies]
+ia = [
+    "anthropic>=2.11.0",
+    "jsonschema>=4.26.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.12.17,<0.13.0"]
