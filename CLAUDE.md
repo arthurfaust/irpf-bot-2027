@@ -27,6 +27,7 @@ Leia os dois antes de começar uma tarefa.
 ```bash
 uv run pytest            # testes; rode antes de sugerir qualquer commit
 uv run irpf-bot-2027     # executa com os caminhos do config/.env
+uv run irpf-bot-2027-exportar ENTRADA.DBK SAIDA.json   # DBK -> JSON (entrada da etapa de IA, ADR 0026)
 ```
 
 `config/.env` define `RAW_FILE`, `OUTPUT_FILE`, `CLIENT_DATA` e `LOG_LEVEL` (veja `config/.env.example`).
@@ -47,6 +48,7 @@ Os DBKs em `tests/dados/` são de uma declaração de teste (CPF fictício 770.3
 ```
 src/irpf_bot_2027/
 ├── main.py           orquestra: lê DBK → confere exercício → lê JSON → valida tudo → insere → grava
+├── exportar.py       comando DBK → JSON (chama exportar() de cada ficha)
 ├── config.py         .env;  config_log.py: logs no terminal e em logs/
 ├── dbk/              genérico, não muda entre anos: Campo, Registro (base), ArquivoDBK
 ├── comum/            conversões (sim/não, dígitos, datas, números), texto, CPF/CNPJ (documentos.py)
@@ -56,17 +58,19 @@ src/irpf_bot_2027/
 │                     dependentes, nome de pessoa, DV da conta, países, bancos, regras da tela
 └── fichas/
     ├── __init__.py   FICHAS = (rendimentos_pj, dependentes, alimentandos, pagamentos, bens): cada ficha
-    │                 expõe NOME, CHAVE_JSON, validar(itens, cpf_declarante), inserir(), relatorio()
+    │                 expõe NOME, CHAVE_JSON, validar(itens, cpf_declarante), inserir(), relatorio(),
+    │                 exportar(arquivo)
     ├── rendimentos_pj/ ficha.py: validação, busca pelo CPF/CNPJ da fonte, inserção (registro 21)
     ├── dependentes/  ficha.py: validação, busca pelo CPF, preenchimento do importado, inserção (25)
     ├── alimentandos/ ficha.py: idem, com decisão judicial/escritura pública (35)
     ├── pagamentos/   ficha.py: validação por código, dependente/alimentando pelo CPF, busca, inserção (26)
     └── bens/         entrada.py (JSON → campos), validacao.py, busca.py (chave e busca no DBK),
-                      ficha.py (atualização, montagem e inserção)
+                      ficha.py (atualização, montagem e inserção), exportacao.py (DBK → JSON)
 tools/visualizador_dbk.html   abre um DBK e mostra os campos de cada linha
 ```
 
-Para uma ficha nova: subpacote em `fichas/` com a mesma forma de `bens/` + incluir em `FICHAS` +
+Para uma ficha nova: subpacote em `fichas/` com a mesma forma de `bens/` (inclusive `exportar` e o
+teste de ida e volta em `tests/test_exportacao.py`) + incluir em `FICHAS` +
 roteiro manual próprio em `tests/manual/<ficha>/` + **itens dela nos três testes do roteiro geral**
 (`tests/manual/geral/`, rodar com `bash tests/manual/geral/rodar.sh`).
 

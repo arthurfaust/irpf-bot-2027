@@ -42,7 +42,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date
 
-from irpf_bot_2027.comum.conversoes import so_digitos
+from irpf_bot_2027.comum.conversoes import data_do_dbk, so_digitos
 from irpf_bot_2027.comum.documentos import cpf_valido
 from irpf_bot_2027.comum.texto import caracteres_fora_do_latin1, normalizar_texto
 from irpf_bot_2027.dbk import ArquivoDBK
@@ -242,6 +242,23 @@ def inserir(arquivo: ArquivoDBK, itens: list[dict], campos_por_item: list[dict])
 
     resultado.dbk_nao_informados = [ordem for ordem in range(1, len(entrada) + 1) if ordem not in usados]
     return resultado
+
+def exportar(arquivo: ArquivoDBK) -> list[dict]:
+    """Dependentes do DBK no formato do JSON de entrada, com a chave em "dbk" (docs/adr/0026).
+    Campo em branco no DBK (ex.: o tipo do dependente importado) não sai no JSON."""
+    racas = {codigo: nome for nome, codigo in tabela.RACA_COR.items()}
+    itens = []
+    for linha in arquivo.linhas_do_tipo(Registro25.TIPO):
+        ler = lambda nome: getattr(Registro25, nome).ler(linha).strip()
+        item = {"tipo": ler("CODIGO"), "nome": ler("NOME"), "cpf": ler("CPF_DEPENDENTE"),
+                "data_nascimento": data_do_dbk(ler("DATA_NASCIMENTO")),
+                "mora_com_titular": {"1": True, "0": False}.get(ler("MORA_COM_TITULAR")),
+                "email": ler("EMAIL").lower(), "ddd": ler("DDD_CELULAR"), "celular": ler("CELULAR"),
+                "raca_cor": racas.get(int(ler("RACA_COR") or 0))}
+        item = {chave: valor for chave, valor in item.items() if valor not in (None, "")}
+        item["dbk"] = {"chave": int(ler("CHAVE"))}
+        itens.append(item)
+    return itens
 
 def relatorio(resultado: Resultado) -> list[tuple[int, str]]:
     def numeros(lista: list[int]) -> str:

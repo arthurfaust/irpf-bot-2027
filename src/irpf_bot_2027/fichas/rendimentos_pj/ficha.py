@@ -29,7 +29,7 @@ import logging
 from collections import Counter
 from dataclasses import dataclass, field
 
-from irpf_bot_2027.comum.conversoes import so_digitos, valor_em_reais
+from irpf_bot_2027.comum.conversoes import numero_do_dbk, so_digitos, valor_em_reais
 from irpf_bot_2027.comum.documentos import ni_valido
 from irpf_bot_2027.comum.texto import caracteres_fora_do_latin1, normalizar_texto
 from irpf_bot_2027.dbk import ArquivoDBK
@@ -188,6 +188,18 @@ def inserir(arquivo: ArquivoDBK, itens: list[dict], campos_por_item: list[dict])
         elif ordem not in usadas:
             resultado.dbk_nao_informadas.append(ordem)
     return resultado
+
+def exportar(arquivo: ArquivoDBK) -> list[dict]:
+    """Fontes do DBK no formato do JSON de entrada, com a ordem na ficha em "dbk" (docs/adr/0026)."""
+    itens = []
+    for ordem, linha in enumerate(arquivo.linhas_do_tipo(Registro21.TIPO), start=1):
+        item = {"cnpj_cpf": Registro21.NI_PAGADOR.ler(linha).strip(),
+                "nome": Registro21.NOME_PAGADOR.ler(linha).strip()}
+        for chave, nome in VALORES.items():
+            item[chave] = numero_do_dbk(getattr(Registro21, nome).ler(linha))
+        item["dbk"] = {"item": ordem}
+        itens.append(item)
+    return itens
 
 def relatorio(resultado: Resultado) -> list[tuple[int, str]]:
     def numeros(lista: list[int]) -> str:

@@ -71,3 +71,16 @@ def numero(valor, casas: int, permite_negativo: bool = False) -> Decimal:
     return convertido
 
 valor_em_reais = partial(numero, casas=2)
+
+# --- caminho inverso (DBK -> JSON), usado na exportação (docs/adr/0026) ---
+
+def numero_do_dbk(texto: str, casas: int = 2) -> str:
+    """"0000000150000" -> "1500.00"; "-000000025000" -> "-250.00" (decimais implícitas)."""
+    return f"{Decimal(int(texto)) / 10 ** casas:.{casas}f}"
+
+def data_do_dbk(texto: str) -> str | None:
+    """"23102020" -> "2020-10-23"; data em branco ou zerada -> None."""
+    texto = texto.strip()
+    if not texto.strip("0"):
+        return None
+    return date(int(texto[4:]), int(texto[2:4]), int(texto[:2])).isoformat()
