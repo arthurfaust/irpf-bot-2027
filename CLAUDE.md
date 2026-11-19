@@ -62,17 +62,22 @@ src/irpf_bot_2027/
     │                 exportar(arquivo)
     ├── rendimentos_pj/ ficha.py: validação, busca pelo CPF/CNPJ da fonte, inserção (registro 21)
     ├── dependentes/  ficha.py: validação, busca pelo CPF, preenchimento do importado, inserção (25)
-    ├── alimentandos/ ficha.py: idem, com decisão judicial/escritura pública (35)
-    ├── pagamentos/   ficha.py: validação por código, dependente/alimentando pelo CPF, busca, inserção (26)
+    ├── alimentandos/ validacao.py (decisão judicial/escritura pública), exportacao.py, ficha.py (busca
+    │                 pelo CPF, preenchimento do importado, inserção) (35)
+    ├── pagamentos/   validacao.py (regras por código), busca.py (chave e dependente/alimentando pelo
+    │                 CPF), exportacao.py, ficha.py (preenchimento do importado, inserção) (26)
     └── bens/         entrada.py (JSON → campos), validacao.py, busca.py (chave e busca no DBK),
                       ficha.py (atualização, montagem e inserção), exportacao.py (DBK → JSON)
 tools/visualizador_dbk.html   abre um DBK e mostra os campos de cada linha
 ```
 
-Para uma ficha nova: subpacote em `fichas/` com a mesma forma de `bens/` (inclusive `exportar` e o
-teste de ida e volta em `tests/test_exportacao.py`) + incluir em `FICHAS` +
+Para uma ficha nova: subpacote em `fichas/` expondo a interface de `fichas/__init__.py` (inclusive
+`exportar` e o teste de ida e volta em `tests/test_exportacao.py`) + incluir em `FICHAS` +
 roteiro manual próprio em `tests/manual/<ficha>/` + **itens dela nos três testes do roteiro geral**
 (`tests/manual/geral/`, rodar com `bash tests/manual/geral/rodar.sh`).
+A ficha começa com um `ficha.py` só; quando passar de umas 300 linhas, é dividida como `bens/` e
+`pagamentos/`: `validacao.py` (JSON → campos), `busca.py` (chave e procura no DBK, se for grande),
+`exportacao.py` (DBK → JSON) e `ficha.py` (montagem, inserção, relatório, e reexporta a interface).
 
 ## Formato do DBK (confirmado em arquivos do programa)
 
