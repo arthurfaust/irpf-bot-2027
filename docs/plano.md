@@ -229,6 +229,21 @@ Decidido em 17/11/2026: fazer as fichas mais comuns antes da preparação para 2
 - [ ] Rendimentos de PJ de dependentes (32), isentos e exclusivos (23, 24, 83-89),
   dívidas (28), doações efetuadas (26, códigos 40-47, 80, 81).
 
+### Fase 4c — comparação com IA (ADR 0026, decidido em 19/11/2026)
+
+Fluxo: DBK → JSON (código) → IA compara com os PDFs anonimizados e devolve o JSON de alterações com
+a referência `"dbk"` → o bot confere a referência e grava.
+
+1. [x] Exportação DBK → JSON (19/11/2026): `exportar(arquivo)` nas 5 fichas, no formato do JSON de
+   entrada, com `"dbk": {"chave": N}` (bens, dependentes, alimentandos) ou `{"item": N}` (fontes,
+   pagamentos); campo em branco no DBK não sai (ex.: o tipo do dependente importado). Comando
+   `uv run irpf-bot-2027-exportar ENTRADA.DBK SAIDA.json`. Ida e volta testada com os DBKs do programa
+   das 5 fichas (`tests/test_exportacao.py`). O bot ainda recusa o campo `"dbk"` (passo 2).
+2. [ ] Campo `"dbk"` no JSON de entrada e a conferência da referência (ADR próprio).
+3. [ ] Prompt e JSON Schema da etapa de IA (fora do bot).
+- Anonimização (software do escritório): mesmo código para o mesmo dado, normalizado antes; validar o
+  enquadramento na LGPD com quem cuida disso (ADR 0026).
+
 ### Fase 5 — preparação para o IRPF 2027
 
 O programa costuma sair entre o fim de fevereiro e março; adiante esta fase se a data se aproximar.
