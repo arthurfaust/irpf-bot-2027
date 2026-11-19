@@ -61,7 +61,7 @@ def validar_item(item: dict, cpf_declarante: str | None) -> tuple[dict, list[str
     campos, erros = {}, []
     if not isinstance(item, dict):
         return campos, ["esperado um objeto com os campos da fonte pagadora"]
-    for chave in sorted(set(item) - set(CAMPOS_JSON) - {referencia.CAMPO}):
+    for chave in sorted(set(item) - set(CAMPOS_JSON) - referencia.CAMPOS_DE_CONTROLE):
         erros.append(f"campo desconhecido '{chave}'")
     for chave in CAMPOS_JSON:
         if item.get(chave) is None or str(item[chave]).strip() == "":

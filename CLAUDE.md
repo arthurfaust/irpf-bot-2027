@@ -28,7 +28,10 @@ Leia os dois antes de começar uma tarefa.
 uv run pytest            # testes; rode antes de sugerir qualquer commit
 uv run irpf-bot-2027     # executa com os caminhos do config/.env
 uv run irpf-bot-2027-exportar ENTRADA.DBK SAIDA.json   # DBK -> JSON (entrada da etapa de IA, ADR 0026)
+uv run irpf-bot-2027-esquema docs/ia   # regera os JSON Schemas; rode ao mudar regra ou tabela (ADR 0028)
 ```
+
+Etapa de IA (fora do bot): `docs/ia/prompt.md` e os esquemas gerados em `docs/ia/`.
 
 `config/.env` define `RAW_FILE`, `OUTPUT_FILE`, `CLIENT_DATA` e `LOG_LEVEL` (veja `config/.env.example`).
 Chamado pelo Windows (`wsl.exe ... bash -lc '...'`), o `$?` sempre aparece como 0; confira códigos de
@@ -49,6 +52,7 @@ Os DBKs em `tests/dados/` são de uma declaração de teste (CPF fictício 770.3
 src/irpf_bot_2027/
 ├── main.py           orquestra: lê DBK → confere exercício → lê JSON → valida tudo → insere → grava
 ├── exportar.py       comando DBK → JSON (chama exportar() de cada ficha)
+├── esquema.py        gera os JSON Schemas de docs/ia/ das tabelas e constantes da validação
 ├── config.py         .env;  config_log.py: logs no terminal e em logs/
 ├── dbk/              genérico, não muda entre anos: Campo, Registro (base), ArquivoDBK
 ├── comum/            conversões (sim/não, dígitos, datas, números), texto, CPF/CNPJ (documentos.py)
@@ -57,7 +61,7 @@ src/irpf_bot_2027/
 │   └── irpf2026/     cabeçalho, registros 21, 25, 26, 27 e 35, tabelas de bens, de pagamentos e de
 │                     dependentes, nome de pessoa, DV da conta, países, bancos, regras da tela
 └── fichas/
-    ├── referencia.py campo "dbk" do JSON: formato e referências repetidas (a conferência é de cada ficha)
+    ├── referencia.py campos de controle do item: "dbk" (formato, repetidas) e "origem" (formato)
     ├── __init__.py   FICHAS = (rendimentos_pj, dependentes, alimentandos, pagamentos, bens): cada ficha
     │                 expõe NOME, CHAVE_JSON, validar(itens, cpf_declarante), inserir(), relatorio(),
     │                 exportar(arquivo)

@@ -54,6 +54,11 @@ def main() -> None:
     chaves_das_fichas = {ficha.CHAVE_JSON for ficha in FICHAS}
     for chave in sorted(set(dados) - chaves_das_fichas - CHAVES_JSON_CONHECIDAS):
         logger.warning("A chave '%s' do JSON não é de nenhuma ficha e foi ignorada.", chave)
+    pendencias = dados.get("pendencias") or []
+    if pendencias:
+        # O texto pode ter dados do cliente: o log só conta (docs/adr/0028).
+        logger.warning("O JSON traz %d pendência(s) da etapa de IA para o contador decidir; veja \"pendencias\" "
+                       "no JSON.", len(pendencias) if isinstance(pendencias, list) else 1)
 
     # 3. Validar todas as fichas antes de gravar qualquer coisa
     validados = []                      # (ficha, itens, dados_validados) das fichas presentes no JSON

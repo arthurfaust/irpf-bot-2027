@@ -76,7 +76,7 @@ def validar_item(item: dict, cpf_declarante: str | None) -> tuple[dict, list[str
     campos, erros = {}, []
     if not isinstance(item, dict):
         return campos, ["esperado um objeto com os campos do dependente"]
-    for chave in sorted(set(item) - set(CAMPOS_JSON) - {referencia.CAMPO}):
+    for chave in sorted(set(item) - set(CAMPOS_JSON) - referencia.CAMPOS_DE_CONTROLE):
         erros.append(f"campo desconhecido '{chave}'")
     for chave in OBRIGATORIOS:
         if not _informado(item, chave):

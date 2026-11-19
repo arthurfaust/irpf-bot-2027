@@ -295,7 +295,7 @@ def converter_campos(bem: dict) -> tuple[dict, list[str]]:
             erros.append(f"'{origem}': {erro}")
 
     for chave, conteudo in bem.items():
-        if chave == "dbk":                          # referência ao bem do DBK (docs/adr/0027): validada em ficha.validar
+        if chave in ("dbk", "origem"):              # campos de controle (docs/adr/0027 e 0028): validados em ficha.validar
             continue
         if not isinstance(conteudo, dict):
             if chave in CAMPOS_SIMPLES:

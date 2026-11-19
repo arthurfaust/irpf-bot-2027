@@ -21,4 +21,5 @@ from irpf_bot_2027.fichas import alimentandos, bens, dependentes, pagamentos, re
 FICHAS = (rendimentos_pj, dependentes, alimentandos, pagamentos, bens)
 
 # Chaves do JSON que não são de nenhuma ficha, mas são esperadas (não geram aviso).
-CHAVES_JSON_CONHECIDAS = {"cpf"}
+# "pendencias": o que a etapa de IA deixou para o contador decidir (docs/adr/0028); o bot só conta.
+CHAVES_JSON_CONHECIDAS = {"cpf", "pendencias"}

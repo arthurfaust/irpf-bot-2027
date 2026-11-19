@@ -243,7 +243,13 @@ a referência `"dbk"` → o bot confere a referência e grava.
    busca, depois de conferida (existe, mesmo tipo, mesmo identificador forte, sem duas referências ao
    mesmo item). Resolve o bem sem identificador e o pagamento no exterior com outro nome. Devolver o
    JSON exportado ao mesmo DBK não cria nem duplica nada (`tests/test_referencia.py`).
-3. [ ] Prompt e JSON Schema da etapa de IA (fora do bot).
+3. [x] Prompt e JSON Schema da etapa de IA (19/11/2026, ADR 0028): `docs/ia/prompt.md` (vários
+   documentos: inventário, um item por coisa, recibos somados, conflito vira pendência, casamento com o
+   DBK); `docs/ia/esquema_entrada.json` (bot) e `esquema_ia.json` (saída da IA, com os códigos da
+   anonimização), gerados do código e conferidos pelos testes; o bot aceita `"origem"` em cada item e
+   `"pendencias"` no topo.
+4. [ ] Escolher provedor/modelo e o script que monta a chamada (documentos + DBK exportado + prompt) e
+   desfaz a anonimização (fora do bot); testar com documentos reais anonimizados.
 - Anonimização (software do escritório): mesmo código para o mesmo dado, normalizado antes; validar o
   enquadramento na LGPD com quem cuida disso (ADR 0026).
 
@@ -261,7 +267,7 @@ O programa costuma sair entre o fim de fevereiro e março; adiante esta fase se 
 
 ### Depois
 
-- JSON Schema gerado das regras, para a IA devolver o JSON no formato certo (saída estruturada).
+- (feito na fase 4c: JSON Schema gerado das regras, `docs/ia/`)
 
 ## Decisões tomadas
 

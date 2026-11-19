@@ -13,20 +13,43 @@ identificador forte nos dois lados, é o mesmo). Sem "dbk", vale a busca de cada
 from collections import Counter
 
 CAMPO = "dbk"
+ORIGEM = "origem"           # de quais documentos o item saiu (docs/adr/0028); o bot só confere o formato
+CAMPOS_DE_CONTROLE = {CAMPO, ORIGEM}
+
+
+def validar_origem(item: dict) -> list[str]:
+    """"origem": [{"documento": "nome do arquivo", "pagina": 2}, ...]; página opcional. Não vai para o DBK
+    nem para o log (o nome do documento pode identificar o cliente)."""
+    if ORIGEM not in item:
+        return []
+    origem = item[ORIGEM]
+    formato = f"'{ORIGEM}': esperada uma lista de {{\"documento\": \"...\", \"pagina\": N}} (página opcional)"
+    if not isinstance(origem, list) or not origem:
+        return [formato]
+    for fonte in origem:
+        if not isinstance(fonte, dict) or not set(fonte) <= {"documento", "pagina"}:
+            return [formato]
+        if not isinstance(fonte.get("documento"), str) or not fonte["documento"].strip():
+            return [formato]
+        pagina = fonte.get("pagina", 1)
+        if isinstance(pagina, bool) or not isinstance(pagina, int) or pagina < 1:
+            return [formato]
+    return []
 
 
 def validar(item: dict, chave_ref: str) -> list[str]:
-    """Erros de formato do campo "dbk" (vazio se não veio)."""
+    """Erros de formato dos campos de controle: "dbk" e "origem" (vazio se não vieram)."""
+    erros = validar_origem(item)
     if CAMPO not in item:
-        return []
+        return erros
     referencia = item[CAMPO]
     formato = f'esperado {{"{chave_ref}": N}}, com N inteiro a partir de 1'
     if not isinstance(referencia, dict) or set(referencia) != {chave_ref}:
-        return [f"'{CAMPO}': {formato}"]
+        return erros + [f"'{CAMPO}': {formato}"]
     valor = referencia[chave_ref]
     if isinstance(valor, bool) or not isinstance(valor, int) or valor < 1:
-        return [f"'{CAMPO}': {formato}"]
-    return []
+        return erros + [f"'{CAMPO}': {formato}"]
+    return erros
 
 
 def numero(item: dict, chave_ref: str) -> int | None:
@@ -43,5 +66,5 @@ def repetidas(itens: list[dict], chave_ref: str) -> set[int]:
 
 
 def sem_campo(item: dict) -> dict:
-    """O item sem o campo "dbk" (para as validações que recusam campo desconhecido)."""
-    return {chave: valor for chave, valor in item.items() if chave != CAMPO}
+    """O item sem os campos de controle ("dbk", "origem")."""
+    return {chave: valor for chave, valor in item.items() if chave not in CAMPOS_DE_CONTROLE}

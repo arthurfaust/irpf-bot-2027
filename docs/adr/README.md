@@ -33,6 +33,7 @@ escreva um novo ADR que o substitui e marque o antigo como "Substituído por NNN
 | [0025](0025-ficha-alimentandos.md) | Ficha Alimentandos | Aceito |
 | [0026](0026-comparacao-com-ia-e-exportacao-do-dbk.md) | Comparação com IA a partir do DBK exportado para JSON | Aceito |
 | [0027](0027-referencia-explicita-ao-item-do-dbk.md) | Referência explícita ao item do DBK (campo "dbk") | Aceito |
+| [0028](0028-etapa-de-ia-prompt-e-esquema.md) | Etapa de IA: prompt, esquemas gerados do código, origem e pendências | Aceito |
 
 Para um ADR novo, copie [modelo.md](modelo.md), use o próximo número e acrescente a linha acima.
 As decisões de 0002 a 0005 e 0008 foram tomadas até 10/11/2026 e registradas aqui em 11/11/2026, a

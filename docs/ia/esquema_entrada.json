@@ -1,0 +1,882 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JSON de entrada do irpf-bot (IRPF 2026, ano-calendário 2025)",
+  "description": "Só o que entra ou muda na declaração; o que não vier continua no DBK como está. Gerado por src/irpf_bot_2027/esquema.py: não edite à mão.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cpf"
+  ],
+  "properties": {
+    "cpf": {
+      "type": "string",
+      "pattern": "^\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}$",
+      "description": "CPF do declarante (o do DBK)"
+    },
+    "rendimentos_pj": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "cnpj_cpf": {
+            "type": "string",
+            "pattern": "^(\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}|\\d{2}\\.?\\d{3}\\.?\\d{3}/?\\d{4}-?\\d{2})$",
+            "description": "CPF ou CNPJ, com ou sem pontuação"
+          },
+          "nome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60,
+            "description": "nome da fonte pagadora"
+          },
+          "rendimentos": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d{1,2})?$",
+            "description": "reais com ponto decimal, ex.: \"1234.56\""
+          },
+          "contribuicao_previdenciaria": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d{1,2})?$",
+            "description": "reais com ponto decimal, ex.: \"1234.56\""
+          },
+          "imposto_retido": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d{1,2})?$",
+            "description": "reais com ponto decimal, ex.: \"1234.56\""
+          },
+          "decimo_terceiro": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d{1,2})?$",
+            "description": "reais com ponto decimal, ex.: \"1234.56\""
+          },
+          "irrf_decimo_terceiro": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d{1,2})?$",
+            "description": "reais com ponto decimal, ex.: \"1234.56\""
+          },
+          "dbk": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "item"
+            ],
+            "properties": {
+              "item": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "description": "item do DBK exportado que este atualiza (ordem da fonte na ficha); omitir se for novo"
+          },
+          "origem": {
+            "type": "array",
+            "minItems": 1,
+            "description": "documentos de onde o item saiu (para o contador conferir); não vai para o DBK",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "documento"
+              ],
+              "properties": {
+                "documento": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "pagina": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "cnpj_cpf",
+          "nome",
+          "rendimentos",
+          "contribuicao_previdenciaria",
+          "imposto_retido",
+          "decimo_terceiro",
+          "irrf_decimo_terceiro"
+        ],
+        "description": "um informe de rendimentos (fonte pagadora PJ do titular); todos os valores obrigatórios, \"0.00\" quando não houver"
+      }
+    },
+    "dependentes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "11",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "31",
+              "41",
+              "51"
+            ],
+            "description": "11 Companheiro(a) ou cônjuge; 21 Filho(a) ou enteado(a) até 21 anos; 22 Filho(a) ou enteado(a) cursando nível superior, até 24 anos; 23 Filho(a) ou enteado(a) em qualquer idade, com deficiência; 24 Irmãos, netos ou bisnetos até 21 anos com guarda judicial; 25 Irmãos, netos ou bisnetos até 24 anos, com guarda judicial; 26 Irmãos, netos ou bisnetos com deficiência e guarda judicial; 31 Pais, avós e bisavós com ou sem rendimentos até R$ 28.467,20; 41 Menor pobre, até 21 anos, com guarda judicial; 51 Tutor ou curador de pessoa absolutamente incapaz"
+          },
+          "nome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60,
+            "description": "só letras e espaços (sem hífen, apóstrofo ou números)"
+          },
+          "cpf": {
+            "type": "string",
+            "pattern": "^\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}$",
+            "description": "CPF, com ou sem pontuação"
+          },
+          "data_nascimento": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "\"AAAA-MM-DD\""
+          },
+          "mora_com_titular": {
+            "type": "boolean"
+          },
+          "email": {
+            "type": "string"
+          },
+          "ddd": {
+            "type": "string",
+            "pattern": "^\\d{2}$"
+          },
+          "celular": {
+            "type": "string",
+            "pattern": "^\\d{4,5}-?\\d{4}$"
+          },
+          "raca_cor": {
+            "type": "string",
+            "enum": [
+              "amarela",
+              "branca",
+              "indigena",
+              "parda",
+              "preta"
+            ]
+          },
+          "dbk": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "chave"
+            ],
+            "properties": {
+              "chave": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "description": "item do DBK exportado que este atualiza (chave do dependente); omitir se for novo"
+          },
+          "origem": {
+            "type": "array",
+            "minItems": 1,
+            "description": "documentos de onde o item saiu (para o contador conferir); não vai para o DBK",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "documento"
+              ],
+              "properties": {
+                "documento": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "pagina": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "tipo",
+          "nome",
+          "cpf",
+          "data_nascimento"
+        ]
+      }
+    },
+    "alimentandos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "nome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60,
+            "description": "só letras e espaços"
+          },
+          "cpf": {
+            "type": "string",
+            "pattern": "^\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}$",
+            "description": "CPF, com ou sem pontuação"
+          },
+          "data_nascimento": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "\"AAAA-MM-DD\""
+          },
+          "residente": {
+            "type": "string",
+            "enum": [
+              "brasil",
+              "exterior"
+            ]
+          },
+          "alimentando_de": {
+            "type": "string",
+            "pattern": "^\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}$",
+            "description": "CPF do titular ou de um dependente"
+          },
+          "decisao_judicial": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "data": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "description": "\"AAAA-MM-DD\""
+              },
+              "processo": {
+                "type": "string"
+              },
+              "vara": {
+                "type": "string"
+              },
+              "comarca": {
+                "type": "string"
+              },
+              "uf": {
+                "type": "string",
+                "enum": [
+                  "AC",
+                  "AL",
+                  "AM",
+                  "AP",
+                  "BA",
+                  "CE",
+                  "DF",
+                  "ES",
+                  "GO",
+                  "MA",
+                  "MG",
+                  "MS",
+                  "MT",
+                  "PA",
+                  "PB",
+                  "PE",
+                  "PI",
+                  "PR",
+                  "RJ",
+                  "RN",
+                  "RO",
+                  "RR",
+                  "RS",
+                  "SC",
+                  "SE",
+                  "SP",
+                  "TO"
+                ]
+              }
+            },
+            "required": [
+              "data"
+            ]
+          },
+          "escritura_publica": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "data": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "description": "\"AAAA-MM-DD\""
+              },
+              "cnpj_cartorio": {
+                "type": "string"
+              },
+              "nome_cartorio": {
+                "type": "string"
+              },
+              "livro": {
+                "type": "string"
+              },
+              "folhas": {
+                "type": "string"
+              },
+              "uf": {
+                "type": "string",
+                "enum": [
+                  "AC",
+                  "AL",
+                  "AM",
+                  "AP",
+                  "BA",
+                  "CE",
+                  "DF",
+                  "ES",
+                  "GO",
+                  "MA",
+                  "MG",
+                  "MS",
+                  "MT",
+                  "PA",
+                  "PB",
+                  "PE",
+                  "PI",
+                  "PR",
+                  "RJ",
+                  "RN",
+                  "RO",
+                  "RR",
+                  "RS",
+                  "SC",
+                  "SE",
+                  "SP",
+                  "TO"
+                ]
+              },
+              "cod_municipio": {
+                "type": "string"
+              },
+              "municipio": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          },
+          "dbk": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "chave"
+            ],
+            "properties": {
+              "chave": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "description": "item do DBK exportado que este atualiza (chave do alimentando); omitir se for novo"
+          },
+          "origem": {
+            "type": "array",
+            "minItems": 1,
+            "description": "documentos de onde o item saiu (para o contador conferir); não vai para o DBK",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "documento"
+              ],
+              "properties": {
+                "documento": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "pagina": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "nome",
+          "cpf",
+          "data_nascimento",
+          "residente",
+          "alimentando_de"
+        ],
+        "description": "informe decisao_judicial, escritura_publica ou os dois (tipo de processo)"
+      }
+    },
+    "pagamentos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "enum": [
+              "01",
+              "02",
+              "09",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "26",
+              "30",
+              "31",
+              "33",
+              "34",
+              "36",
+              "37",
+              "60",
+              "61",
+              "62",
+              "66",
+              "70",
+              "71",
+              "72",
+              "76",
+              "99"
+            ],
+            "description": "01 Instrução no Brasil; 02 Instrução no exterior; 09 Fonoaudiólogos no Brasil; 10 Médicos no Brasil; 11 Dentistas no Brasil; 12 Psicólogos no Brasil; 13 Fisioterapeutas no Brasil; 14 Terapeutas ocupacionais no Brasil; 15 Médicos no exterior; 16 Dentistas no exterior; 17 Psicólogos no exterior; 18 Fisioterapeutas no exterior; 19 Terapeutas ocupacionais no exterior; 20 Fonoaudiólogos no exterior; 21 Hospitais, clínicas e laboratórios no Brasil; 22 Hospitais, clínicas e laboratórios no exterior; 26 Planos de saúde no Brasil; 30 Pensão judicial paga a residente no Brasil; 31 Pensão judicial paga a não residente; 33 Pensão por escritura pública paga a residente; 34 Pensão por escritura pública paga a não residente; 36 Previdência complementar (inclusive FAPI); 37 Previdência complementar fechada ou aberta pública; 60 Advogados (exceto de ações trabalhistas); 61 Advogados (relativos a ações trabalhistas); 62 Advogados (demais honorários); 66 Engenheiros, arquitetos e outros autônomos; 70 Aluguéis de imóveis; 71 Administrador de imóveis; 72 Corretor de imóveis; 76 Arrendamento rural; 99 Outros pagamentos"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "T",
+              "D",
+              "A"
+            ]
+          },
+          "cpf_dependente_alimentando": {
+            "type": "string",
+            "pattern": "^\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}$",
+            "description": "CPF, com ou sem pontuação"
+          },
+          "cnpj_cpf": {
+            "type": "string",
+            "pattern": "^(\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}|\\d{2}\\.?\\d{3}\\.?\\d{3}/?\\d{4}-?\\d{2})$",
+            "description": "CPF ou CNPJ, com ou sem pontuação"
+          },
+          "nome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "valor_pago": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d{1,2})?$",
+            "description": "reais com ponto decimal, ex.: \"1234.56\""
+          },
+          "parcela_nao_dedutivel": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d{1,2})?$",
+            "description": "reais com ponto decimal, ex.: \"1234.56\""
+          },
+          "descricao": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "pais": {
+            "type": "string",
+            "pattern": "^\\d{1,3}$",
+            "description": "código do país (tabela do programa)"
+          },
+          "dbk": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "item"
+            ],
+            "properties": {
+              "item": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "description": "item do DBK exportado que este atualiza (ordem do pagamento na ficha); omitir se for novo"
+          },
+          "origem": {
+            "type": "array",
+            "minItems": 1,
+            "description": "documentos de onde o item saiu (para o contador conferir); não vai para o DBK",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "documento"
+              ],
+              "properties": {
+                "documento": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "pagina": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "codigo",
+          "valor_pago"
+        ],
+        "description": "tipo (T titular, D dependente, A alimentando) obrigatório nos códigos 01, 02, 09, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 26, 36, 37, 99; 36, 37 e 99 só T ou D. CPF obrigatório: 09, 10, 11, 12, 13, 14, 66; CNPJ obrigatório: 01, 21, 26, 36, 37; CPF ou CNPJ: 60, 61, 62, 70, 71, 72, 76; opcional: 99. exterior (02, 15, 16, 17, 18, 19, 20, 22, 31, 34): sem cnpj_cpf, com pais. pensão (30, 31, 33, 34): sem tipo, cnpj_cpf e nome; cpf_dependente_alimentando = o alimentando. parcela_nao_dedutivel só em 01, 02, 09, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 26, 30, 31, 33, 34, 36. descricao obrigatória em 99. um item por beneficiário, código, tipo e dependente/alimentando: somar os recibos do ano"
+      }
+    },
+    "bens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "grupo": {
+            "type": "string",
+            "enum": [
+              "01",
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "99"
+            ],
+            "description": "01 Bens Imóveis; 02 Bens Móveis; 03 Participações Societárias; 04 Aplicações e Investimentos; 05 Créditos; 06 Depósito à Vista e Numerário; 07 Fundos; 08 Criptoativos; 99 Outros Bens e Direitos"
+          },
+          "codigo": {
+            "type": "string",
+            "pattern": "^\\d{2}$",
+            "description": "códigos por grupo: 01: 01 Prédio residencial, 02 Prédio comercial, 03 Galpão, 11 Apartamento, 12 Casa, 13 Terreno, 14 Imóvel rural, 15 Sala ou conjunto, 16 Construção, 17 Benfeitorias até 1988, 18 Loja, 19 Garagem Avulsa, 99 Outros bens imóveis | 02: 01 Veículo automotor terrestre: caminhão, automóvel, moto etc, 02 Aeronave, 03 Embarcação, 04 Bem relacionado com o exercício da atividade autônoma, 05 Quadro, objeto de arte, de coleção, antiguidade etc, 06 Joia, 99 Outros bens móveis | 03: 01 Ações (inclusive as listadas em bolsa), 02 Quotas ou quinhões de capital, 03 Holding Patrimonial - ações ou quotas adquiridas por integralização de bens (já declarados) ao capital, 99 Outras participações societárias | 04: 01 Depósito em conta poupança, 02 Títulos públicos e privados sujeitos à tributação (Tesouro Direto, CDB, RDB e Outros), 03 Títulos isentos de tributação (LCI, LCA, LCD, CRI, CRA, LIG, Debêntures de Infraestrutura e outros), 04 Ativos negociados em bolsa no Brasil (BDRs, opções e outros - exceto ações e fundos), 05 Ouro, ativo financeiro, 99 Outras aplicações e investimentos | 05: 01 Empréstimos concedidos, 02 Crédito decorrente de alienação, 99 Outros créditos | 06: 01 Depósito em conta corrente ou conta pagamento, 02 Conta gráfica mantida em agente operador de loterias de apostas de quota fixa - Lei 14.790/2023, 10 Dinheiro em espécie - moeda nacional, 11 Dinheiro em espécie - moeda estrangeira, 99 Outros depósitos à vista | 07: 01 Fundos de Investimentos sujeitos à tributação periódica (come-cotas) - Lei 14.754/2023, 02 Fundos de Investimento nas Cadeias Produtivas Agroindustriais (Fiagro) - Lei 8.668/1993, 03 Fundos de Investimento Imobiliário (FII) - Lei 8.668/1993, 04 Fundos de Investimento em Ações (Lei 14.754/2023) e Fundos Mútuos de Privatização - FGTS (Lei 8.036/1990), 06 FIP - Entidade de investimento, FIDC - Entidade de investimento sem tributação periódica (come-cotas), ETF - Entidade de investimento - Lei 14.754/2023, 07 Fundos de Investimento em Participações em Infraestrutura (FIP-IE) e Fundos de Investimento em Participação na Produção Econômica Intensiva em Pesquisa, Desenvolvimento e Inovação (FIP-PD&I) - Lei 11.478/2007, 08 Fundos de Índice de Renda Fixa (ETFs) - Lei 13.043/2014, art. 2º, 10 Fundos de Infraestrutura, FIDC e outros Fundos de Investimento (alíquota 0%) - Lei 12.431/2011 arts. 2º e 3º, 12 Fundos de Investimentos em Empresas Emergente - FIEE Lei 11.312/2006, art 2º, 13 Fundo multimercado Lei 14.754/2023, art. 25 combinado com o art. 40, 99 Fundos de Investimento no Exterior - Lei 14.754/2023, arts. 2º a 14 | 08: 01 Criptoativo Bitcoin - BTC, 02 Outras criptomoedas, conhecidas como altcoins, por exemplo, Ether (ETH), Ripple (XRP), Bitcoin Cash (BCH) e Litecoin (LTC), 03 Criptoativos conhecidos como stablecoins, por exemplo, Tether (USDT), USD Coin (USDC), Brazilian Digital Token (BRZ), Binance USD (BUSD), DAI, True USD (TUSD), Gemini USD (GUSD, Paxos USD (PAX), Paxos Gold (PAXG), etc, 10 Criptoativos conhecidos como NFTs (Non-Fungible Tokens), 99 Outros criptoativos | 99: 01 Licença e concessão especiais, 02 Título de clube e assemelhado, 03 Direito de autor, de inventor e patente, 04 Direito de lavra e assemelhado, 05 Consórcio não contemplado, 06 VGBL - Vida Gerador de Benefício Livre, 07 Juros Sobre Capital Próprio a receber, 08 Leasing com opção de compra a ser exercida no final do contrato, 99 Outros bens e direitos"
+          },
+          "pais": {
+            "type": "string",
+            "pattern": "^\\d{1,3}$",
+            "description": "código do país, \"105\" = Brasil"
+          },
+          "discriminacao": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "situacao_anterior": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d{1,2})?$",
+            "description": "situação em 31/12/2024; num bem do DBK, a mesma do DBK"
+          },
+          "situacao_atual": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d{1,2})?$",
+            "description": "situação em 31/12/2025"
+          },
+          "usufruto": {
+            "type": "boolean"
+          },
+          "cnpj_cpf": {
+            "type": "string",
+            "pattern": "^(\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}|\\d{2}\\.?\\d{3}\\.?\\d{3}/?\\d{4}-?\\d{2})$",
+            "description": "CPF ou CNPJ, com ou sem pontuação"
+          },
+          "pertence_a": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "tipo": {
+                "type": "string",
+                "enum": [
+                  "T",
+                  "D"
+                ]
+              },
+              "cpf": {
+                "type": "string",
+                "pattern": "^\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}$",
+                "description": "CPF, com ou sem pontuação"
+              }
+            }
+          },
+          "cripto": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "autocustodiante": {
+                "type": "boolean"
+              },
+              "cnpj_custodiante": {
+                "type": "string",
+                "pattern": "^(\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}|\\d{2}\\.?\\d{3}\\.?\\d{3}/?\\d{4}-?\\d{2})$",
+                "description": "CPF ou CNPJ, com ou sem pontuação"
+              },
+              "altcoin": {
+                "type": "string",
+                "maxLength": 10
+              },
+              "stablecoin": {
+                "type": "string",
+                "maxLength": 10
+              }
+            }
+          },
+          "imovel": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "logradouro": {
+                "type": "string",
+                "maxLength": 40
+              },
+              "numero": {
+                "type": "string",
+                "maxLength": 6
+              },
+              "complemento": {
+                "type": "string",
+                "maxLength": 40
+              },
+              "bairro": {
+                "type": "string",
+                "maxLength": 40
+              },
+              "cep": {
+                "type": "string",
+                "maxLength": 9
+              },
+              "uf": {
+                "type": "string",
+                "maxLength": 2
+              },
+              "cod_municipio": {
+                "type": "string"
+              },
+              "municipio": {
+                "type": "string",
+                "maxLength": 40
+              },
+              "area": {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d)?$",
+                "description": "uma casa decimal, ex.: \"75.5\""
+              },
+              "unidade": {
+                "type": "string",
+                "enum": [
+                  "m2",
+                  "ha"
+                ]
+              },
+              "data_aquisicao": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "description": "\"AAAA-MM-DD\""
+              },
+              "iptu": {
+                "type": "string",
+                "maxLength": 30
+              },
+              "cib": {
+                "type": "string",
+                "maxLength": 8
+              },
+              "cei_cno": {
+                "type": "string"
+              },
+              "registrado_cartorio": {
+                "type": "boolean"
+              },
+              "matricula": {
+                "type": "string",
+                "maxLength": 40
+              },
+              "cartorio": {
+                "type": "string",
+                "maxLength": 60
+              }
+            }
+          },
+          "conta": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "banco": {
+                "type": "string"
+              },
+              "agencia": {
+                "type": "string"
+              },
+              "conta": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "dv": {
+                "type": "string",
+                "maxLength": 2
+              },
+              "conta_pagamento": {
+                "type": "boolean"
+              }
+            }
+          },
+          "bolsa": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "negociado": {
+                "type": "boolean"
+              },
+              "codigo": {
+                "type": "string",
+                "maxLength": 20
+              }
+            }
+          },
+          "veiculo": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "renavam": {
+                "type": "string",
+                "maxLength": 30
+              },
+              "registro_aeronave": {
+                "type": "string",
+                "maxLength": 30
+              },
+              "registro_embarcacao": {
+                "type": "string",
+                "maxLength": 30
+              }
+            }
+          },
+          "exterior": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "lucro_prejuizo": {
+                "type": "string",
+                "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+                "description": "reais; prejuízo com \"-\", ex.: \"-250.00\""
+              },
+              "imposto_pago": {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d{1,2})?$",
+                "description": "reais com ponto decimal, ex.: \"1234.56\""
+              },
+              "dividendos_recebidos": {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d{1,2})?$",
+                "description": "reais com ponto decimal, ex.: \"1234.56\""
+              },
+              "imposto_dividendos": {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d{1,2})?$",
+                "description": "reais com ponto decimal, ex.: \"1234.56\""
+              }
+            }
+          },
+          "dbk": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "chave"
+            ],
+            "properties": {
+              "chave": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "description": "item do DBK exportado que este atualiza (chave do bem); omitir se for novo"
+          },
+          "origem": {
+            "type": "array",
+            "minItems": 1,
+            "description": "documentos de onde o item saiu (para o contador conferir); não vai para o DBK",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "documento"
+              ],
+              "properties": {
+                "documento": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "pagina": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "grupo",
+          "codigo",
+          "pais",
+          "discriminacao",
+          "situacao_anterior",
+          "situacao_atual"
+        ],
+        "description": "os blocos aceitos dependem do grupo/código/país (o bot confere e diz o que falta ou sobra)"
+      }
+    },
+    "pendencias": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "descricao": {
+            "type": "string",
+            "minLength": 1
+          },
+          "origem": {
+            "type": "array",
+            "minItems": 1,
+            "description": "documentos de onde o item saiu (para o contador conferir); não vai para o DBK",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "documento"
+              ],
+              "properties": {
+                "documento": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "pagina": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "descricao"
+        ],
+        "description": "o que a IA não decidiu sozinha, para o contador"
+      }
+    }
+  }
+}
