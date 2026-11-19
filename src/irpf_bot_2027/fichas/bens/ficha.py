@@ -17,7 +17,8 @@ from dataclasses import dataclass, field
 
 from irpf_bot_2027.dbk import ArquivoDBK
 from irpf_bot_2027.fichas.bens.busca import (
-    chave_busca, identificar, procurar, procurar_incompletos, procurar_mesmo_tipo, procurar_semelhantes,
+    chave_busca, identificar, normalizar_registro, procurar, procurar_incompletos, procurar_mesmo_tipo,
+    procurar_semelhantes,
 )
 from irpf_bot_2027.fichas.bens.entrada import CAMPOS_SIMPLES
 from irpf_bot_2027.fichas.bens.validacao import validar_bem
@@ -101,12 +102,10 @@ def vazio_no_dbk(nome: str, texto: str) -> bool:
 
 def equivalentes(nome: str, gravado_pelo_json: str, no_dbk: str) -> bool:
     """Mesmo valor, ignorando o formato: números pelo valor; textos em maiúsculas, só letras e números,
-    sem zeros à esquerda (ex.: conta "000000004321" = "4321", "PT-ABC" = "PTABC")."""
+    sem zeros à esquerda (ex.: conta "000000004321" = "4321", "PT-ABC" = "PTABC", "1º RI" = "1o RI")."""
     if getattr(Registro27, nome).tipo == "N":
         return int(gravado_pelo_json) == int(no_dbk)
-    def normalizar(texto: str) -> str:
-        return "".join(c for c in texto.upper() if c.isalnum()).lstrip("0")
-    return normalizar(gravado_pelo_json) == normalizar(no_dbk)
+    return normalizar_registro(gravado_pelo_json) == normalizar_registro(no_dbk)
 
 def mesmo_texto(a: str, b: str) -> bool:
     return " ".join(a.upper().split()) == " ".join(b.upper().split())

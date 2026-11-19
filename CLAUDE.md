@@ -66,7 +66,9 @@ src/irpf_bot_2027/
 tools/visualizador_dbk.html   abre um DBK e mostra os campos de cada linha
 ```
 
-Para uma ficha nova: subpacote em `fichas/` com a mesma forma de `bens/` + incluir em `FICHAS`.
+Para uma ficha nova: subpacote em `fichas/` com a mesma forma de `bens/` + incluir em `FICHAS` +
+roteiro manual próprio em `tests/manual/<ficha>/` + **itens dela nos três testes do roteiro geral**
+(`tests/manual/geral/`, rodar com `bash tests/manual/geral/rodar.sh`).
 
 ## Formato do DBK (confirmado em arquivos do programa)
 

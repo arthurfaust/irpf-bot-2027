@@ -211,6 +211,17 @@ Decidido em 17/11/2026: fazer as fichas mais comuns antes da preparação para 2
   do bot nos três testes. Pendências como esperado: aviso "não relacionado a despesa dedutível" só nos
   alimentandos sem pagamento; data de nascimento e tipo de processo da importada resolvidos; só sobra
   a confirmação dos requisitos (não gravada no DBK).
+- [x] Roteiro geral `tests/manual/geral/` (18/11/2026): todas as fichas num cliente; teste2 roda o mesmo
+  JSON de novo e confirma que nada é duplicado; teste3 parte da declaração importada. Rodar com
+  `bash tests/manual/geral/rodar.sh`. **Atualizar a cada ficha nova.** O roteiro mostrou que a fonte
+  em revisão aparecia também como "não veio no JSON"; corrigido (como nos pagamentos).
+- [x] Roteiro geral confirmado no programa em 19/11/2026, com ida e volta: registros 21, 25, 26 e 35
+  idênticos nos três testes; teste3 idêntico por inteiro. Nos bens, o programa regravou o cartório
+  "1º RI" como "1o RI" (e mudou a posição do imóvel, mantendo a chave). A busca e a comparação do bem
+  encontrado passaram a tratar "º"/"ª" como "o"/"a"; confirmado rodando o JSON sobre o regravado.
+- [ ] Dígito verificador da conta (aviso "DV da conta inválido" no programa): validador
+  `ValidadorDvContaCorrente`, com algoritmo próprio para 18 bancos (BB, Caixa, Itaú, Bradesco,
+  Santander, Sicredi, Sicoob...). O bot não confere; o DV do roteiro geral é fictício.
 - [ ] Rendimentos de PJ de dependentes (32), isentos e exclusivos (23, 24, 83-89),
   dívidas (28), doações efetuadas (26, códigos 40-47, 80, 81).
 

@@ -1,0 +1,117 @@
+{
+  "cpf": "77039677008",
+  "rendimentos_pj": [
+    {
+      "cnpj_cpf": "33.000.167/0001-01", "nome": "Empresa Teste Um Ltda",
+      "rendimentos": "85000.00", "contribuicao_previdenciaria": "9000.00", "imposto_retido": "12000.00",
+      "decimo_terceiro": "7000.00", "irrf_decimo_terceiro": "600.00"
+    },
+    {
+      "cnpj_cpf": "60.701.190/0001-04", "nome": "Empresa Teste Dois SA",
+      "rendimentos": "20000.00", "contribuicao_previdenciaria": "0.00", "imposto_retido": "1500.00",
+      "decimo_terceiro": "0.00", "irrf_decimo_terceiro": "0.00"
+    }
+  ],
+  "dependentes": [
+    {
+      "tipo": "21", "nome": "Joao Teste", "cpf": "222.333.444-05", "data_nascimento": "2015-05-10",
+      "mora_com_titular": true, "raca_cor": "parda"
+    },
+    {
+      "tipo": "11", "nome": "Conjuge Teste", "cpf": "888.999.000-78", "data_nascimento": "1985-08-20",
+      "email": "conjuge@teste.com", "ddd": "11", "celular": "91234-5678"
+    }
+  ],
+  "alimentandos": [
+    {
+      "nome": "Maria Teste", "cpf": "333.444.555-08", "data_nascimento": "2012-03-20", "residente": "brasil",
+      "alimentando_de": "770.396.770-08",
+      "decisao_judicial": {
+        "data": "2024-02-10", "processo": "0001234-56.2024.8.26.0100", "vara": "1",
+        "comarca": "Sao Paulo", "uf": "SP"
+      }
+    }
+  ],
+  "pagamentos": [
+    {
+      "codigo": "10", "tipo": "T", "cnpj_cpf": "444.555.666-19", "nome": "Medico Teste",
+      "valor_pago": "1500.00", "parcela_nao_dedutivel": "200.00", "descricao": "Consultas"
+    },
+    {
+      "codigo": "26", "tipo": "D", "cpf_dependente_alimentando": "222.333.444-05",
+      "cnpj_cpf": "33.000.167/0001-01", "nome": "Operadora Teste", "valor_pago": "6000.00"
+    },
+    {
+      "codigo": "01", "tipo": "A", "cpf_dependente_alimentando": "333.444.555-08",
+      "cnpj_cpf": "60.701.190/0001-04", "nome": "Escola Teste", "valor_pago": "3000.00"
+    },
+    {
+      "codigo": "30", "cpf_dependente_alimentando": "333.444.555-08", "valor_pago": "12000.00"
+    },
+    {
+      "codigo": "36", "tipo": "T", "cnpj_cpf": "00.000.000/0001-91", "nome": "Previdencia Teste",
+      "valor_pago": "4000.00"
+    }
+  ],
+  "bens": [
+    {
+      "grupo": "08", "codigo": "01", "pais": "105",
+      "discriminacao": "0,05 BTC custodiados na corretora X",
+      "situacao_anterior": "1000.00", "situacao_atual": "2000.00",
+      "pertence_a": {
+        "tipo": "T"
+      },
+      "cripto": {
+        "autocustodiante": false, "cnpj_custodiante": "00.000.000/0001-91"
+      }
+    },
+    {
+      "grupo": "01", "codigo": "11", "pais": "105","discriminacao": "Apartamento na Rua X, 100, Curitiba",
+      "situacao_anterior": "350000.00", "situacao_atual": "350000.00",
+      "imovel": {
+        "logradouro": "Rua X", "numero": "100", "bairro": "Centro", "cep": "80000000",
+        "uf": "PR", "cod_municipio": "7535", "municipio": "Curitiba",
+        "area": "75.5", "unidade": "m2", "data_aquisicao": "2019-05-10",
+        "iptu": "123456", "registrado_cartorio": true, "matricula": "9999", "cartorio": "1º RI"
+      }
+    },
+    {
+      "grupo": "06", "codigo": "01", "pais": "105", "cnpj_cpf": "00000000000191",
+      "discriminacao": "Conta corrente no Banco do Brasil","situacao_anterior": "1000.00", "situacao_atual": "1500.00",
+      "pertence_a": {
+        "tipo": "T"
+      },
+      "conta": {
+        "banco": "001", "agencia": "1234", "conta": "98765", "dv": "X", "conta_pagamento": false
+      }
+    },
+    {
+      "grupo": "03", "codigo": "01", "pais": "105", "cnpj_cpf": "33000167000101",
+      "discriminacao": "100 acoes PETR4 na corretora X",
+      "situacao_anterior": "3000.00", "situacao_atual": "3500.00",
+      "bolsa": {
+        "negociado": true, "codigo": "PETR4"
+      }
+    },
+    {
+      "grupo": "02", "codigo": "01", "pais": "105",
+      "discriminacao": "Automovel marca X modelo Y ano 2020",
+      "situacao_anterior": "50000.00", "situacao_atual": "50000.00",
+      "veiculo": {
+        "renavam": "12345678900"
+      }
+    },
+    {
+      "grupo": "07", "codigo": "99", "pais": "249",
+      "discriminacao": "Cotas do fundo X na corretora Y (EUA)",
+      "situacao_anterior": "20000.00", "situacao_atual": "21000.00",
+      "bolsa": {
+        "negociado": false
+      },
+      "exterior": {
+        "lucro_prejuizo": "-250.00", "imposto_pago": "0.00",
+        "dividendos_recebidos": "300.00", "imposto_dividendos": "45.00"
+      }
+    }
+  ]
+}

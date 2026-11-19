@@ -120,6 +120,14 @@ def test_duas_fontes_do_json_para_uma_sem_valores_vao_para_revisao():
     assert resultado.revisao == [1, 2]
 
 
+def test_fonte_sem_valores_em_revisao_continua_no_relatorio():
+    arquivo = dbk_do_programa()
+    zerar(arquivo, 2)
+    resultado = gravar(arquivo, DOIS, {**DOIS, "rendimentos": "1.00"})
+    assert resultado.revisao == [1, 2] and resultado.dbk_sem_valores == [2]
+    assert resultado.dbk_nao_informadas == [1, 3]
+
+
 def test_relatorio_sem_dados_do_cliente():
     arquivo = dbk_do_programa()
     zerar(arquivo, 3)
@@ -128,7 +136,7 @@ def test_relatorio_sem_dados_do_cliente():
     texto = "\n".join(t for _, t in rendimentos_pj.relatorio(resultado))
     assert "0 preenchida(s), 1 nova(s), 1 para revisão" in texto
     assert "continuam sem valores" in texto and "itens da ficha): 3" in texto
-    assert "com valores que não vieram no JSON (itens da ficha): 1, 2" in texto     # a 1 foi para revisão
+    assert "com valores que não vieram no JSON (itens da ficha): 2" in texto        # a 1 veio (revisão)
     assert not any(d in texto for d in ("33000167", "EMPRESA", "BANCO TESTE", "85000"))
 
 

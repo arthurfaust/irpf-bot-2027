@@ -51,7 +51,17 @@ def test_imovel_pelo_iptu():
 
 
 def test_imovel_sem_iptu_pela_matricula_e_cartorio():
-    assert chave_busca(validados(imovel(iptu=None))[0]) == ("01", "11", "105", "MATRICULA", "9999", "1ºRI")
+    assert chave_busca(validados(imovel(iptu=None))[0]) == ("01", "11", "105", "MATRICULA", "9999", "1ORI")
+
+
+def test_cartorio_regravado_pelo_programa_continua_igual():
+    """O programa regrava "1º RI" como "1o RI" (roteiro geral, 19/11/2026)."""
+    assert chave_busca(validados(imovel(iptu=None))[0]) == chave_busca(validados(imovel(iptu=None, cartorio="1o RI"))[0])
+    dbk = dbk_com(imovel(iptu=None, cartorio="1o RI"))
+    resultado = gravar(dbk, imovel(iptu=None))
+    assert resultado.atualizados == [1] and resultado.novos == []
+    from irpf_bot_2027.fichas.bens.ficha import equivalentes
+    assert equivalentes("CARTORIO", "1º RI", "1o RI")          # sem aviso de campo diferente
 
 
 def test_imovel_rural_pelo_cib_e_construcao_pelo_cei():

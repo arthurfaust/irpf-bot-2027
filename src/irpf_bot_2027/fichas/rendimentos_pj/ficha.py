@@ -154,6 +154,7 @@ def inserir(arquivo: ArquivoDBK, itens: list[dict], campos_por_item: list[dict])
         encontradas = [(ordem, posicao) for ordem, posicao in enumerate(fontes_da_entrada(), start=1)
                        if Registro21.NI_PAGADOR.ler(arquivo.linhas[posicao]).strip() == ni]
 
+        usadas.update(ordem for ordem, _ in encontradas)     # veio no JSON, mesmo que vá para revisão
         if len(encontradas) > 1:
             logger.warning("%s: %d fontes no DBK com o mesmo CPF/CNPJ; não foi gravada (revisão).", descricao, len(encontradas))
             resultado.revisao.append(numero)
@@ -182,11 +183,9 @@ def inserir(arquivo: ArquivoDBK, itens: list[dict], campos_por_item: list[dict])
         resultado.novas.append(numero)
 
     for ordem, posicao in enumerate(fontes_da_entrada(), start=1):
-        if ordem in usadas:
-            continue
-        if sem_valores(arquivo.linhas[posicao]):
+        if sem_valores(arquivo.linhas[posicao]):                 # inclusive a que foi para revisão
             resultado.dbk_sem_valores.append(ordem)
-        else:
+        elif ordem not in usadas:
             resultado.dbk_nao_informadas.append(ordem)
     return resultado
 

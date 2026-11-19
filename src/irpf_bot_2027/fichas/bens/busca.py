@@ -103,13 +103,18 @@ def chave_da_conta(grupo: str, codigo: str, campos: dict) -> tuple | None:
         return None
     return (grupo, codigo, banco, agencia, conta)
 
+def _maiusculas_sem_ordinais(valor) -> str:
+    """O programa regrava "º" como "o" (confirmado no roteiro geral em 19/11/2026: cartório "1º RI"
+    voltou "1o RI"); "ª" e "°" são tratados do mesmo jeito para a comparação."""
+    return str(valor or "").replace("º", "o").replace("°", "o").replace("ª", "a").upper()
+
 def so_letras_e_numeros(valor) -> str:
-    """"5th Avenue, 100" -> "5THAVENUE100"."""
-    return "".join(c for c in str(valor or "").upper() if c.isalnum())
+    """"5th Avenue, 100" -> "5THAVENUE100"; "1º RI" e "1o RI" -> "1ORI"."""
+    return "".join(c for c in _maiusculas_sem_ordinais(valor) if c.isalnum())
 
 def normalizar_registro(valor) -> str:
     """"0ABC1234-FL" -> "ABC1234FL"; "00987654322" -> "987654322"; "pt-abc" -> "PTABC"."""
-    return "".join(c for c in str(valor or "").upper() if c.isalnum()).lstrip("0")
+    return "".join(c for c in _maiusculas_sem_ordinais(valor) if c.isalnum()).lstrip("0")
 
 def identificar_imovel_no_brasil(grupo: str, codigo: str, pais: str, campos: dict) -> Identificacao:
     """Registro do código (IPTU, CIB no rural, CEI/CNO na construção); sem ele, matrícula + cartório.
